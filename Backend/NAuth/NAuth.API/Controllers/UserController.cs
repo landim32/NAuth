@@ -1,37 +1,68 @@
-﻿using System;
+﻿using DB.Infra.Context;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using NAuth.API.DTO;
+using NAuth.Domain.Impl.Models;
+using NAuth.Domain.Impl.Services;
+using NAuth.Domain.Interfaces.Factory;
+using NAuth.Domain.Interfaces.Models;
+using NAuth.Domain.Interfaces.Services;
+using NAuth.DTO.Domain;
+using NAuth.DTO.User;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
-using System.Threading.Tasks;
-using NAuth.API.DTO;
-using NAuth.Domain.Interfaces.Services;
-using NAuth.DTO.User;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using NAuth.Domain.Impl.Models;
-using NAuth.Domain.Interfaces.Models;
-using NAuth.DTO.Domain;
-using NAuth.Domain.Impl.Services;
 using System.Runtime.CompilerServices;
-using DB.Infra.Context;
-using NAuth.Domain.Interfaces.Factory;
+using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace NAuth.API.Controllers
 {
-    [Route("[controller]")]
+    //[Route("[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
 
         private readonly IUserService _userService;
+        private readonly IImageService _imageService;
         private readonly IUserDomainFactory _userFactory;
 
-        public UserController(IUserService userService, IUserDomainFactory userFactory)
+        public UserController(IUserService userService, IImageService imageService, IUserDomainFactory userFactory)
         {
             _userService = userService;
+            _imageService = imageService;
             _userFactory = userFactory;
+        }
+
+        [Authorize]
+        [HttpPost("uploadImageUser")]
+        public ActionResult<StringResult> UploadImageUser(IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                {
+                    return BadRequest("No file uploaded");
+                }
+                var userSession = _userService.GetUserInSession(HttpContext);
+                if (userSession == null)
+                {
+                    return StatusCode(401, "Not Authorized");
+                }
+
+                var fileName = _imageService.InsertToUser(file.OpenReadStream(), userSession.UserId);
+                return new StringResult()
+                {
+                    Value = _imageService.GetImageUrl(fileName)
+                };
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPost("gettokenauthorized")]
