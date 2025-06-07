@@ -7,9 +7,11 @@ import UserTokenResult from '../../DTO/Services/UserTokenResult';
 import IHttpClient from '../../Infra/Interface/IHttpClient';
 import IUserService from '../Interfaces/IUserService';
 
+const API_URL = "https://emagine.com.br/auth-api"; 
 let _httpClient: IHttpClient;
 
 const UserService: IUserService = {
+
   init: function (htppClient: IHttpClient): void {
     _httpClient = htppClient;
   },
@@ -20,7 +22,7 @@ const UserService: IUserService = {
     formData.append('file', file, 'cropped.jpg');
 
     //formData.append("networkId", "0");
-    const request = await _httpClient.doPostFormDataAuth<StringResult>('/uploadImageUser', formData, token);
+    const request = await _httpClient.doPostFormDataAuth<StringResult>(API_URL + '/uploadImageUser', formData, token);
     if (request.success) {
       return request.data;
     } else {
@@ -34,7 +36,7 @@ const UserService: IUserService = {
   },
   getMe: async (token: string) => {
     let ret = {} as UserResult;
-    const url = '/getme';
+    const url = API_URL + '/getme';
     const request = await _httpClient.doGetAuth<UserResult>(url, token);
     if (request.success) {
       return request.data;
@@ -49,7 +51,7 @@ const UserService: IUserService = {
   },
   getUserByEmail: async (email: string) => {
     let ret = {} as UserResult;
-    const url = '/getbyemail/' + email;
+    const url = API_URL + '/getbyemail/' + email;
     const request = await _httpClient.doGet<UserResult>(url, {});
     if (request.success) {
       return request.data;
@@ -64,7 +66,7 @@ const UserService: IUserService = {
   },
   getBySlug: async (slug: string) => {
     let ret = {} as UserResult;
-    const url = '/getBySlug/' + slug;
+    const url = API_URL + '/getBySlug/' + slug;
     const request = await _httpClient.doGet<UserResult>(url, {});
     if (request.success) {
       return request.data;
@@ -79,7 +81,7 @@ const UserService: IUserService = {
   },
   getTokenAuthorized: async (email: string, password: string) => {
     let ret = {} as UserTokenResult;
-    const request = await _httpClient.doPost<UserTokenResult>('/gettokenauthorized', {
+    const request = await _httpClient.doPost<UserTokenResult>(API_URL + '/gettokenauthorized', {
       email: email,
       password: password,
     });
@@ -96,7 +98,7 @@ const UserService: IUserService = {
   },
   insert: async (user: UserInfo) => {
     let ret = {} as UserResult;
-    const request = await _httpClient.doPost<UserResult>('/insert', user);
+    const request = await _httpClient.doPost<UserResult>(API_URL + '/insert', user);
     if (request.success) {
       return request.data;
     } else {
@@ -110,7 +112,7 @@ const UserService: IUserService = {
   },
   update: async (user: UserInfo, token: string) => {
     let ret = {} as UserResult;
-    const request = await _httpClient.doPostAuth<UserResult>('/update', user, token);
+    const request = await _httpClient.doPostAuth<UserResult>(API_URL + '/update', user, token);
     if (request.success) {
       return request.data;
     } else {
@@ -124,7 +126,7 @@ const UserService: IUserService = {
   },
   loginWithEmail: async (email: string, password: string) => {
     let ret = {} as UserResult;
-    const request = await _httpClient.doPost<UserResult>('/loginwithemail', {
+    const request = await _httpClient.doPost<UserResult>(API_URL + '/loginwithemail', {
       email: email,
       password: password,
     });
@@ -141,7 +143,7 @@ const UserService: IUserService = {
   },
   hasPassword: async (token: string) => {
     let ret = {} as StatusRequest;
-    const url = '/haspassword';
+    const url = API_URL + '/haspassword';
     const request = await _httpClient.doGetAuth<StatusRequest>(url, token);
     if (request.success) {
       return request.data;
@@ -157,7 +159,7 @@ const UserService: IUserService = {
   changePassword: async (oldPassword: string, newPassword: string, token: string) => {
     let ret = {} as StatusRequest;
     const request = await _httpClient.doPostAuth<StatusRequest>(
-      '/changepassword',
+      API_URL + '/changepassword',
       {
         oldPassword: oldPassword,
         newPassword: newPassword,
@@ -178,7 +180,7 @@ const UserService: IUserService = {
   },
   sendRecoveryEmail: async (email: string) => {
     let ret = {} as StatusRequest;
-    const url = '/sendrecoveryemail/' + email;
+    const url = API_URL + '/sendrecoveryemail/' + email;
     const request = await _httpClient.doGet<StatusRequest>(url, {});
     if (request.success) {
       return request.data;
@@ -193,7 +195,7 @@ const UserService: IUserService = {
   },
   changePasswordUsingHash: async (recoveryHash: string, newPassword: string) => {
     let ret = {} as StatusRequest;
-    const request = await _httpClient.doPost<StatusRequest>('/changepasswordusinghash', {
+    const request = await _httpClient.doPost<StatusRequest>(API_URL + '/changepasswordusinghash', {
       recoveryHash: recoveryHash,
       newPassword: newPassword,
     });
@@ -210,7 +212,7 @@ const UserService: IUserService = {
   },
   list: async (take: number) => {
     let ret = {} as UserListResult;
-    const request = await _httpClient.doGet<UserResult>('/list/' + take, {});
+    const request = await _httpClient.doGet<UserResult>(API_URL + '/list/' + take, {});
     if (request.success) {
       return request.data;
     } else {

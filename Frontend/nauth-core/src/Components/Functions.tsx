@@ -1,7 +1,4 @@
 import { LanguageEnum } from '../DTO/Enum/LanguageEnum';
-import NavDropdown from 'react-bootstrap/NavDropdown';
-import { useTranslation } from 'react-i18next';
-import { getLangInfo } from '../i18n';
 
 const showFrequencyMin = (frequency: number, t: (key: string) => string) => {
   switch (frequency) {
@@ -63,46 +60,4 @@ function formatPhoneNumber(phone: string) {
   );
 }
 
-const MenuLanguage = () => {
-  const { i18n, t } = useTranslation();
-  const currentLangInfo = getLangInfo(i18n.language);
-
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
-  };
-
-  const supportedLanguages = [
-    getLangInfo(LanguageEnum.Portuguese), // Default/BR
-    getLangInfo(LanguageEnum.English),
-    getLangInfo(LanguageEnum.Spanish),
-    getLangInfo(LanguageEnum.French),
-  ];
-
-  return (
-    <NavDropdown
-      title={
-        <>
-          <img
-            src={`${import.meta.env.BASE_URL}flags/${currentLangInfo.flag}`}
-            alt={t(currentLangInfo.nameKey)}
-            style={{ width: '21px', height: '21px' }}
-          />
-        </>
-      }
-      id="basic-nav-dropdown">
-      {supportedLanguages.map((lang) => (
-        <NavDropdown.Item key={lang.code} onClick={() => changeLanguage(lang.code)}>
-          <img src={`${import.meta.env.BASE_URL}flags/${lang.flag}`} alt={t(lang.nameKey)} style={{ width: '21px', height: '21px' }} />
-          &nbsp;{t(lang.nameKey)}
-        </NavDropdown.Item>
-      ))}
-    </NavDropdown>
-  );
-};
-
-const langToStr = (lang: LanguageEnum) => {
-  // Use the centralized getLangInfo from i18n.ts
-  return getLangInfo(lang).code;
-};
-
-export { showFrequencyMin, showFrequencyMax, formatPhoneNumber, MenuLanguage, langToStr };
+export { showFrequencyMin, showFrequencyMax, formatPhoneNumber };
