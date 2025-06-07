@@ -12,6 +12,7 @@
     <EmbeddedResource Remove="DTOs\**" />
     <None Remove="DTOs\**" />
     <None Remove="DTO\" />
+    <None Remove="emagine.com.br.pfx" />
     <None Remove="nochainswap.org.pfx" />
   </ItemGroup>
 
@@ -30,5 +31,9 @@
 
   <ItemGroup>
     <Compile Remove="Controllers\OriginalController.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="emagine.com.br.pfx" />
   </ItemGroup>
 </Project>

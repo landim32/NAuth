@@ -27,13 +27,12 @@ namespace NAuth.API
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    /*
                     #if !DEBUG
                     webBuilder.UseKestrel(options =>
                     {
                         options.ConfigureHttpsDefaults(httpsOptions =>
                         {
-                            var s = Assembly.GetExecutingAssembly().GetManifestResourceStream("NAuth.API.nauth.com.pfx");
+                            var s = Assembly.GetExecutingAssembly().GetManifestResourceStream("NAuth.API.emagine.com.br.pfx");
                             using (MemoryStream ms = new MemoryStream())
                             {
                                 s.CopyTo(ms);
@@ -42,7 +41,6 @@ namespace NAuth.API
                         });
                     });
                     #endif
-                    */
                     webBuilder.UseStartup<Startup>();
                 });
     }
