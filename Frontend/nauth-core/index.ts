@@ -8,8 +8,6 @@ export type { default as IUserProvider } from './Contexts/User/IUserProvider';
 
 export { default as ContextBuilder } from './Contexts/Utils/ContextBuilder';
 
-export { default as UserPage } from './Pages/UserPage';
-
 export { default as UserFactory } from './Business/Factory/UserFactory';
 export { default as AuthFactory } from './Business/Factory/AuthFactory';
 export { default as UserBusiness } from './Business/Impl/UserBusiness';
