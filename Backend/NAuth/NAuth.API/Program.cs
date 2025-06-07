@@ -18,7 +18,7 @@ namespace NAuth.API
 {
     public class Program
     {
-        private const string PFX_CERTIFICATE = "NAuth.API.emagine.com.br.pfx";
+        private const string PFX_CERTIFICATE = "NAuth.API.emagine.pfx";
 
         public static void Main(string[] args)
         {
