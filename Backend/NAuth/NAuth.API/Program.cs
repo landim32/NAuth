@@ -18,6 +18,8 @@ namespace NAuth.API
 {
     public class Program
     {
+        private const string PFX_CERTIFICATE = "NAuth.API.emagine.com.br.pfx";
+
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
@@ -32,7 +34,10 @@ namespace NAuth.API
                     {
                         options.ConfigureHttpsDefaults(httpsOptions =>
                         {
-                            var s = Assembly.GetExecutingAssembly().GetManifestResourceStream("NAuth.API.emagine.com.br.pfx");
+                            var s = Assembly.GetExecutingAssembly().GetManifestResourceStream(PFX_CERTIFICATE);
+                            if (s == null) {
+                                throw new Exception($"Cant find {PFX_CERTIFICATE}.");
+                            }
                             using (MemoryStream ms = new MemoryStream())
                             {
                                 s.CopyTo(ms);
