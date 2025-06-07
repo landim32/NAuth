@@ -13,7 +13,6 @@
     <None Remove="DTOs\**" />
     <None Remove="DTO\" />
     <None Remove="emagine.com.br.pfx" />
-    <None Remove="nochainswap.org.pfx" />
   </ItemGroup>
 
   <ItemGroup>
