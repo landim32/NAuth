@@ -25,7 +25,11 @@ public partial class NAuthContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+#if DEBUG
         optionsBuilder.UseNpgsql("Host=emagine-db-do-user-4436480-0.e.db.ondigitalocean.com;Port=25060;Database=nauth;Username=doadmin;Password=AVNS_akcvzXVnMkvNKaO10-O");
+#else
+        optionsBuilder.UseNpgsql("Host=private-emagine-db-do-user-4436480-0.e.db.ondigitalocean.com;Port=25060;Database=nauth;Username=doadmin;Password=AVNS_akcvzXVnMkvNKaO10-O");
+#endif
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
