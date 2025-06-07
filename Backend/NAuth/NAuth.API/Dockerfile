@@ -19,7 +19,7 @@ RUN make install
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["NAuth.API/nauth.com.pfx", "NAuth.API/"]
+#COPY ["NAuth.API/nauth.com.pfx", "NAuth.API/"]
 COPY ["NAuth.API/NAuth.API.csproj", "NAuth.API/"]
 COPY ["NAuth.Application/NAuth.Application.csproj", "NAuth.Application/"]
 COPY ["NAuth.Domain/NAuth.Domain.csproj", "NAuth.Domain/"]

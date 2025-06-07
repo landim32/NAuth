@@ -27,6 +27,7 @@ namespace NAuth.API
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    /*
                     #if !DEBUG
                     webBuilder.UseKestrel(options =>
                     {
@@ -41,6 +42,7 @@ namespace NAuth.API
                         });
                     });
                     #endif
+                    */
                     webBuilder.UseStartup<Startup>();
                 });
     }
