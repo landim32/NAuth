@@ -1,7 +1,7 @@
 import { LanguageEnum } from '../DTO/Enum/LanguageEnum';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import { useTranslation } from 'react-i18next';
-import { getLangInfo } from '../../i18n';
+import { getLangInfo } from '../i18n';
 
 const showFrequencyMin = (frequency: number, t: (key: string) => string) => {
   switch (frequency) {
