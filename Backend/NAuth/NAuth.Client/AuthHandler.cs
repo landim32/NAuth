@@ -1,0 +1,76 @@
+﻿using System;
+using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using NAuth.Client;
+using NAuth.DTO.User;
+
+namespace EasySLA.Domain
+{
+    public class AuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+    {
+        private readonly IUserClient _userClient;
+        public AuthHandler(
+            IOptionsMonitor<AuthenticationSchemeOptions> options,
+            ILoggerFactory logger,
+            UrlEncoder encoder,
+            ISystemClock clock,
+            IUserClient userClient
+        )
+            : base(options, logger, encoder, clock)
+        {
+            _userClient = userClient;
+        }
+
+        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
+        {
+            if (!Request.Headers.ContainsKey("Authorization"))
+            {
+                return AuthenticateResult.Fail("Missing Authorization Header");
+            }
+
+            UserInfo user = null; 
+            try
+            {
+                var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+                var token = authHeader.Parameter;
+                if (string.IsNullOrEmpty(token))
+                {
+                    return AuthenticateResult.Fail("Missing Authorization Token");
+                }
+                var userResult = await _userClient.GetByTokenAsync(token);
+                if (userResult == null) {
+                    return AuthenticateResult.Fail("Invalid Session");
+                }
+                if (!userResult.Sucesso)
+                {
+                    return AuthenticateResult.Fail(userResult.Mensagem);
+                }
+                user = userResult.User;
+            }
+            catch (Exception)
+            {
+                return AuthenticateResult.Fail("Invalid Authorization Header");
+            }
+            
+            var claims = new[] {
+                new Claim("UserInfo",  JsonConvert.SerializeObject(new UserInfo() {
+                     UserId = user.UserId,
+                     Hash = user.Hash,
+                     Name = user.Name,
+                     Email = user.Email,
+                }))
+            };
+            var identity = new ClaimsIdentity(claims, Scheme.Name);
+            var principal = new ClaimsPrincipal(identity);
+            var ticket = new AuthenticationTicket(principal, Scheme.Name);
+
+            return AuthenticateResult.Success(ticket);
+        }
+    }
+}

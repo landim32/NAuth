@@ -114,6 +114,50 @@ namespace NAuth.API.Controllers
             }
         }
 
+        [HttpGet("getbytoken/{token}")]
+        public ActionResult<UserResult> GetByToken(string token)
+        {
+            try
+            {
+                var user = _userService.GetUserByToken(token);
+                if (user == null)
+                {
+                    return new UserResult() { User = null, Sucesso = false, Mensagem = "User Not Found" };
+                }
+
+                return new UserResult()
+                {
+                    User = _userService.GetUserInfoFromModel(user)
+                };
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("getbyid/{userId}")]
+        public ActionResult<UserResult> GetById(long userId)
+        {
+            try
+            {
+                var user = _userService.GetUserByID(userId);
+                if (user == null)
+                {
+                    return new UserResult() { User = null, Sucesso = false, Mensagem = "User Not Found" };
+                }
+
+                return new UserResult()
+                {
+                    User = _userService.GetUserInfoFromModel(user)
+                };
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         [HttpGet("getbyemail/{email}")]
         public ActionResult<UserResult> GetByEmail(string email)
         {

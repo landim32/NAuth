@@ -1,0 +1,27 @@
+{
+  "name": "nauth-core",
+  "version": "0.1.0",
+  "description": "Reusable React components and business logic for NAuth",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "react": ">=17",
+    "react-router-dom": "^6.27.0"
+  },
+  "peerDependencies": {
+    "react": ">=17",
+    "react-dom": ">=17"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  },
+  "author": "Rodrigo Landim Carneiro",
+  "license": "MIT"
+}
