@@ -48,6 +48,14 @@ namespace NAuth.Client
             return JsonConvert.DeserializeObject<UserResult>(json);
         }
 
+        public async Task<UserResult?> GetByIdAsync(long userId)
+        {
+            var response = await _httpClient.GetAsync($"{API_URL}/getbyid/{userId}");
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<UserResult>(json);
+        }
+
         public async Task<UserResult?> GetByTokenAsync(string token)
         {
             var response = await _httpClient.GetAsync($"{API_URL}/getbytoken/{token}");

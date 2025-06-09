@@ -11,6 +11,7 @@ namespace NAuth.Client
         UserInfo? GetUserInSession(HttpContext httpContext);
         Task<UserTokenResult?> GetTokenAuthorizedAsync(LoginParam login);
         Task<UserResult?> GetMeAsync(string token);
+        Task<UserResult?> GetByIdAsync(long userId);
         Task<UserResult?> GetByTokenAsync(string token);
         Task<UserResult?> GetByEmailAsync(string email);
         Task<UserResult?> GetBySlugAsync(string slug);
