@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 using NAuth.Client;
 using NAuth.DTO.User;
 
-namespace EasySLA.Domain
+namespace BazzucaSocial.Domain
 {
     public class AuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
