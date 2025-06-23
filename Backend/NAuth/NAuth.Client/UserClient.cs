@@ -15,7 +15,7 @@ namespace NAuth.Client
     public class UserClient: IUserClient
     {
         private readonly HttpClient _httpClient;
-        private const string API_URL = "https://emagine.com.br/api-auth";
+        private const string API_URL = "https://emagine.com.br/auth-api";
 
         public UserClient()
         {
