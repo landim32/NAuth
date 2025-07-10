@@ -15,11 +15,18 @@ namespace NAuth.Client
     public class UserClient: IUserClient
     {
         private readonly HttpClient _httpClient;
+#if DEBUG
         private const string API_URL = "https://emagine.com.br/auth-api";
+#else
+        private const string API_URL = "https://nauth-api1";
+#endif
 
         public UserClient()
         {
-            _httpClient = new HttpClient();
+            _httpClient = new HttpClient(new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+            });
         }
 
         public UserInfo? GetUserInSession(HttpContext httpContext)

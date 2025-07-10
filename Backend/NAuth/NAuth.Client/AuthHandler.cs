@@ -53,9 +53,9 @@ namespace NAuth.Client
                 }
                 user = userResult.User;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return AuthenticateResult.Fail("Invalid Authorization Header");
+                return AuthenticateResult.Fail(e.Message + "\n" + e.InnerException?.Message);
             }
             
             var claims = new[] {
