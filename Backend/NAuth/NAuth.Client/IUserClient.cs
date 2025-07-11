@@ -8,6 +8,7 @@ namespace NAuth.Client
 {
     public interface IUserClient
     {
+        void SetApiURL(string apiURL);
         UserInfo? GetUserInSession(HttpContext httpContext);
         Task<UserTokenResult?> GetTokenAuthorizedAsync(LoginParam login);
         Task<UserResult?> GetMeAsync(string token);

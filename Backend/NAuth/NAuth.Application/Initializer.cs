@@ -16,11 +16,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using NAuth.Domain;
+using NAuth.Client;
+using AuthHandler = NAuth.Domain.AuthHandler;
+//using AuthHandler = NAuth.Client.AuthHandler;
 
 namespace NAuth.Application
 {
     public static class Initializer
     {
+        private static readonly string NAUTH_API_URL = "https://emagine.com.br/auth-api";
 
         private static void injectDependency(Type serviceType, Type implementationType, IServiceCollection services, bool scoped = true)
         {
@@ -55,6 +59,15 @@ namespace NAuth.Application
             injectDependency(typeof(IUserService), typeof(UserService), services, scoped);
             injectDependency(typeof(IMailerSendService), typeof(MailerSendService), services, scoped);
             #endregion
+
+            if (scoped)
+            {
+                services.AddScoped<IUserClient, UserClient>(new Func<IServiceProvider, UserClient>(x => new UserClient(NAUTH_API_URL)));
+            }
+            else
+            {
+                services.AddTransient<IUserClient, UserClient>(new Func<IServiceProvider, UserClient>(x => new UserClient(NAUTH_API_URL)));
+            }
 
             #region Factory
             injectDependency(typeof(IUserAddressDomainFactory), typeof(UserAddressDomainFactory), services, scoped);
