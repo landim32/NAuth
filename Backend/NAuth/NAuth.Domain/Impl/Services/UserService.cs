@@ -64,7 +64,7 @@ namespace NAuth.Domain.Impl.Services
             {
                 throw new Exception("Fingerprint is empty");
             }
-            var currentDate = DateTime.UtcNow;
+            var currentDate = DateTime.Now;
             var tokenModel = _tokenFactory.BuildUserTokenModel();
             tokenModel.UserId = userId;
             tokenModel.IpAddress = ipAddress;

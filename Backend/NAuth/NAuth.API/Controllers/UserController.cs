@@ -65,6 +65,7 @@ namespace NAuth.API.Controllers
             }
         }
 
+        /*
         [HttpPost("gettokenauthorized")]
         public ActionResult<UserTokenResult> GetTokenAuthorized([FromBody] LoginParam login)
         {
@@ -96,8 +97,9 @@ namespace NAuth.API.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+        */
 
-        [HttpGet("getme")]
+        [HttpGet("getMe")]
         [Authorize]
         public ActionResult<UserResult> GetMe()
         {
@@ -125,7 +127,7 @@ namespace NAuth.API.Controllers
             }
         }
 
-        [HttpGet("getbytoken/{token}")]
+        [HttpGet("getByToken/{token}")]
         public ActionResult<UserResult> GetByToken(string token)
         {
             try
@@ -147,7 +149,7 @@ namespace NAuth.API.Controllers
             }
         }
 
-        [HttpGet("getbyid/{userId}")]
+        [HttpGet("getById/{userId}")]
         public ActionResult<UserResult> GetById(long userId)
         {
             try
@@ -169,7 +171,7 @@ namespace NAuth.API.Controllers
             }
         }
 
-        [HttpGet("getbyemail/{email}")]
+        [HttpGet("getByEmail/{email}")]
         public ActionResult<UserResult> GetByEmail(string email)
         {
             try
@@ -266,15 +268,15 @@ namespace NAuth.API.Controllers
             }
         }
 
-        [HttpPost("loginwithemail")]
-        public ActionResult<UserResult> LoginWithEmail([FromBody]LoginParam param)
+        [HttpPost("loginWithEmail")]
+        public ActionResult<UserTokenResult> LoginWithEmail([FromBody]LoginParam param)
         {
             try
             {
                 var user = _userService.LoginWithEmail(param.Email, param.Password);
                 if (user == null)
                 {
-                    return new UserResult() { User = null, Sucesso = false, Mensagem = "Email or password is wrong" };
+                    return new UserTokenResult() { User = null, Sucesso = false, Mensagem = "Email or password is wrong" };
                 }
                 var fingerprint = Request.Headers["X-Device-Fingerprint"].FirstOrDefault();
                 var userAgent = Request.Headers["User-Agent"].FirstOrDefault();
@@ -286,8 +288,9 @@ namespace NAuth.API.Controllers
                     ipAddr = Request.Headers["X-Forwarded-For"].FirstOrDefault();
                 }
                 var token = _userService.CreateToken(user.UserId, ipAddr, userAgent, fingerprint);
-                return new UserResult()
+                return new UserTokenResult()
                 {
+                    Token = token.Token,
                     User = _userService.GetUserInfoFromModel(user)
                 };
             }
@@ -298,7 +301,7 @@ namespace NAuth.API.Controllers
         }
 
         [Authorize]
-        [HttpGet("haspassword")]
+        [HttpGet("hasPassword")]
         public ActionResult<StatusResult> HasPassword()
         {
             try
@@ -326,7 +329,7 @@ namespace NAuth.API.Controllers
         }
 
         [Authorize]
-        [HttpPost("changepassword")]
+        [HttpPost("changePassword")]
         public ActionResult<StatusResult> ChangePassword([FromBody]ChangePasswordParam param)
         {
             try
@@ -354,7 +357,7 @@ namespace NAuth.API.Controllers
             }
         }
 
-        [HttpGet("sendrecoverymail/{email}")]
+        [HttpGet("sendRecoveryMail/{email}")]
         public async Task<ActionResult<StatusResult>> SendRecoveryMail(string email)
         {
             try
@@ -381,7 +384,7 @@ namespace NAuth.API.Controllers
             }
         }
 
-        [HttpPost("changepasswordusinghash")]
+        [HttpPost("changePasswordUsingHash")]
         public ActionResult<StatusResult> ChangePasswordUsingHash([FromBody] ChangePasswordUsingHashParam param)
         {
             try

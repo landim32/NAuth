@@ -63,7 +63,7 @@ namespace DB.Infra.Repository
         public IUserTokenModel GetByToken(string token, IUserTokenDomainFactory factory)
         {
             var row = _ccsContext.UserTokens
-                .FirstOrDefault(x => x.Token == token && x.ExpireAt > DateTime.UtcNow);
+                .FirstOrDefault(x => x.Token == token && x.ExpireAt > DateTime.Now);
             if (row == null)
                 return null;
             return DbToModel(factory, row);
