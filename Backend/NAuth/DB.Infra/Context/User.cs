@@ -42,4 +42,6 @@ public partial class User
     public virtual ICollection<UserDocument> UserDocuments { get; set; } = new List<UserDocument>();
 
     public virtual ICollection<UserPhone> UserPhones { get; set; } = new List<UserPhone>();
+
+    public virtual ICollection<UserToken> UserTokens { get; set; } = new List<UserToken>();
 }

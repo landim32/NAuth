@@ -75,9 +75,20 @@ namespace NAuth.API.Controllers
                 {
                     return new UserTokenResult() {Sucesso = false, Mensagem = "Email or password is wrong" };
                 }
+                var fingerprint = Request.Headers["X-Device-Fingerprint"].FirstOrDefault();
+                var userAgent = Request.Headers["User-Agent"].FirstOrDefault();
+
+                var ipAddr = Request.HttpContext.Connection?.RemoteIpAddress?.ToString();
+
+                if (Request.Headers?.ContainsKey("X-Forwarded-For") == true)
+                {
+                    ipAddr = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+                }
+                var token = _userService.CreateToken(user.UserId, ipAddr, userAgent, fingerprint);
+
                 return new UserTokenResult()
                 {
-                    Token = user.GenerateNewToken(_userFactory)
+                    Token = token.Token
                 };
             }
             catch (Exception ex)
@@ -265,6 +276,16 @@ namespace NAuth.API.Controllers
                 {
                     return new UserResult() { User = null, Sucesso = false, Mensagem = "Email or password is wrong" };
                 }
+                var fingerprint = Request.Headers["X-Device-Fingerprint"].FirstOrDefault();
+                var userAgent = Request.Headers["User-Agent"].FirstOrDefault();
+
+                var ipAddr = Request.HttpContext.Connection?.RemoteIpAddress?.ToString();
+
+                if (Request.Headers?.ContainsKey("X-Forwarded-For") == true)
+                {
+                    ipAddr = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+                }
+                var token = _userService.CreateToken(user.UserId, ipAddr, userAgent, fingerprint);
                 return new UserResult()
                 {
                     User = _userService.GetUserInfoFromModel(user)

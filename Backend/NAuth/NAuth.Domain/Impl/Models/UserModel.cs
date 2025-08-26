@@ -21,7 +21,7 @@ namespace NAuth.Domain.Impl.Models
 
         public long UserId { get; set; }
         public string Hash { get; set; }
-        public string Token { get; set; }
+        //public string Token { get; set; }
         public string Slug { get; set; }
         public string Image {  get; set; }
         public string Name { get; set; }
@@ -34,6 +34,11 @@ namespace NAuth.Domain.Impl.Models
         public DateTime UpdatedAt { get; set; }
         public string StripeId { get; set; }
 
+        public IUserModel GetById(long userId, IUserDomainFactory factory)
+        {
+            return _repositoryUser.GetById(userId, factory);
+        }
+
         private string CreateMD5(string input)
         {
             using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
@@ -45,10 +50,7 @@ namespace NAuth.Domain.Impl.Models
             }
         }
 
-        public IUserModel GetById(long userId, IUserDomainFactory factory)
-        {
-            return _repositoryUser.GetById(userId, factory);
-        }
+        /*
 
         public IUserModel GetByToken(string token, IUserDomainFactory factory)
         {
@@ -61,6 +63,7 @@ namespace NAuth.Domain.Impl.Models
             _repositoryUser.UpdateToken(this.UserId, token);
             return token;
         }
+        */
 
         public IUserModel Insert(IUserDomainFactory factory)
         {
