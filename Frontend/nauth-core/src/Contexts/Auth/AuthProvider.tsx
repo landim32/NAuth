@@ -31,16 +31,14 @@ export default function AuthProvider(props: any) {
       try {
         const retLog = await UserFactory.UserBusiness.loginWithEmail(email, password);
         if (retLog.sucesso) {
-          const retTok = await UserFactory.UserBusiness.getTokenAuthorized(email, password);
-          if (retTok.sucesso) {
             authProviderValue.setSession({
               ...sessionInfo,
-              userId: retLog.dataResult.userId,
-              hash: retLog.dataResult.hash,
-              token: retTok.dataResult,
-              isAdmin: retLog.dataResult.isAdmin,
-              name: retLog.dataResult.name,
-              email: retLog.dataResult.email,
+              userId: retLog.dataResult.user.userId,
+              hash: retLog.dataResult.user.hash,
+              token: retLog.dataResult.token,
+              isAdmin: retLog.dataResult.user.isAdmin,
+              name: retLog.dataResult.user.name,
+              email: retLog.dataResult.user.email,
               language: language,
             });
             setLoading(false);
@@ -49,14 +47,6 @@ export default function AuthProvider(props: any) {
               sucesso: true,
               mensagemSucesso: 'User Logged',
             };
-          } else {
-            setLoading(false);
-            return {
-              ...ret,
-              sucesso: false,
-              mensagemErro: retTok.mensagem,
-            };
-          }
         } else {
           setLoading(false);
           return {

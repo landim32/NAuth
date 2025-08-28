@@ -10,7 +10,6 @@ namespace NAuth.Client
     {
         void SetApiURL(string apiURL);
         UserInfo? GetUserInSession(HttpContext httpContext);
-        Task<UserTokenResult?> GetTokenAuthorizedAsync(LoginParam login);
         Task<UserResult?> GetMeAsync(string token);
         Task<UserResult?> GetByIdAsync(long userId);
         Task<UserResult?> GetByTokenAsync(string token);

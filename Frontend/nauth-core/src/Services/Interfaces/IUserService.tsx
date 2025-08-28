@@ -13,10 +13,9 @@ export default interface IUserService {
   getMe: (token: string) => Promise<UserResult>;
   getUserByEmail: (email: string) => Promise<UserResult>;
   getBySlug: (slug: string) => Promise<UserResult>;
-  getTokenAuthorized: (email: string, password: string) => Promise<UserTokenResult>;
   insert: (user: UserInfo) => Promise<UserResult>;
   update: (user: UserInfo, token: string) => Promise<UserResult>;
-  loginWithEmail: (email: string, password: string) => Promise<UserResult>;
+  loginWithEmail: (email: string, password: string) => Promise<UserTokenResult>;
   hasPassword: (token: string) => Promise<StatusRequest>;
   changePassword: (oldPassword: string, newPassword: string, token: string) => Promise<StatusRequest>;
   sendRecoveryEmail: (email: string) => Promise<StatusRequest>;

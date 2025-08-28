@@ -1,6 +1,7 @@
 import BusinessResult from '../../DTO/Business/BusinessResult';
 import AuthSession from '../../DTO/Domain/AuthSession';
 import UserInfo from '../../DTO/Domain/UserInfo';
+import UserTokenInfo from '../../DTO/Domain/UserTokenInfo';
 import IUserService from '../../Services/Interfaces/IUserService';
 import AuthFactory from '../Factory/AuthFactory';
 import IUserBusiness from '../Interfaces/IUserBusiness';
@@ -111,23 +112,6 @@ const UserBusiness: IUserBusiness = {
       throw new Error('Failed to get user by email');
     }
   },
-  getTokenAuthorized: async (email: string, password: string) => {
-    const ret = {} as BusinessResult<string>;
-    const retServ = await _userService.getTokenAuthorized(email, password);
-    if (retServ.sucesso) {
-      return {
-        ...ret,
-        dataResult: retServ.token,
-        sucesso: true,
-      };
-    } else {
-      return {
-        ...ret,
-        sucesso: false,
-        mensagem: retServ.mensagem,
-      };
-    }
-  },
   insert: async (user: UserInfo) => {
     try {
       const ret = {} as BusinessResult<UserInfo>;
@@ -180,12 +164,16 @@ const UserBusiness: IUserBusiness = {
   },
   loginWithEmail: async (email: string, password: string) => {
     try {
-      const ret = {} as BusinessResult<UserInfo>;
+      const ret = {} as BusinessResult<UserTokenInfo>;
       const retServ = await _userService.loginWithEmail(email, password);
       if (retServ.sucesso) {
+        const userTokenInfo: UserTokenInfo = {
+          token: retServ.token,
+          user: retServ.user
+        } as UserTokenInfo;
         return {
           ...ret,
-          dataResult: retServ.user,
+          dataResult: userTokenInfo,
           sucesso: true,
         };
       } else {

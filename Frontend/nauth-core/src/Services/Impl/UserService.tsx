@@ -36,7 +36,7 @@ const UserService: IUserService = {
   },
   getMe: async (token: string) => {
     let ret = {} as UserResult;
-    const url = API_URL + '/getme';
+    const url = API_URL + '/getMe';
     const request = await _httpClient.doGetAuth<UserResult>(url, token);
     if (request.success) {
       return request.data;
@@ -51,7 +51,7 @@ const UserService: IUserService = {
   },
   getUserByEmail: async (email: string) => {
     let ret = {} as UserResult;
-    const url = API_URL + '/getbyemail/' + email;
+    const url = API_URL + '/getByEmail/' + email;
     const request = await _httpClient.doGet<UserResult>(url, {});
     if (request.success) {
       return request.data;
@@ -68,23 +68,6 @@ const UserService: IUserService = {
     let ret = {} as UserResult;
     const url = API_URL + '/getBySlug/' + slug;
     const request = await _httpClient.doGet<UserResult>(url, {});
-    if (request.success) {
-      return request.data;
-    } else {
-      ret = {
-        ...ret,
-        mensagem: request.messageError,
-        sucesso: false,
-      };
-    }
-    return ret;
-  },
-  getTokenAuthorized: async (email: string, password: string) => {
-    let ret = {} as UserTokenResult;
-    const request = await _httpClient.doPost<UserTokenResult>(API_URL + '/gettokenauthorized', {
-      email: email,
-      password: password,
-    });
     if (request.success) {
       return request.data;
     } else {
@@ -125,8 +108,8 @@ const UserService: IUserService = {
     return ret;
   },
   loginWithEmail: async (email: string, password: string) => {
-    let ret = {} as UserResult;
-    const request = await _httpClient.doPost<UserResult>(API_URL + '/loginwithemail', {
+    let ret = {} as UserTokenResult;
+    const request = await _httpClient.doPost<UserTokenResult>(API_URL + '/loginWithEmail', {
       email: email,
       password: password,
     });
@@ -143,7 +126,7 @@ const UserService: IUserService = {
   },
   hasPassword: async (token: string) => {
     let ret = {} as StatusRequest;
-    const url = API_URL + '/haspassword';
+    const url = API_URL + '/hasPassword';
     const request = await _httpClient.doGetAuth<StatusRequest>(url, token);
     if (request.success) {
       return request.data;
@@ -159,7 +142,7 @@ const UserService: IUserService = {
   changePassword: async (oldPassword: string, newPassword: string, token: string) => {
     let ret = {} as StatusRequest;
     const request = await _httpClient.doPostAuth<StatusRequest>(
-      API_URL + '/changepassword',
+      API_URL + '/changePassword',
       {
         oldPassword: oldPassword,
         newPassword: newPassword,
@@ -180,7 +163,7 @@ const UserService: IUserService = {
   },
   sendRecoveryEmail: async (email: string) => {
     let ret = {} as StatusRequest;
-    const url = API_URL + '/sendrecoveryemail/' + email;
+    const url = API_URL + '/sendRecoveryMail/' + email;
     const request = await _httpClient.doGet<StatusRequest>(url, {});
     if (request.success) {
       return request.data;
@@ -195,7 +178,7 @@ const UserService: IUserService = {
   },
   changePasswordUsingHash: async (recoveryHash: string, newPassword: string) => {
     let ret = {} as StatusRequest;
-    const request = await _httpClient.doPost<StatusRequest>(API_URL + '/changepasswordusinghash', {
+    const request = await _httpClient.doPost<StatusRequest>(API_URL + '/changePasswordUsingHash', {
       recoveryHash: recoveryHash,
       newPassword: newPassword,
     });
@@ -223,32 +206,7 @@ const UserService: IUserService = {
       };
     }
     return ret;
-  },
-  /*,
-    search: async (networkId: number, keyword: string, pageNum: number, token: string, profileId?: number) => {
-        let ret = {} as UserListPagedResult;
-        let param: UserSearchParam;
-        param = {
-            ...param,
-            networkId: networkId,
-            keyword: keyword,
-            profileId: profileId,
-            pageNum: pageNum
-        };
-        let request = await _httpClient.doPostAuth<UserListPagedResult>("/User/search", param, token);
-        if (request.success) {
-            return request.data;
-        }
-        else {
-            ret = {
-            ...ret,
-            mensagem: request.messageError,
-            sucesso: false,
-        };
-        }
-        return ret;
-    }
-        */
+  }
 };
 
 export default UserService;

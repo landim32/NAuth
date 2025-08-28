@@ -39,19 +39,11 @@ namespace NAuth.Client
             }
             return null;
         }
-        public async Task<UserTokenResult?> GetTokenAuthorizedAsync(LoginParam login)
-        {
-            var content = new StringContent(JsonConvert.SerializeObject(login), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"{_ApiURL}/gettokenauthorized", content);
-            response.EnsureSuccessStatusCode();
-            var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<UserTokenResult>(json);
-        }
 
         public async Task<UserResult?> GetMeAsync(string token)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await _httpClient.GetAsync($"{_ApiURL}/getme");
+            var response = await _httpClient.GetAsync($"{_ApiURL}/getMe");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<UserResult>(json);
@@ -59,7 +51,7 @@ namespace NAuth.Client
 
         public async Task<UserResult?> GetByIdAsync(long userId)
         {
-            var response = await _httpClient.GetAsync($"{_ApiURL}/getbyid/{userId}");
+            var response = await _httpClient.GetAsync($"{_ApiURL}/getById/{userId}");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<UserResult>(json);
@@ -67,7 +59,7 @@ namespace NAuth.Client
 
         public async Task<UserResult?> GetByTokenAsync(string token)
         {
-            var response = await _httpClient.GetAsync($"{_ApiURL}/getbytoken/{token}");
+            var response = await _httpClient.GetAsync($"{_ApiURL}/getByToken/{token}");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<UserResult>(json);
@@ -75,7 +67,7 @@ namespace NAuth.Client
 
         public async Task<UserResult?> GetByEmailAsync(string email)
         {
-            var response = await _httpClient.GetAsync($"{_ApiURL}/getbyemail/{email}");
+            var response = await _httpClient.GetAsync($"{_ApiURL}/getByEmail/{email}");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<UserResult>(json);
@@ -111,7 +103,7 @@ namespace NAuth.Client
         public async Task<UserResult?> LoginWithEmailAsync(LoginParam param)
         {
             var content = new StringContent(JsonConvert.SerializeObject(param), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"{_ApiURL}/loginwithemail", content);
+            var response = await _httpClient.PostAsync($"{_ApiURL}/loginWithEmail", content);
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<UserResult>(json);
@@ -120,7 +112,7 @@ namespace NAuth.Client
         public async Task<StatusResult?> HasPasswordAsync(string token)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await _httpClient.GetAsync($"{_ApiURL}/haspassword");
+            var response = await _httpClient.GetAsync($"{_ApiURL}/hasPassword");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<StatusResult>(json);
@@ -130,7 +122,7 @@ namespace NAuth.Client
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var content = new StringContent(JsonConvert.SerializeObject(param), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"{_ApiURL}/changepassword", content);
+            var response = await _httpClient.PostAsync($"{_ApiURL}/changePassword", content);
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<StatusResult>(json);
@@ -138,7 +130,7 @@ namespace NAuth.Client
 
         public async Task<StatusResult?> SendRecoveryMailAsync(string email)
         {
-            var response = await _httpClient.GetAsync($"{_ApiURL}/sendrecoverymail/{email}");
+            var response = await _httpClient.GetAsync($"{_ApiURL}/sendRecoveryMail/{email}");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<StatusResult>(json);
@@ -147,7 +139,7 @@ namespace NAuth.Client
         public async Task<StatusResult?> ChangePasswordUsingHashAsync(ChangePasswordUsingHashParam param)
         {
             var content = new StringContent(JsonConvert.SerializeObject(param), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"{_ApiURL}/changepasswordusinghash", content);
+            var response = await _httpClient.PostAsync($"{_ApiURL}/changePasswordUsingHash", content);
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<StatusResult>(json);

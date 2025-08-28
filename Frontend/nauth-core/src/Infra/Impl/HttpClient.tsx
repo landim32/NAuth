@@ -1,6 +1,7 @@
 import IHttpClient from '../Interface/IHttpClient';
 import axios, { AxiosInstance } from 'axios';
 import ApiResponse from '../../DTO/Services/ApiResponse';
+import { getFingerprint } from './fingerprint';
 
 let logoff: () => void;
 
@@ -51,6 +52,11 @@ const HttpClient = (): IHttpClient => {
     init: (baseUrl: string) => {
       axiosIntance = axios.create({
         baseURL: baseUrl,
+      });
+      axiosIntance.interceptors.request.use(async (config) => {
+        const fingerprint = await getFingerprint();
+        config.headers['X-Device-Fingerprint'] = fingerprint;
+        return config;
       });
     },
     setLogoff: (logoffCallback: () => void) => {
