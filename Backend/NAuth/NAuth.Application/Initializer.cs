@@ -16,11 +16,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using NAuth.Domain;
+using NAuth.Client;
+using AuthHandler = NAuth.Domain.AuthHandler;
+//using AuthHandler = NAuth.Client.AuthHandler;
 
 namespace NAuth.Application
 {
     public static class Initializer
     {
+        private static readonly string NAUTH_API_URL = "https://emagine.com.br/auth-api";
 
         private static void injectDependency(Type serviceType, Type implementationType, IServiceCollection services, bool scoped = true)
         {
@@ -46,6 +50,7 @@ namespace NAuth.Application
             injectDependency(typeof(IUserAddressRepository<IUserAddressModel, IUserAddressDomainFactory>), typeof(UserAddressRepository), services, scoped);
             injectDependency(typeof(IUserDocumentRepository<IUserDocumentModel, IUserDocumentDomainFactory>), typeof(UserDocumentRepository), services, scoped);
             injectDependency(typeof(IUserPhoneRepository<IUserPhoneModel, IUserPhoneDomainFactory>), typeof(UserPhoneRepository), services, scoped);
+            injectDependency(typeof(IUserTokenRepository<IUserTokenModel, IUserTokenDomainFactory>), typeof(UserTokenRepository), services, scoped);
             injectDependency(typeof(IUserRepository<IUserModel, IUserDomainFactory>), typeof(UserRepository), services, scoped);
            
             #endregion
@@ -56,10 +61,20 @@ namespace NAuth.Application
             injectDependency(typeof(IMailerSendService), typeof(MailerSendService), services, scoped);
             #endregion
 
+            if (scoped)
+            {
+                services.AddScoped<IUserClient, UserClient>(new Func<IServiceProvider, UserClient>(x => new UserClient(NAUTH_API_URL)));
+            }
+            else
+            {
+                services.AddTransient<IUserClient, UserClient>(new Func<IServiceProvider, UserClient>(x => new UserClient(NAUTH_API_URL)));
+            }
+
             #region Factory
             injectDependency(typeof(IUserAddressDomainFactory), typeof(UserAddressDomainFactory), services, scoped);
             injectDependency(typeof(IUserDocumentDomainFactory), typeof(UserDocumentDomainFactory), services, scoped);
             injectDependency(typeof(IUserPhoneDomainFactory), typeof(UserPhoneDomainFactory), services, scoped);
+            injectDependency(typeof(IUserTokenDomainFactory), typeof(UserTokenDomainFactory), services, scoped);
             injectDependency(typeof(IUserDomainFactory), typeof(UserDomainFactory), services, scoped);
             #endregion
 

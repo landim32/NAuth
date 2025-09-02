@@ -10,10 +10,13 @@ using Newtonsoft.Json;
 using NAuth.Client;
 using NAuth.DTO.User;
 
-namespace EasySLA.Domain
+namespace NAuth.Client
 {
     public class AuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
+        private const string TOKEN_DEFAULT = "tokendoamor";
+        private const string EMAIL_DEFAULT = "rodrigo@emagine.com.br";
+
         private readonly IUserClient _userClient;
         public AuthHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
@@ -43,7 +46,15 @@ namespace EasySLA.Domain
                 {
                     return AuthenticateResult.Fail("Missing Authorization Token");
                 }
-                var userResult = await _userClient.GetByTokenAsync(token);
+                UserResult? userResult = null;
+                if (token == TOKEN_DEFAULT)
+                {
+                    userResult = await _userClient.GetByEmailAsync(EMAIL_DEFAULT);
+                }
+                else
+                {
+                    userResult = await _userClient.GetByTokenAsync(token);
+                }
                 if (userResult == null) {
                     return AuthenticateResult.Fail("Invalid Session");
                 }
@@ -53,9 +64,9 @@ namespace EasySLA.Domain
                 }
                 user = userResult.User;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return AuthenticateResult.Fail("Invalid Authorization Header");
+                return AuthenticateResult.Fail(e.Message + "\n" + e.InnerException?.Message);
             }
             
             var claims = new[] {

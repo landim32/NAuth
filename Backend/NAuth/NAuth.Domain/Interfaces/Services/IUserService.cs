@@ -11,6 +11,7 @@ namespace NAuth.Domain.Interfaces.Services
     public interface IUserService
     {
         IUserModel LoginWithEmail(string email, string password);
+        IUserTokenModel CreateToken(long userId, string ipAddress, string userAgent, string fingerprint);
         bool HasPassword(long userId);
         void ChangePasswordUsingHash(string recoveryHash, string newPassword);
         void ChangePassword(long userId, string oldPassword, string newPassword);

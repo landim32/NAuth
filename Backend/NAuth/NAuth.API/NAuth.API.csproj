@@ -15,14 +15,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="9.0.4" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.2" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="9.0.8" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Core.Domain\Core.Domain.csproj" />
     <ProjectReference Include="..\NAuth.Application\NAuth.Application.csproj" />
+    <ProjectReference Include="..\NAuth.Client\NAuth.Client.csproj" />
     <ProjectReference Include="..\NAuth.Domain\NAuth.Domain.csproj" />
     <ProjectReference Include="..\NAuth.DTO\NAuth.DTO.csproj" />
   </ItemGroup>

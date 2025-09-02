@@ -21,6 +21,7 @@ namespace NAuth.Domain.Impl.Services
         private readonly IUserDomainFactory _userFactory;
         private readonly IUserPhoneDomainFactory _phoneFactory;
         private readonly IUserAddressDomainFactory _addrFactory;
+        private readonly IUserTokenDomainFactory _tokenFactory;
         private readonly IMailerSendService _mailerSendService;
         private readonly IImageService _imageService;
 
@@ -28,6 +29,7 @@ namespace NAuth.Domain.Impl.Services
             IUserDomainFactory userFactory, 
             IUserPhoneDomainFactory phoneFactory, 
             IUserAddressDomainFactory addrFactory,
+            IUserTokenDomainFactory tokenFactory,
             IMailerSendService mailerSendService,
             IImageService imageService
         )
@@ -35,6 +37,7 @@ namespace NAuth.Domain.Impl.Services
             _userFactory = userFactory;
             _phoneFactory = phoneFactory;
             _addrFactory = addrFactory;
+            _tokenFactory = tokenFactory;
             _mailerSendService = mailerSendService;
             _imageService = imageService;
         }
@@ -42,6 +45,36 @@ namespace NAuth.Domain.Impl.Services
         public IUserModel LoginWithEmail(string email, string password)
         {
             return _userFactory.BuildUserModel().LoginWithEmail(email, password, _userFactory);
+        }
+
+        public IUserTokenModel CreateToken(long userId, string ipAddress, string userAgent, string fingerprint) { 
+            if (userId <= 0)
+            {
+                throw new Exception("UserId is invalid");
+            }
+            if (string.IsNullOrEmpty(ipAddress))
+            {
+                throw new Exception("IP Address is empty");
+            }
+            if (string.IsNullOrEmpty(userAgent))
+            {
+                throw new Exception("User Agent is empty");
+            }
+            if (string.IsNullOrEmpty(fingerprint))
+            {
+                throw new Exception("Fingerprint is empty");
+            }
+            var currentDate = DateTime.Now;
+            var tokenModel = _tokenFactory.BuildUserTokenModel();
+            tokenModel.UserId = userId;
+            tokenModel.IpAddress = ipAddress;
+            tokenModel.UserAgent = userAgent;
+            tokenModel.Fingerprint = fingerprint;
+            tokenModel.CreatedAt = currentDate;
+            tokenModel.LastAccess = currentDate;
+            tokenModel.ExpireAt = currentDate.AddMonths(2);
+            tokenModel.Token = StringUtils.GenerateShortUniqueString();
+            return tokenModel.Insert(_tokenFactory);
         }
 
         public bool HasPassword(long userId)
@@ -406,7 +439,12 @@ namespace NAuth.Domain.Impl.Services
 
         public IUserModel GetUserByToken(string token)
         {
-            return _userFactory.BuildUserModel().GetByToken(token, _userFactory);
+            var tokenModel = _tokenFactory.BuildUserTokenModel().GetByToken(token, _tokenFactory);
+            if (tokenModel == null)
+            {
+                return null;
+            }
+            return _userFactory.BuildUserModel().GetById(tokenModel.UserId, _userFactory);
         }
 
         /*
