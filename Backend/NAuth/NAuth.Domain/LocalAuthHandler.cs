@@ -1,33 +1,35 @@
 ﻿using System;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using NAuth.Domain.Interfaces.Models;
+using NAuth.Domain.Interfaces.Services;
+using NAuth.DTO.User;
+using Core.Domain;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using NAuth.Client;
-using NAuth.DTO.User;
+using NAuth.Domain.Impl.Models;
 
-namespace NAuth.Client
+namespace NAuth.Domain
 {
-    public class AuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+    public class LocalAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
-        private const string TOKEN_DEFAULT = "tokendoamor";
-        private const string EMAIL_DEFAULT = "rodrigo@emagine.com.br";
+        private readonly IUserService _userService;
 
-        private readonly IUserClient _userClient;
-        public AuthHandler(
+        public LocalAuthHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
             ISystemClock clock,
-            IUserClient userClient
-        )
+            IUserService userService)
             : base(options, logger, encoder, clock)
         {
-            _userClient = userClient;
+            _userService = userService;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -37,7 +39,7 @@ namespace NAuth.Client
                 return AuthenticateResult.Fail("Missing Authorization Header");
             }
 
-            UserInfo user = null; 
+            IUserModel user = null; 
             try
             {
                 var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
@@ -46,27 +48,16 @@ namespace NAuth.Client
                 {
                     return AuthenticateResult.Fail("Missing Authorization Token");
                 }
-                UserResult? userResult = null;
-                if (token == TOKEN_DEFAULT)
-                {
-                    userResult = await _userClient.GetByEmailAsync(EMAIL_DEFAULT);
-                }
-                else
-                {
-                    userResult = await _userClient.GetByTokenAsync(token);
-                }
-                if (userResult == null) {
+
+                user = _userService.GetUserByToken(token);
+                if (user == null) {
                     return AuthenticateResult.Fail("Invalid Session");
                 }
-                if (!userResult.Sucesso)
-                {
-                    return AuthenticateResult.Fail(userResult.Mensagem);
-                }
-                user = userResult.User;
+
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                return AuthenticateResult.Fail(e.Message + "\n" + e.InnerException?.Message);
+                return AuthenticateResult.Fail("Invalid Authorization Header");
             }
             
             var claims = new[] {

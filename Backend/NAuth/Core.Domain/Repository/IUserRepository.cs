@@ -12,7 +12,6 @@ namespace Core.Domain.Repository
         TModel GetByEmail(string email, TFactory factory);
         TModel GetBySlug(string slug, TFactory factory);
         TModel GetByStripeId(string stripeId, TFactory factory);
-        //void UpdateToken(long userId, string token);
         TModel LoginWithEmail(string email, string encryptPwd, TFactory factory);
         TModel GetUserByRecoveryHash(string recoveryHash, TFactory factory);
         void UpdateRecoveryHash(long userId, string recoveryHash);

@@ -17,15 +17,13 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using NAuth.Domain;
 using NAuth.Client;
-using AuthHandler = NAuth.Domain.AuthHandler;
-//using AuthHandler = NAuth.Client.AuthHandler;
+using LocalAuthHandler = NAuth.Domain.LocalAuthHandler;
+using System.Configuration;
 
 namespace NAuth.Application
 {
     public static class Initializer
     {
-        private static readonly string NAUTH_API_URL = "https://emagine.com.br/auth-api";
-
         private static void injectDependency(Type serviceType, Type implementationType, IServiceCollection services, bool scoped = true)
         {
             if(scoped)
@@ -33,12 +31,12 @@ namespace NAuth.Application
             else
                 services.AddTransient(serviceType, implementationType);
         }
-        public static void Configure(IServiceCollection services, ConfigurationParam config, bool scoped = true)
+        public static void Configure(IServiceCollection services, string connection, bool scoped = true)
         {
             if (scoped)
-                services.AddDbContext<NAuthContext>(x => x.UseLazyLoadingProxies().UseNpgsql(config.ConnectionString));
+                services.AddDbContext<NAuthContext>(x => x.UseLazyLoadingProxies().UseNpgsql(connection));
             else
-                services.AddDbContextFactory<NAuthContext>(x => x.UseLazyLoadingProxies().UseNpgsql(config.ConnectionString));
+                services.AddDbContextFactory<NAuthContext>(x => x.UseLazyLoadingProxies().UseNpgsql(connection));
 
             #region Infra
             injectDependency(typeof(NAuthContext), typeof(NAuthContext), services, scoped);
@@ -61,14 +59,7 @@ namespace NAuth.Application
             injectDependency(typeof(IMailerSendService), typeof(MailerSendService), services, scoped);
             #endregion
 
-            if (scoped)
-            {
-                services.AddScoped<IUserClient, UserClient>(new Func<IServiceProvider, UserClient>(x => new UserClient(NAUTH_API_URL)));
-            }
-            else
-            {
-                services.AddTransient<IUserClient, UserClient>(new Func<IServiceProvider, UserClient>(x => new UserClient(NAUTH_API_URL)));
-            }
+            injectDependency(typeof(IUserClient), typeof(UserClient), services, scoped);
 
             #region Factory
             injectDependency(typeof(IUserAddressDomainFactory), typeof(UserAddressDomainFactory), services, scoped);
@@ -80,7 +71,7 @@ namespace NAuth.Application
 
 
             services.AddAuthentication("BasicAuthentication")
-                .AddScheme<AuthenticationSchemeOptions, AuthHandler>("BasicAuthentication", null);
+                .AddScheme<AuthenticationSchemeOptions, LocalAuthHandler>("BasicAuthentication", null);
 
         }
     }

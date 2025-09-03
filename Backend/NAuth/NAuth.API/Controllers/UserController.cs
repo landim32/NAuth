@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NAuth.API.DTO;
 using NAuth.Domain.Impl.Models;
 using NAuth.Domain.Impl.Services;
 using NAuth.Domain.Interfaces.Factory;
@@ -17,11 +16,8 @@ using System.Net.Mail;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace NAuth.API.Controllers
 {
-    //[Route("[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -64,40 +60,6 @@ namespace NAuth.API.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
-        /*
-        [HttpPost("gettokenauthorized")]
-        public ActionResult<UserTokenResult> GetTokenAuthorized([FromBody] LoginParam login)
-        {
-            try
-            {
-                var user = _userService.LoginWithEmail(login.Email, login.Password);
-                if (user == null)
-                {
-                    return new UserTokenResult() {Sucesso = false, Mensagem = "Email or password is wrong" };
-                }
-                var fingerprint = Request.Headers["X-Device-Fingerprint"].FirstOrDefault();
-                var userAgent = Request.Headers["User-Agent"].FirstOrDefault();
-
-                var ipAddr = Request.HttpContext.Connection?.RemoteIpAddress?.ToString();
-
-                if (Request.Headers?.ContainsKey("X-Forwarded-For") == true)
-                {
-                    ipAddr = Request.Headers["X-Forwarded-For"].FirstOrDefault();
-                }
-                var token = _userService.CreateToken(user.UserId, ipAddr, userAgent, fingerprint);
-
-                return new UserTokenResult()
-                {
-                    Token = token.Token
-                };
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-        */
 
         [HttpGet("getMe")]
         [Authorize]
@@ -218,8 +180,6 @@ namespace NAuth.API.Controllers
         {
             try
             {
-                //if(String.IsNullOrEmpty(param.Address))
-                //    return StatusCode(400, "Address is empty");
                 if (user == null)
                 {
                     return new UserResult() { User = null, Sucesso = false, Mensagem = "User is empty" };
@@ -401,27 +361,6 @@ namespace NAuth.API.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
-        /*
-        [HttpPost("search")]
-        [Authorize]
-        public ActionResult<UserListPagedResult> Search([FromBody] UserSearchParam param)
-        {
-            try
-            {
-                var userSession = _userService.GetUserInSession(HttpContext);
-                if (userSession == null)
-                {
-                    return StatusCode(401, "Not Authorized");
-                }
-                return _userService.Search(param.NetworkId, param.Keyword, param.ProfileId, param.PageNum);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-        */
 
         [HttpGet("list/{take}")]
         public ActionResult<UserListResult> list(int take)

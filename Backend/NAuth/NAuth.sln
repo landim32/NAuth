@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NAuth.Application", "NAuth.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NAuth.Client", "NAuth.Client\NAuth.Client.csproj", "{30B413FD-646E-48C3-A423-617C1D35B170}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NAuth.Test", "NAuth.Test\NAuth.Test.csproj", "{74E59D4A-EEE8-41F9-813D-E9E8FC7E9D0C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -65,6 +67,10 @@ Global
 		{30B413FD-646E-48C3-A423-617C1D35B170}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{30B413FD-646E-48C3-A423-617C1D35B170}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{30B413FD-646E-48C3-A423-617C1D35B170}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74E59D4A-EEE8-41F9-813D-E9E8FC7E9D0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74E59D4A-EEE8-41F9-813D-E9E8FC7E9D0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74E59D4A-EEE8-41F9-813D-E9E8FC7E9D0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74E59D4A-EEE8-41F9-813D-E9E8FC7E9D0C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
