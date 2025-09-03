@@ -7,13 +7,13 @@
 ## 🚀 Features
 
 - 🔐 User registration with email confirmation  
-- 🔑 Login with JWT token authentication  
+- 🔑 Login with Token authentication  
 - 🔄 Password reset via email (secure token-based flow)  
 - ✏️ Profile update and password change  
 - 🧰 Ready-to-use frontend components with Bootstrap  
 - 🗄️ PostgreSQL schema and migrations included  
 - 📦 Modular architecture for reuse across multiple projects  
-- 🌐 RESTful API with Swagger documentation
+- 🌐 REST API with Swagger documentation
 
 ---
 
@@ -33,16 +33,28 @@
 
 ```
 NAuth/
-├── backend/           # .NET Core Web API
-│   ├── Controllers/
-│   ├── Services/
-│   ├── Models/
-│   └── Migrations/
-├── frontend/          # React + Bootstrap frontend
-│   ├── components/
-│   ├── pages/
-│   └── services/
-├── docs/              # API and setup documentation
+├── Backend/                 # .NET Core Web API
+│   └── NAuth/
+│       ├── DB.Infra         # Repository
+│       ├── NAuth.API        # API Rest
+│       ├── NAuth.Client     # NAuth Client
+│       ├── NAuth.Domain     # NAuth Domain
+│       │   ├── Interfaces
+│       │   │   ├── Core
+│       │   │   ├── Factory
+│       │   │   ├── Models
+│       │   │   └── Services
+│       │   └── Impl
+│       │       ├── Core
+│       │       ├── Factory
+│       │       ├── Models
+│       │       └── Services
+│       ├── NAuth.DTO
+│       └── NAuth.Test       # Unit Test Layer
+├── Frontend/                # React + Bootstrap frontend
+│   ├── nauth-core/          # React Hook           
+│   └── nauth-app/           # React App
+├── SQL/                     # Database Structure
 └── README.md
 ```
 
@@ -53,7 +65,7 @@ NAuth/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-org/nauth.git
+git clone https://github.com/landim32/nauth.git
 cd nauth
 ```
 
@@ -115,7 +127,7 @@ NAuth includes ready-to-use email templates and SMTP support. Configure your pro
 
 ## 👨‍💻 Author
 
-Developed by [Rodrigo Landim Carneiro](https://github.com/rodlandim)
+Developed by [Rodrigo Landim Carneiro](https://github.com/landim32)
 
 ---
 
