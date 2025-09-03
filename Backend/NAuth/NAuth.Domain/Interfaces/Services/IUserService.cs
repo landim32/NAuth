@@ -24,7 +24,6 @@ namespace NAuth.Domain.Interfaces.Services
         IUserModel GetUserByID(long userId);
         IUserModel GetUserByToken(string token);
         IUserModel GetByStripeId(string stripeId);
-        //IUserModel GetUserHash(ChainEnum chain, string address);
         UserInfo GetUserInSession(HttpContext httpContext);
         UserInfo GetUserInfoFromModel(IUserModel md);
         IList<IUserModel> ListUsers(int take);

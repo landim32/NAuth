@@ -447,22 +447,6 @@ namespace NAuth.Domain.Impl.Services
             return _userFactory.BuildUserModel().GetById(tokenModel.UserId, _userFactory);
         }
 
-        /*
-        public IUserModel GetUserHash(ChainEnum chain, string address)
-        {
-            var user = _userFactory.BuildUserModel().GetByAddress(chain, address, _userFactory);
-            if (user != null)
-            {
-                user.Hash = GetUniqueToken();
-                return user.Update(_userFactory);
-            }
-            else
-            {
-                return user;
-            }
-        }
-        */
-
         public UserInfo GetUserInSession(HttpContext httpContext)
         {
             if (httpContext.User.Claims.Count() > 0)
@@ -509,48 +493,6 @@ namespace NAuth.Domain.Impl.Services
                     }).ToList()
             };
         }
-
-        /*
-        public UserListPagedResult Search(long networkId, string keyword, long? profileId, int pageNum)
-        {
-            var userModel = _userFactory.BuildUserModel();
-            var profileModel = _profileFactory.BuildUserProfileModel();
-            var model = _userNetworkFactory.BuildUserNetworkModel();
-            int pageCount = 0;
-            var usersNetwork = model.Search(networkId, keyword, (profileId.GetValueOrDefault() == 0 ? null : profileId), pageNum, out pageCount, _userNetworkFactory);
-            var users = new List<UserNetworkSearchInfo>();
-            foreach (var user in usersNetwork)
-            {
-                var mdUser = userModel.GetById(user.UserId, _userFactory);
-                var info = new UserNetworkSearchInfo
-                {
-                    UserId = user.UserId,
-                    NetworkId = user.NetworkId,
-                    ProfileId = user.ProfileId,
-                    Name = mdUser.Name,
-                    Email = mdUser.Email,
-                    
-                    Role = user.Role,
-                    Status = user.Status
-                };
-                if (user.ProfileId.HasValue)
-                {
-                    var mdProfile = profileModel.GetById(user.ProfileId.Value, _profileFactory);
-                    info.Profile = mdProfile.Name;
-                    info.Commission = mdProfile.Commission;
-                    info.Level = mdProfile.Level;
-                }
-                users.Add(info);
-            }
-            return new UserListPagedResult
-            {
-                Sucesso = true,
-                Users = users,
-                PageNum = pageNum,
-                PageCount = pageCount
-            };
-        }
-        */
 
         private string GetUniqueToken()
         {

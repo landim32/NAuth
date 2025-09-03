@@ -26,8 +26,6 @@ namespace NAuth.Domain.Interfaces.Models
         IUserModel GetByEmail(string email, IUserDomainFactory factory);
         IUserModel GetBySlug(string slug, IUserDomainFactory factory);
         IUserModel GetById(long userId, IUserDomainFactory factory);
-        //IUserModel GetByToken(string token, IUserDomainFactory factory);
-        //string GenerateNewToken(IUserDomainFactory factory);
         IUserModel GetByStripeId(string stripeId, IUserDomainFactory factory);
         IUserModel GetByRecoveryHash(string recoveryHash, IUserDomainFactory factory);
         IEnumerable<IUserModel> ListUsers(int take, IUserDomainFactory factory);
