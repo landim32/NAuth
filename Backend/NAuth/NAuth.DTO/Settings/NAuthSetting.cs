@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NAuth.Application
+namespace NAuth.DTO.Settings
 {
-    public class ConfigurationParam
+    public class NAuthSetting
     {
-        public string ConnectionString { get; set; }
+        public string ApiUrl { get; set; }
     }
 }

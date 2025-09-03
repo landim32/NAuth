@@ -16,11 +16,8 @@ using System.Net.Mail;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace NAuth.API.Controllers
 {
-    //[Route("[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -183,8 +180,6 @@ namespace NAuth.API.Controllers
         {
             try
             {
-                //if(String.IsNullOrEmpty(param.Address))
-                //    return StatusCode(400, "Address is empty");
                 if (user == null)
                 {
                     return new UserResult() { User = null, Sucesso = false, Mensagem = "User is empty" };

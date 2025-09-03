@@ -1,51 +1,43 @@
 ﻿using System;
-using System.Linq;
 using System.Net.Http.Headers;
 using System.Security.Claims;
-using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using NAuth.Domain.Interfaces.Models;
-using NAuth.Domain.Interfaces.Services;
-using NAuth.DTO.User;
-using Core.Domain;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using NAuth.Domain.Impl.Models;
+using NAuth.Client;
+using NAuth.DTO.User;
 
-namespace NAuth.Domain
+namespace NAuth.Client
 {
-    public class AuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+    public class RemoteAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
-        //private readonly ICryptoUtils _cryptoUtils;
-        private readonly IUserService _userService;
-
         private const string TOKEN_DEFAULT = "tokendoamor";
         private const string EMAIL_DEFAULT = "rodrigo@emagine.com.br";
 
-        public AuthHandler(
+        private readonly IUserClient _userClient;
+        public RemoteAuthHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
             ISystemClock clock,
-            //ICryptoUtils cryptoUtils,
-            IUserService userService)
+            IUserClient userClient
+        )
             : base(options, logger, encoder, clock)
         {
-            //_cryptoUtils = cryptoUtils;
-            _userService = userService;
+            _userClient = userClient;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             if (!Request.Headers.ContainsKey("Authorization"))
+            {
                 return AuthenticateResult.Fail("Missing Authorization Header");
+            }
 
-            //string btcAddress = null;
-            //string stxAddress = null;
-            IUserModel user = null; 
+            UserInfo user = null; 
             try
             {
                 var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
@@ -54,48 +46,27 @@ namespace NAuth.Domain
                 {
                     return AuthenticateResult.Fail("Missing Authorization Token");
                 }
+                UserResult? userResult = null;
                 if (token == TOKEN_DEFAULT)
                 {
-                    user = _userService.GetUserByEmail(EMAIL_DEFAULT);
+                    userResult = await _userClient.GetByEmailAsync(EMAIL_DEFAULT);
                 }
                 else
                 {
-                    user = _userService.GetUserByToken(token);
+                    userResult = await _userClient.GetByTokenAsync(token);
                 }
-                if (user == null) {
+                if (userResult == null) {
                     return AuthenticateResult.Fail("Invalid Session");
                 }
-                /*
-                var masterKey = authHeader.Parameter;
-                if(masterKey == "masterkeydoamor")
+                if (!userResult.Sucesso)
                 {
-                    user = _userService.GetUserByAddress(ChainEnum.StackAndBitcoin, STX_ADDRESS);
+                    return AuthenticateResult.Fail(userResult.Mensagem);
                 }
-                else
-                {
-                    var hashAuth = Encoding.UTF8.GetString(Convert.FromBase64String(authHeader.Parameter));
-                    var hashList = hashAuth.Split("|separator|");
-                    if (hashList.Count() == 2)
-                    {
-                        var signature = hashList[0];
-                        //btcAddress = hashList[1];
-                        stxAddress = hashList[1];
-
-                        user = _userService.GetUserByAddress(ChainEnum.StackAndBitcoin, STX_ADDRESS);
-                        if (user == null)
-                            return AuthenticateResult.Fail("Invalid Session");
-                    }
-                    else
-                    {
-                        return AuthenticateResult.Fail("Incorrect Session");
-                    }
-                }
-                */
-
+                user = userResult.User;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return AuthenticateResult.Fail("Invalid Authorization Header");
+                return AuthenticateResult.Fail(e.Message + "\n" + e.InnerException?.Message);
             }
             
             var claims = new[] {

@@ -1,6 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Options;
 using NAuth.Domain.Interfaces.Services;
 using NAuth.DTO.MailerSend;
+using NAuth.DTO.Settings;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,19 +16,21 @@ namespace NAuth.Domain.Impl.Services
 {
     public class MailerSendService : IMailerSendService
     {
-        private const string MAIL_SENDER = "contact@trial-3zxk54vxer6gjy6v.mlsender.net";
-        private const string API_URL = "https://api.mailersend.com/v1/email";
-        private const string API_TOKEN = "mlsn.30332ed20b31409638f22ad3c259905860bbf5e2ec79e3e3542f3d5776c6dabd";
+        private readonly IOptions<MailerSendSetting> _mailSettings;
 
+        public MailerSendService(IOptions<MailerSendSetting> mailSettings)
+        {
+            _mailSettings = mailSettings;
+        }
 
         public async Task<bool> Sendmail(MailerInfo email)
         {
             using (var client = new HttpClient())
             {
-                email.From.Email = MAIL_SENDER;
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", API_TOKEN);
+                email.From.Email = _mailSettings.Value.MailSender;
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _mailSettings.Value.ApiToken);
                 var jsonContent = new StringContent(JsonConvert.SerializeObject(email), Encoding.UTF8, "application/json");
-                HttpResponseMessage response = await client.PostAsync(API_URL, jsonContent);
+                HttpResponseMessage response = await client.PostAsync(_mailSettings.Value.ApiUrl, jsonContent);
                 if (!response.IsSuccessStatusCode)
                 {
                     var errorStr = await response.Content.ReadAsStringAsync();

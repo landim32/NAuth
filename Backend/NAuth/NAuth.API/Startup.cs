@@ -1,23 +1,24 @@
-using NAuth.Application;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using NAuth.Application;
+using NAuth.DTO.Settings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Server.Kestrel.Https;
-using System.Security.Cryptography.X509Certificates;
 
 namespace NAuth.API
 {
@@ -33,11 +34,11 @@ namespace NAuth.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var config = new ConfigurationParam
-            {
-                ConnectionString = Configuration.GetConnectionString("NAuthContext")
-            };
-            Initializer.Configure(services, config);
+            services.Configure<MailerSendSetting>(Configuration.GetSection("MailerSend"));
+            services.Configure<NAuthSetting>(Configuration.GetSection("NAuth"));
+
+            Initializer.Configure(services, Configuration.GetConnectionString("NAuthContext"));
+
             services.AddControllers();
             services.AddHealthChecks();
             services.AddSwaggerGen(c =>
