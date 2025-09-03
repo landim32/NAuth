@@ -106,28 +106,6 @@ namespace DB.Infra.Repository
             return null;
         }
 
-        /*
-        public IUserModel GetByToken(string token, IUserDomainFactory factory)
-        {
-            var row = _ccsContext
-                .Users
-                .Where(x => x.UserTokens.Where(y => y.Token == token) == token)
-                .FirstOrDefault();
-            if (row != null)
-            {
-                return DbToModel(factory, row);
-            }
-            return null;
-        }
-        public void UpdateToken(long userId, string token)
-        {
-            var row = _ccsContext.Users.Find(userId);
-            row.Token = token;
-            _ccsContext.Users.Update(row);
-            _ccsContext.SaveChanges();
-        }
-        */
-
         public IUserModel GetByStripeId(string stripeId, IUserDomainFactory factory)
         {
             var row = _ccsContext.Users.Where(x => x.StripeId == stripeId).FirstOrDefault();
