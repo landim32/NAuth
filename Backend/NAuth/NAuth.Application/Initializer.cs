@@ -19,7 +19,6 @@ using NAuth.Domain;
 using NAuth.Client;
 using LocalAuthHandler = NAuth.Domain.LocalAuthHandler;
 using System.Configuration;
-//using AuthHandler = NAuth.Client.AuthHandler;
 
 namespace NAuth.Application
 {
