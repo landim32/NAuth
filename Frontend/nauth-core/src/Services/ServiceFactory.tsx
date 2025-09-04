@@ -4,7 +4,8 @@ import IUserService from './Interfaces/IUserService';
 import UserService from './Impl/UserService';
 
 const httpClientAuth: IHttpClient = HttpClient();
-httpClientAuth.init(import.meta.env.VITE_API_URL);
+console.log("VITE_NAUTH_URL", import.meta.env.VITE_NAUTH_URL);
+httpClientAuth.init(import.meta.env.VITE_NAUTH_URL);
 
 const userServiceImpl: IUserService = UserService;
 userServiceImpl.init(httpClientAuth);

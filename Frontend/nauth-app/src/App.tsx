@@ -1,49 +1,54 @@
-import './App.css';
-import { Routes, Route, Outlet, Link } from "react-router-dom";
-import ContextBuilder from './NAuth/Contexts/Utils/ContextBuilder';
-import AuthProvider from './NAuth/Contexts/Auth/AuthProvider';
-import UserPage from './NAuth/Pages/UserPage';
-import PasswordPage from './NAuth/Pages/PasswordPage';
-import LoginPage from './NAuth/Pages/LoginPage';
-import RecoveryPage from './NAuth/Pages/RecoveryPage';
-import UserProvider from './NAuth/Contexts/User/UserProvider';
-import HomePage from './Pages/HomePage';
-import Error404Page from './NAuth/Pages/Error404Page';
-import UserFullPage from './NAuth/Pages/UserFullPage';
-import Menu from './Pages/HomePage/Menu';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "@/hooks/use-theme";
+import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
+import Index from "./pages/Index";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Register from "./pages/Register";
+import ChangePassword from "./pages/ChangePassword";
+import RecoverPassword from "./pages/RecoverPassword";
+import NotFound from "./pages/NotFound";
+import { AuthProvider, ContextBuilder, UserProvider } from "./lib/nauth-core";
 
-function Layout() {
-  return (
-    <div>
-      <Menu />
-      <Outlet />
-    </div>
-  );
-}
+const queryClient = new QueryClient();
 
-function App() {
-  const ContextContainer = ContextBuilder([AuthProvider, UserProvider]);
+  const ContextContainer = ContextBuilder([
+    AuthProvider, UserProvider
+  ]);
 
-  return (
-    <ContextContainer>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<HomePage />} />
-          <Route path="new-seller" element={<UserFullPage />} />
-          <Route path="account">
-            <Route index element={<LoginPage />} />
-            <Route path="login" element={<LoginPage />} />
-            <Route path="edit-account" element={<UserPage />} />
-            <Route path="new-account" element={<UserPage />} />
-            <Route path="recovery-password" element={<RecoveryPage />} />
-            <Route path="change-password" element={<PasswordPage />} />
-          </Route>
-          
-        </Route>
-        <Route path="*" element={<Error404Page />} />
-      </Routes>
-    </ContextContainer>
-  );
-}
+const App = () => (
+  <ContextContainer>
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider defaultTheme="light" storageKey="nauth-ui-theme">
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <div className="min-h-screen flex flex-col bg-background">
+            <Navigation />
+            <main className="flex-1">
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/change-password" element={<ChangePassword />} />
+                <Route path="/recover-password" element={<RecoverPassword />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+            <Footer />
+          </div>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
+  </QueryClientProvider>
+  </ContextContainer>
+);
 
 export default App;

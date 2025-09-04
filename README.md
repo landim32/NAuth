@@ -71,6 +71,12 @@ cd nauth
 
 ### 2. Configure environment variables
 
+Ao alterar o Frontend/nauth-core é necessário atualizar a biblioteca hook no Frontend/nauth-app com o comando abaixo:
+
+```bash
+npm install --legacy-peer-deps ../nauth-core
+``` 
+
 Edit `.env` files in both `backend` and `frontend` folders to set your PostgreSQL connection, email settings, and frontend URL.
 
 ### 3. Start with Docker (recommended)
@@ -81,14 +87,14 @@ docker-compose up --build
 
 The app will be available at:
 - Frontend: `http://localhost:3000`
-- Backend API: `http://localhost:5000`
+- Backend API: `http://localhost:44374`
 
 ---
 
 ## 🧪 API Documentation
 
 Once running, access the Swagger UI at:  
-`http://localhost:5000/swagger/index.html`
+`http://localhost:44374/swagger/index.html`
 
 ---
 

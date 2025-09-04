@@ -225,14 +225,14 @@ export default function UserProvider(props: any) {
       const ret = {} as Promise<ProviderResult>;
       setLoading(true);
       try {
-        const brt = await UserFactory.UserBusiness.update(user);
+        const brt = await UserFactory.UserBusiness.loginWithEmail(email, password);
         if (brt.sucesso) {
           setLoading(false);
           _setUser(brt.dataResult);
           return {
             ...ret,
             sucesso: true,
-            mensagemSucesso: 'User updated',
+            mensagemSucesso: 'User successfully logged',
           };
         } else {
           setLoading(false);
