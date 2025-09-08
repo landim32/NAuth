@@ -28,7 +28,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <BrowserRouter basename="/nauth">
           <div className="min-h-screen flex flex-col bg-background">
             <Navigation />
             <main className="flex-1">
