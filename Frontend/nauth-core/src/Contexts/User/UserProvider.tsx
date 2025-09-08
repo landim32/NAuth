@@ -267,8 +267,8 @@ export default function UserProvider(props: any) {
         const bsRet = await UserFactory.UserBusiness.loginWithEmail(email, password);
         if (bsRet.sucesso) {
           setLoading(false);
-          _setUser(bsRet.dataResult);
-          _setSessionInfo({
+          _setUser(bsRet.dataResult.user);
+          userProviderValue.setSession({
             ...sessionInfo,
             userId: bsRet.dataResult.user.userId,
             hash: bsRet.dataResult.user.hash,
