@@ -105,8 +105,8 @@ const Index = () => {
               asChild
               className="text-lg px-8 py-6 border-brand-primary/20 hover:bg-brand-primary/10"
             >
-              <a href="https://docs.nauth.dev" target="_blank" rel="noopener noreferrer">
-                View Documentation
+              <a href="https://github.com/landim32/nauth" target="_blank" rel="noopener noreferrer">
+                Visit your GitHub Repository
               </a>
             </Button>
           </div>
@@ -181,7 +181,7 @@ const Index = () => {
             Ready to Get Started?
           </h2>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join thousands of developers who trust NAuth for their authentication needs
+            Join to developers who trust NAuth for their authentication needs
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
@@ -189,13 +189,8 @@ const Index = () => {
               asChild
               className="bg-gradient-to-r from-brand-primary to-brand-secondary hover:shadow-brand transition-all duration-300"
             >
-              <a href="https://github.com/nauth/nauth" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/landim32/nauth" target="_blank" rel="noopener noreferrer">
                 View on GitHub
-              </a>
-            </Button>
-            <Button size="lg" variant="outline" asChild>
-              <a href="https://docs.nauth.dev/quickstart" target="_blank" rel="noopener noreferrer">
-                Quick Start Guide
               </a>
             </Button>
           </div>
