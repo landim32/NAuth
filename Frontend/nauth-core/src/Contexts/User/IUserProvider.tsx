@@ -2,6 +2,8 @@ import UserInfo from '../../DTO/Domain/UserInfo';
 import ProviderResult from '../../DTO/Contexts/ProviderResult';
 import UrlProviderResult from '../../DTO/Contexts/UrlProviderResult';
 import UserProviderResult from '../../DTO/Contexts/UserProviderResult';
+import AuthSession from '../../DTO/Domain/AuthSession';
+import { LanguageEnum } from '../../DTO/Enum/LanguageEnum';
 
 interface IUserProvider {
   loading: boolean;
@@ -11,10 +13,16 @@ interface IUserProvider {
   loadingSearch: boolean;
 
   userHasPassword: boolean;
+  sessionInfo: AuthSession;
+  language: LanguageEnum;
   user: UserInfo;
   users: UserInfo[];
 
-  //searchResult: UserListPagedInfo;
+  setLanguage: (value: LanguageEnum) => void;
+  setSession: (session: AuthSession) => void;
+
+  logout: () => ProviderResult;
+  loadUserSession: () => Promise<ProviderResult>;
 
   setUser: (user: UserInfo) => void;
   uploadImageUser: (file: Blob) => Promise<UrlProviderResult>;
@@ -31,7 +39,6 @@ interface IUserProvider {
   changePasswordUsingHash: (recoveryHash: string, newPassword: string) => Promise<ProviderResult>;
 
   list: (take: number) => Promise<ProviderResult>;
-  //search: (networkId: number, keyword: string, pageNum: number, profileId?: number) => Promise<ProviderResult>;
 }
 
 export default IUserProvider;

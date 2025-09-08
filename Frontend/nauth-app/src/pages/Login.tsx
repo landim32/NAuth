@@ -2,7 +2,6 @@ import { useContext, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CodeExample } from "@/components/CodeExample"
 import { LogIn } from "lucide-react"
@@ -14,7 +13,6 @@ import dotnetCode from "../assets/code-examples/login-dotnet.txt?raw";
 export default function Login() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [keepSignedIn, setKeepSignedIn] = useState(false)
 
   const userContext = useContext<IUserProvider>(UserContext);
 
@@ -60,19 +58,6 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="keep-signed-in"
-                  checked={keepSignedIn}
-                  onCheckedChange={(checked) => setKeepSignedIn(checked as boolean)}
-                />
-                <Label 
-                  htmlFor="keep-signed-in" 
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Keep me signed in
-                </Label>
               </div>
               <Button className="w-full bg-gradient-to-r from-brand-primary to-brand-secondary hover:shadow-brand transition-all duration-300" 
                 onClick={async (e) => {

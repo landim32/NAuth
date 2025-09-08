@@ -3,19 +3,34 @@ import AuthSession from '../../DTO/Domain/AuthSession';
 import UserInfo from '../../DTO/Domain/UserInfo';
 import UserTokenInfo from '../../DTO/Domain/UserTokenInfo';
 import IUserService from '../../Services/Interfaces/IUserService';
-import AuthFactory from '../Factory/AuthFactory';
+import UserFactory from '../Factory/UserFactory';
 import IUserBusiness from '../Interfaces/IUserBusiness';
 
 let _userService: IUserService;
+
+const LS_KEY = 'login-with-metamask:auth';
 
 const UserBusiness: IUserBusiness = {
   init: function (userService: IUserService): void {
     _userService = userService;
   },
+
+  getSession: () => {
+    const ls = window.localStorage.getItem(LS_KEY);
+    return ls && JSON.parse(ls);
+  },
+  setSession: (session: AuthSession) => {
+    console.log('Set Session: ', JSON.stringify(session));
+    localStorage.setItem(LS_KEY, JSON.stringify(session));
+  },
+  cleanSession: () => {
+    localStorage.removeItem(LS_KEY);
+  },
+
   uploadImageUser: async (file: Blob) => {
     try {
       const ret = {} as BusinessResult<string>;
-      const session: AuthSession = AuthFactory.AuthBusiness.getSession();
+      const session: AuthSession = UserFactory.UserBusiness.getSession();
       if (!session) {
         return {
           ...ret,
@@ -44,7 +59,7 @@ const UserBusiness: IUserBusiness = {
   getMe: async () => {
     try {
       const ret = {} as BusinessResult<UserInfo>;
-      const session: AuthSession = AuthFactory.AuthBusiness.getSession();
+      const session: AuthSession = UserFactory.UserBusiness.getSession();
       if (!session) {
         return {
           ...ret,
@@ -136,7 +151,7 @@ const UserBusiness: IUserBusiness = {
   update: async (user: UserInfo) => {
     try {
       const ret = {} as BusinessResult<UserInfo>;
-      const session: AuthSession = AuthFactory.AuthBusiness.getSession();
+      const session: AuthSession = UserFactory.UserBusiness.getSession();
       if (!session) {
         return {
           ...ret,
@@ -190,7 +205,7 @@ const UserBusiness: IUserBusiness = {
   hasPassword: async () => {
     try {
       const ret = {} as BusinessResult<boolean>;
-      const session: AuthSession = AuthFactory.AuthBusiness.getSession();
+      const session: AuthSession = UserFactory.UserBusiness.getSession();
       if (!session) {
         return {
           ...ret,
@@ -218,7 +233,7 @@ const UserBusiness: IUserBusiness = {
   },
   changePassword: async (oldPassword: string, newPassword: string) => {
     const ret = {} as BusinessResult<boolean>;
-    const session: AuthSession = AuthFactory.AuthBusiness.getSession();
+    const session: AuthSession = UserFactory.UserBusiness.getSession();
     if (!session) {
       return {
         ...ret,

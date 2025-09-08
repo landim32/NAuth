@@ -3,6 +3,10 @@ import { ThemeToggle } from "./ThemeToggle"
 import { MobileNav } from "./MobileNav"
 import { cn } from "@/lib/utils"
 import nauthLogo from "@/assets/nauth-logo.png"
+import { useContext, useEffect } from "react";
+import { toast } from "sonner";
+import { User } from "lucide-react"
+import { IUserProvider, UserContext } from "@/lib/nauth-core"
 
 const navigationItems = [
   { href: "/login", label: "Login" },
@@ -13,7 +17,18 @@ const navigationItems = [
 ]
 
 export function Navigation() {
-  const location = useLocation()
+
+  const location = useLocation();
+
+  const userContext = useContext<IUserProvider>(UserContext);
+
+  useEffect(() => {
+    userContext.loadUserSession().then((ret) => {
+      if (!ret.sucesso) {
+        toast.error(ret.mensagemErro);
+      }
+    });
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -45,6 +60,15 @@ export function Navigation() {
                 {item.label}
               </Link>
             ))}
+            {userContext.sessionInfo &&
+              <Link
+                to="/login"
+                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                onClick={async () => { await userContext.logout() }}
+              >
+                Logoff
+              </Link>
+            }
           </nav>
         </div>
 
@@ -61,6 +85,12 @@ export function Navigation() {
 
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center">
+            {userContext.sessionInfo &&
+              <Link to="/login" className="flex items-center mr-2">
+                <User className="h-5 w-5" />
+                {userContext.sessionInfo.name}
+              </Link>
+            }
             <ThemeToggle />
           </nav>
         </div>

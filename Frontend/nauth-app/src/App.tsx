@@ -13,12 +13,12 @@ import Register from "./pages/Register";
 import ChangePassword from "./pages/ChangePassword";
 import RecoverPassword from "./pages/RecoverPassword";
 import NotFound from "./pages/NotFound";
-import { AuthProvider, ContextBuilder, UserProvider } from "./lib/nauth-core";
+import { ContextBuilder, UserProvider } from "./lib/nauth-core";
 
 const queryClient = new QueryClient();
 
   const ContextContainer = ContextBuilder([
-    AuthProvider, UserProvider
+    UserProvider
   ]);
 
 const App = () => (

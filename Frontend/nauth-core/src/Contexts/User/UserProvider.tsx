@@ -6,6 +6,8 @@ import ProviderResult from '../../DTO/Contexts/ProviderResult';
 import UserFactory from '../../Business/Factory/UserFactory';
 import UserProviderResult from '../../DTO/Contexts/UserProviderResult';
 import UrlProviderResult from '../../DTO/Contexts/UrlProviderResult';
+import { LanguageEnum } from '../../DTO/Enum/LanguageEnum';
+import AuthSession from '../../DTO/Domain/AuthSession';
 
 export default function UserProvider(props: any) {
   const [loading, setLoading] = useState<boolean>(false);
@@ -14,12 +16,14 @@ export default function UserProvider(props: any) {
   const [loadingUpdate, setLoadingUpdate] = useState<boolean>(false);
   const [loadingSearch, setLoadingSearch] = useState<boolean>(false);
 
+  const [language, setLanguage] = useState<LanguageEnum>(LanguageEnum.English);
+  const [sessionInfo, _setSessionInfo] = useState<AuthSession>(null);
+
   const [userHasPassword, setUserHasPassword] = useState<boolean>(false);
 
   const [userImage, setUserImage] = useState<string>('');
   const [user, _setUser] = useState<UserInfo>(null);
   const [users, setUsers] = useState<UserInfo[]>([]);
-  //const [searchResult, setSearchResult] = useState<UserListPagedInfo>(null);
 
   const userProviderValue: IUserProvider = {
     loading: loading,
@@ -30,14 +34,60 @@ export default function UserProvider(props: any) {
     userHasPassword: userHasPassword,
     user: user,
     users: users,
-    //searchResult: searchResult,
+
+    language: language,
+    sessionInfo: sessionInfo,
+
+    setSession: (session: AuthSession) => {
+      console.log(JSON.stringify(session));
+      _setSessionInfo(session);
+      UserFactory.UserBusiness.setSession(session);
+    },
+    setLanguage: (value: LanguageEnum) => {
+      setLanguage(value);
+    },
     setUser: (user: UserInfo) => {
       _setUser(user);
     },
+
+
+    logout: function (): ProviderResult {
+      try {
+        UserFactory.UserBusiness.cleanSession();
+        _setSessionInfo(null);
+        return {
+          sucesso: true,
+          mensagemErro: '',
+          mensagemSucesso: '',
+        };
+      } catch (err) {
+        return {
+          sucesso: false,
+          mensagemErro: 'Falha ao tenta executar o logout',
+          mensagemSucesso: '',
+        };
+      }
+    },
+    loadUserSession: async () => {
+      const ret = {} as Promise<ProviderResult>;
+      const session = await UserFactory.UserBusiness.getSession();
+      if (session) {
+        userProviderValue.setSession(session);
+        return {
+          ...ret,
+          sucesso: true,
+        };
+      }
+      return {
+        ...ret,
+        sucesso: false,
+        mensagemErro: 'Session not load',
+      };
+    },
+
     uploadImageUser: async (file: Blob) => {
       const ret = {} as Promise<UrlProviderResult>;
       setLoading(true);
-      //try {
       const brt = await UserFactory.UserBusiness.uploadImageUser(file);
       if (brt.sucesso) {
         setLoading(false);
@@ -56,17 +106,6 @@ export default function UserProvider(props: any) {
           mensagemErro: brt.mensagem,
         };
       }
-      /*
-                    }
-                    catch (err) {
-                        setLoadingUpdate(false);
-                        return {
-                            ...ret,
-                            sucesso: false,
-                            mensagemErro: JSON.stringify(err)
-                        };
-                    }
-                    */
     },
     getMe: async () => {
       const ret = {} as Promise<UserProviderResult>;
@@ -225,10 +264,20 @@ export default function UserProvider(props: any) {
       const ret = {} as Promise<ProviderResult>;
       setLoading(true);
       try {
-        const brt = await UserFactory.UserBusiness.loginWithEmail(email, password);
-        if (brt.sucesso) {
+        const bsRet = await UserFactory.UserBusiness.loginWithEmail(email, password);
+        if (bsRet.sucesso) {
           setLoading(false);
-          _setUser(brt.dataResult);
+          _setUser(bsRet.dataResult);
+          _setSessionInfo({
+            ...sessionInfo,
+            userId: bsRet.dataResult.user.userId,
+            hash: bsRet.dataResult.user.hash,
+            token: bsRet.dataResult.token,
+            isAdmin: bsRet.dataResult.user.isAdmin,
+            name: bsRet.dataResult.user.name,
+            email: bsRet.dataResult.user.email,
+            language: language,
+          });
           return {
             ...ret,
             sucesso: true,
@@ -239,7 +288,7 @@ export default function UserProvider(props: any) {
           return {
             ...ret,
             sucesso: false,
-            mensagemErro: brt.mensagem,
+            mensagemErro: bsRet.mensagem,
           };
         }
       } catch (err) {
@@ -399,32 +448,7 @@ export default function UserProvider(props: any) {
           mensagemErro: JSON.stringify(err),
         };
       }
-    },
-    /*,
-        search: async (networkId: number, keyword: string, pageNum: number, profileId?: number) => {
-            let ret = {} as Promise<ProviderResult>;
-            setLoadingSearch(true);
-            setSearchResult(null);
-                let brt = await UserFactory.UserBusiness.search(networkId, keyword, pageNum, profileId);
-                if (brt.sucesso) {
-                    setLoadingSearch(false);
-                    setSearchResult(brt.dataResult);
-                    return {
-                        ...ret,
-                        sucesso: true,
-                        mensagemSucesso: "Search executed"
-                    };
-                }
-                else {
-                    setLoadingSearch(false);
-                    return {
-                        ...ret,
-                        sucesso: false,
-                        mensagemErro: brt.mensagem
-                    };
-                }
-        }
-                */
+    }
   };
 
   return <UserContext.Provider value={userProviderValue}>{props.children}</UserContext.Provider>;

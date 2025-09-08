@@ -1,7 +1,3 @@
-export { default as AuthContext } from './src/Contexts/Auth/AuthContext';
-export { default as AuthProvider } from './src/Contexts/Auth/AuthProvider';
-export type { default as IAuthProvider } from './src/Contexts/Auth/IAuthProvider';
-
 export { default as UserContext } from './src/Contexts/User/UserContext';
 export { default as UserProvider } from './src/Contexts/User/UserProvider';
 export type { default as IUserProvider } from './src/Contexts/User/IUserProvider';
@@ -9,11 +5,8 @@ export type { default as IUserProvider } from './src/Contexts/User/IUserProvider
 export { default as ContextBuilder } from './src/Contexts/Utils/ContextBuilder';
 
 export { default as UserFactory } from './src/Business/Factory/UserFactory';
-export { default as AuthFactory } from './src/Business/Factory/AuthFactory';
 export { default as UserBusiness } from './src/Business/Impl/UserBusiness';
-export { default as AuthBusiness } from './src/Business/Impl/AuthBusiness';
 export type { default as IUserBusiness } from './src/Business/Interfaces/IUserBusiness';
-export type { default as IAuthBusiness } from './src/Business/Interfaces/IAuthBusiness';
 
 export { HttpClient } from './src/Infra/Impl/HttpClient';
 export type { default as IHttpClient } from './src/Infra/Interface/IHttpClient';

@@ -1,24 +1,24 @@
 // Login Component with NAuth
 import { useState } from 'react'
-import { useAuth } from '@nauth/react'
+import { IUserProvider, UserContext } from "@/lib/nauth-core";
 
 export function LoginForm() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [keepSignedIn, setKeepSignedIn] = useState(false)
-  const { login, loading, error } = useAuth()
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const userContext = useContext<IUserProvider>(UserContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    try {
-      await login({
-        email,
-        password,
-        rememberMe: keepSignedIn
-      })
-    } catch (err) {
-      console.error('Login failed:', err)
+    let ret = await userContext.loginWithEmail(email, password); 
+    if (!ret.sucesso) {
+      setError(ret.mensagemErro);
+      return;
     }
+    // Redirect to dashboard page
+    window.location.href = '/dashboard';
   }
 
   return (
@@ -43,17 +43,8 @@ export function LoginForm() {
           required
         />
       </div>
-      <div>
-        <input
-          id="keep-signed-in"
-          type="checkbox"
-          checked={keepSignedIn}
-          onChange={(e) => setKeepSignedIn(e.target.checked)}
-        />
-        <label htmlFor="keep-signed-in">Keep me signed in</label>
-      </div>
       <button type="submit" disabled={loading}>
-        {loading ? 'Signing in...' : 'Sign In'}
+        {userContext.loading ? 'Signing in...' : 'Sign In'}
       </button>
       {error && <p className="error">{error}</p>}
     </form>
