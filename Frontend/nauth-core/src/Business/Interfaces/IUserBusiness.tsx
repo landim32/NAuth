@@ -1,10 +1,16 @@
 import BusinessResult from '../../DTO/Business/BusinessResult';
+import AuthSession from '../../DTO/Domain/AuthSession';
 import UserInfo from '../../DTO/Domain/UserInfo';
 import UserTokenInfo from '../../DTO/Domain/UserTokenInfo';
 import IUserService from '../../Services/Interfaces/IUserService';
 
 export default interface IUserBusiness {
   init: (userService: IUserService) => void;
+  
+  getSession: () => AuthSession;
+  setSession: (session: AuthSession) => void;
+  cleanSession: () => void;
+
   uploadImageUser: (file: Blob) => Promise<BusinessResult<string>>;
   getMe: () => Promise<BusinessResult<UserInfo>>;
   getUserByEmail: (email: string) => Promise<BusinessResult<UserInfo>>;

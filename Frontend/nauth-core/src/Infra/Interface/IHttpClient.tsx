@@ -1,5 +1,4 @@
 import ApiResponse from '../../DTO/Services/ApiResponse';
-//import { History } from 'history';
 
 interface IHttpClient {
   init: (baseUrl: string) => void;
