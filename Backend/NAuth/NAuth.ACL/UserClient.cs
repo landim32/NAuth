@@ -12,7 +12,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NAuth.Client
+namespace NAuth.ACL
 {
     public class UserClient: IUserClient
     {
@@ -37,121 +37,149 @@ namespace NAuth.Client
             return null;
         }
 
-        public async Task<UserResult?> GetMeAsync(string token)
+        private UserInfo? GetUserInfoFromJson(string json)
+        {
+            var result = JsonConvert.DeserializeObject<UserResult>(json);
+            if (result == null)
+            {
+                throw new NullReferenceException("UserResult is null");
+            }
+            if (!result.Sucesso)
+            {
+                throw new Exception(result.Mensagem);
+            }
+            return result.User;
+        }
+
+        private bool GetBoolFromJson(string json)
+        {
+            var result = JsonConvert.DeserializeObject<UserResult>(json);
+            if (result == null)
+            {
+                throw new NullReferenceException("UserResult is null");
+            }
+            if (!result.Sucesso)
+            {
+                throw new Exception(result.Mensagem);
+            }
+            return result.Sucesso;
+        }
+
+        public async Task<UserInfo?> GetMeAsync(string token)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await _httpClient.GetAsync($"{_nauthSetting.Value.ApiUrl}/getMe");
             response.EnsureSuccessStatusCode();
-            var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<UserResult>(json);
+            return GetUserInfoFromJson(await response.Content.ReadAsStringAsync());
         }
 
-        public async Task<UserResult?> GetByIdAsync(long userId)
+        public async Task<UserInfo?> GetByIdAsync(long userId)
         {
             var response = await _httpClient.GetAsync($"{_nauthSetting.Value.ApiUrl}/getById/{userId}");
             response.EnsureSuccessStatusCode();
-            var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<UserResult>(json);
+            return GetUserInfoFromJson(await response.Content.ReadAsStringAsync());
         }
 
-        public async Task<UserResult?> GetByTokenAsync(string token)
+        public async Task<UserInfo?> GetByTokenAsync(string token)
         {
             var response = await _httpClient.GetAsync($"{_nauthSetting.Value.ApiUrl}/getByToken/{token}");
             response.EnsureSuccessStatusCode();
-            var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<UserResult>(json);
+            return GetUserInfoFromJson(await response.Content.ReadAsStringAsync());
         }
 
-        public async Task<UserResult?> GetByEmailAsync(string email)
+        public async Task<UserInfo?> GetByEmailAsync(string email)
         {
             var response = await _httpClient.GetAsync($"{_nauthSetting.Value.ApiUrl}/getByEmail/{email}");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<UserResult>(json);
+            return GetUserInfoFromJson(await response.Content.ReadAsStringAsync());
         }
 
-        public async Task<UserResult?> GetBySlugAsync(string slug)
+        public async Task<UserInfo?> GetBySlugAsync(string slug)
         {
             var response = await _httpClient.GetAsync($"{_nauthSetting.Value.ApiUrl}/getBySlug/{slug}");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<UserResult>(json);
+            return GetUserInfoFromJson(await response.Content.ReadAsStringAsync());
         }
 
-        public async Task<UserResult?> InsertAsync(UserInfo user)
+        public async Task<UserInfo?> InsertAsync(UserInfo user)
         {
             var content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync($"{_nauthSetting.Value.ApiUrl}/insert", content);
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<UserResult>(json);
+            return GetUserInfoFromJson(await response.Content.ReadAsStringAsync());
         }
 
-        public async Task<UserResult?> UpdateAsync(UserInfo user, string token)
+        public async Task<UserInfo?> UpdateAsync(UserInfo user, string token)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync($"{_nauthSetting.Value.ApiUrl}/update", content);
             response.EnsureSuccessStatusCode();
-            var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<UserResult>(json);
+            return GetUserInfoFromJson(await response.Content.ReadAsStringAsync());
         }
 
-        public async Task<UserResult?> LoginWithEmailAsync(LoginParam param)
+        public async Task<UserInfo?> LoginWithEmailAsync(LoginParam param)
         {
             var content = new StringContent(JsonConvert.SerializeObject(param), Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync($"{_nauthSetting.Value.ApiUrl}/loginWithEmail", content);
             response.EnsureSuccessStatusCode();
-            var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<UserResult>(json);
+            return GetUserInfoFromJson(await response.Content.ReadAsStringAsync());
         }
 
-        public async Task<StatusResult?> HasPasswordAsync(string token)
+        public async Task<bool> HasPasswordAsync(string token)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await _httpClient.GetAsync($"{_nauthSetting.Value.ApiUrl}/hasPassword");
             response.EnsureSuccessStatusCode();
-            var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<StatusResult>(json);
+            return GetBoolFromJson(await response.Content.ReadAsStringAsync());
         }
 
-        public async Task<StatusResult?> ChangePasswordAsync(ChangePasswordParam param, string token)
+        public async Task<bool> ChangePasswordAsync(ChangePasswordParam param, string token)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var content = new StringContent(JsonConvert.SerializeObject(param), Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync($"{_nauthSetting.Value.ApiUrl}/changePassword", content);
             response.EnsureSuccessStatusCode();
-            var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<StatusResult>(json);
+            return GetBoolFromJson(await response.Content.ReadAsStringAsync());
         }
 
-        public async Task<StatusResult?> SendRecoveryMailAsync(string email)
+        public async Task<bool> SendRecoveryMailAsync(string email)
         {
             var response = await _httpClient.GetAsync($"{_nauthSetting.Value.ApiUrl}/sendRecoveryMail/{email}");
             response.EnsureSuccessStatusCode();
-            var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<StatusResult>(json);
+            return GetBoolFromJson(await response.Content.ReadAsStringAsync());
         }
 
-        public async Task<StatusResult?> ChangePasswordUsingHashAsync(ChangePasswordUsingHashParam param)
+        public async Task<bool> ChangePasswordUsingHashAsync(ChangePasswordUsingHashParam param)
         {
             var content = new StringContent(JsonConvert.SerializeObject(param), Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync($"{_nauthSetting.Value.ApiUrl}/changePasswordUsingHash", content);
             response.EnsureSuccessStatusCode();
-            var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<StatusResult>(json);
+            return GetBoolFromJson(await response.Content.ReadAsStringAsync());
         }
 
-        public async Task<UserListResult?> ListAsync(int take)
+        public async Task<IList<UserInfo>> ListAsync(int take)
         {
             var response = await _httpClient.GetAsync($"{_nauthSetting.Value.ApiUrl}/list/{take}");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<UserListResult>(json);
+            var result = JsonConvert.DeserializeObject<UserListResult>(json);
+            if (result == null)
+            {
+                throw new NullReferenceException("UserListResult is null");
+            }
+            if (!result.Sucesso)
+            {
+                throw new Exception(result.Mensagem);
+            }
+            return result.Users;
         }
 
         // Para upload de imagem, utilize MultipartFormDataContent
-        public async Task<StringResult?> UploadImageUserAsync(Stream fileStream, string fileName, string token)
+        public async Task<string> UploadImageUserAsync(Stream fileStream, string fileName, string token)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             using var content = new MultipartFormDataContent();
@@ -159,7 +187,16 @@ namespace NAuth.Client
             var response = await _httpClient.PostAsync($"{_nauthSetting.Value.ApiUrl}/uploadImageUser", content);
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<StringResult>(json);
+            var result = JsonConvert.DeserializeObject<StringResult>(json);
+            if (result == null)
+            {
+                throw new NullReferenceException("UserListResult is null");
+            }
+            if (!result.Sucesso)
+            {
+                throw new Exception(result.Mensagem);
+            }
+            return result.Value;
         }
     }
 
