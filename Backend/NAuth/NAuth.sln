@@ -29,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NAuth.API", "NAuth.API\NAut
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NAuth.Application", "NAuth.Application\NAuth.Application.csproj", "{5DE107B9-14A2-4A93-ACF8-E6F6BE632AC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NAuth.Client", "NAuth.Client\NAuth.Client.csproj", "{30B413FD-646E-48C3-A423-617C1D35B170}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NAuth.ACL", "NAuth.ACL\NAuth.ACL.csproj", "{30B413FD-646E-48C3-A423-617C1D35B170}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NAuth.Test", "NAuth.Test\NAuth.Test.csproj", "{74E59D4A-EEE8-41F9-813D-E9E8FC7E9D0C}"
 EndProject

@@ -16,9 +16,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using NAuth.Domain;
-using NAuth.Client;
 using LocalAuthHandler = NAuth.Domain.LocalAuthHandler;
 using System.Configuration;
+using NAuth.ACL;
 
 namespace NAuth.Application
 {

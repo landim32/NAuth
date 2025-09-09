@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using NAuth.Client;
+using NAuth.ACL;
 using NAuth.DTO.User;
 
-namespace NAuth.Client
+namespace NAuth.ACL
 {
     public class RemoteAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
@@ -37,7 +37,7 @@ namespace NAuth.Client
                 return AuthenticateResult.Fail("Missing Authorization Header");
             }
 
-            UserInfo user = null; 
+            UserInfo? user = null; 
             try
             {
                 var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
@@ -46,23 +46,17 @@ namespace NAuth.Client
                 {
                     return AuthenticateResult.Fail("Missing Authorization Token");
                 }
-                UserResult? userResult = null;
                 if (token == TOKEN_DEFAULT)
                 {
-                    userResult = await _userClient.GetByEmailAsync(EMAIL_DEFAULT);
+                    user = await _userClient.GetByEmailAsync(EMAIL_DEFAULT);
                 }
                 else
                 {
-                    userResult = await _userClient.GetByTokenAsync(token);
+                    user = await _userClient.GetByTokenAsync(token);
                 }
-                if (userResult == null) {
+                if (user == null) {
                     return AuthenticateResult.Fail("Invalid Session");
                 }
-                if (!userResult.Sucesso)
-                {
-                    return AuthenticateResult.Fail(userResult.Mensagem);
-                }
-                user = userResult.User;
             }
             catch (Exception e)
             {
