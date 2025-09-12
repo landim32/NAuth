@@ -19,6 +19,8 @@ using NAuth.Domain;
 using LocalAuthHandler = NAuth.Domain.LocalAuthHandler;
 using System.Configuration;
 using NAuth.ACL;
+using NTools.ACL.Interfaces;
+using NTools.ACL;
 
 namespace NAuth.Application
 {
@@ -50,16 +52,21 @@ namespace NAuth.Application
             injectDependency(typeof(IUserPhoneRepository<IUserPhoneModel, IUserPhoneDomainFactory>), typeof(UserPhoneRepository), services, scoped);
             injectDependency(typeof(IUserTokenRepository<IUserTokenModel, IUserTokenDomainFactory>), typeof(UserTokenRepository), services, scoped);
             injectDependency(typeof(IUserRepository<IUserModel, IUserDomainFactory>), typeof(UserRepository), services, scoped);
-           
+
             #endregion
 
             #region Service
-            injectDependency(typeof(IImageService), typeof(ImageService), services, scoped);
             injectDependency(typeof(IUserService), typeof(UserService), services, scoped);
-            injectDependency(typeof(IMailerSendService), typeof(MailerSendService), services, scoped);
             #endregion
 
-            injectDependency(typeof(IUserClient), typeof(UserClient), services, scoped);
+            #region Clients
+            injectDependency(typeof(IMailClient), typeof(MailClient), services, scoped);
+            injectDependency(typeof(IFileClient), typeof(FileClient), services, scoped);
+            injectDependency(typeof(IStringClient), typeof(StringClient), services, scoped);
+            injectDependency(typeof(IDocumentClient), typeof(DocumentClient), services, scoped);
+            #endregion
+
+            //injectDependency(typeof(IUserClient), typeof(UserClient), services, scoped);
 
             #region Factory
             injectDependency(typeof(IUserAddressDomainFactory), typeof(UserAddressDomainFactory), services, scoped);

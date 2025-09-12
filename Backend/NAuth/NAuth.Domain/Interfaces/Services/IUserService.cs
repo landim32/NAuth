@@ -10,22 +10,23 @@ namespace NAuth.Domain.Interfaces.Services
 {
     public interface IUserService
     {
+        string GetBucketName();
         IUserModel LoginWithEmail(string email, string password);
-        IUserTokenModel CreateToken(long userId, string ipAddress, string userAgent, string fingerprint);
+        Task<IUserTokenModel> CreateToken(long userId, string ipAddress, string userAgent, string fingerprint);
         bool HasPassword(long userId);
         void ChangePasswordUsingHash(string recoveryHash, string newPassword);
         void ChangePassword(long userId, string oldPassword, string newPassword);
         Task<bool> SendRecoveryEmail(string email);
 
-        IUserModel Insert(UserInfo user);
-        IUserModel Update(UserInfo user);
+        Task<IUserModel> Insert(UserInfo user);
+        Task<IUserModel> Update(UserInfo user);
         IUserModel GetUserByEmail(string email);
         IUserModel GetBySlug(string slug);
         IUserModel GetUserByID(long userId);
         IUserModel GetUserByToken(string token);
         IUserModel GetByStripeId(string stripeId);
         UserInfo GetUserInSession(HttpContext httpContext);
-        UserInfo GetUserInfoFromModel(IUserModel md);
+        Task<UserInfo> GetUserInfoFromModel(IUserModel md);
         IList<IUserModel> ListUsers(int take);
     }
 }

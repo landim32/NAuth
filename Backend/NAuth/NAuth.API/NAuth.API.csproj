@@ -35,4 +35,13 @@
   <ItemGroup>
     <EmbeddedResource Include="emagine.pfx" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="NTools.ACL">
+      <HintPath>..\Lib\NTools.ACL.dll</HintPath>
+    </Reference>
+    <Reference Include="NTools.DTO">
+      <HintPath>..\Lib\NTools.DTO.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

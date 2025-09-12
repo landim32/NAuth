@@ -1,45 +1,63 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
+﻿using Core.Domain;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
+using NAuth.Domain.Impl.Models;
 using NAuth.Domain.Interfaces.Factory;
 using NAuth.Domain.Interfaces.Models;
 using NAuth.Domain.Interfaces.Services;
+using NAuth.DTO.Settings;
 using NAuth.DTO.User;
-using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
-using NAuth.Domain.Impl.Models;
-using NAuth.DTO.MailerSend;
-using System.Threading.Tasks;
-using Core.Domain;
+using NTools.ACL;
+using NTools.ACL.Interfaces;
+using NTools.DTO.MailerSend;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace NAuth.Domain.Impl.Services
 {
     public class UserService : IUserService
     {
+        private readonly IOptions<NAuthSetting> _nauthSetting;
         private readonly IUserDomainFactory _userFactory;
         private readonly IUserPhoneDomainFactory _phoneFactory;
         private readonly IUserAddressDomainFactory _addrFactory;
         private readonly IUserTokenDomainFactory _tokenFactory;
-        private readonly IMailerSendService _mailerSendService;
-        private readonly IImageService _imageService;
+        private readonly IMailClient _mailClient;
+        private readonly IFileClient _fileClient;
+        private readonly IStringClient _stringClient;
+        private readonly IDocumentClient _documentClient;
 
         public UserService(
+            IOptions<NAuthSetting> nauthSetting,
             IUserDomainFactory userFactory, 
             IUserPhoneDomainFactory phoneFactory, 
             IUserAddressDomainFactory addrFactory,
             IUserTokenDomainFactory tokenFactory,
-            IMailerSendService mailerSendService,
-            IImageService imageService
+            IMailClient mailClient,
+            IFileClient fileClient,
+            IStringClient stringClient,
+            IDocumentClient documentClient
         )
         {
+            _nauthSetting = nauthSetting;
             _userFactory = userFactory;
             _phoneFactory = phoneFactory;
             _addrFactory = addrFactory;
             _tokenFactory = tokenFactory;
-            _mailerSendService = mailerSendService;
-            _imageService = imageService;
+            _mailClient = mailClient;
+            _fileClient = fileClient;
+            _stringClient = stringClient;
+            _documentClient = documentClient;
+        }
+
+        public string GetBucketName()
+        {
+            return _nauthSetting.Value.BucketName;
         }
 
         public IUserModel LoginWithEmail(string email, string password)
@@ -47,7 +65,7 @@ namespace NAuth.Domain.Impl.Services
             return _userFactory.BuildUserModel().LoginWithEmail(email, password, _userFactory);
         }
 
-        public IUserTokenModel CreateToken(long userId, string ipAddress, string userAgent, string fingerprint) { 
+        public async Task<IUserTokenModel> CreateToken(long userId, string ipAddress, string userAgent, string fingerprint) { 
             if (userId <= 0)
             {
                 throw new Exception("UserId is invalid");
@@ -73,7 +91,7 @@ namespace NAuth.Domain.Impl.Services
             tokenModel.CreatedAt = currentDate;
             tokenModel.LastAccess = currentDate;
             tokenModel.ExpireAt = currentDate.AddMonths(2);
-            tokenModel.Token = StringUtils.GenerateShortUniqueString();
+            tokenModel.Token = await _stringClient.GenerateShortUniqueStringAsync();
             return tokenModel.Insert(_tokenFactory);
         }
 
@@ -184,17 +202,17 @@ namespace NAuth.Domain.Impl.Services
                 Text = textMessage,
                 Html = htmlMessage
             };
-            await _mailerSendService.Sendmail(mail);
+            await _mailClient.SendmailAsync(mail);
             return await Task.FromResult(true);
         }
 
-        private string GenerateSlug(IUserModel md)
+        private async Task<string> GenerateSlug(IUserModel md)
         {
             string newSlug;
             int c = 0;
             do
             {
-                newSlug = SlugHelper.GerarSlug((!string.IsNullOrEmpty(md.Slug)) ? md.Slug : md.Name);
+                newSlug = await _stringClient.GenerateSlugAsync((!string.IsNullOrEmpty(md.Slug)) ? md.Slug : md.Name);
                 if (c > 0)
                 {
                     newSlug += c.ToString();
@@ -237,7 +255,7 @@ namespace NAuth.Domain.Impl.Services
             }
         }
 
-        private void ValidatePhones(UserInfo user)
+        private async Task ValidatePhones(UserInfo user)
         {
             if (user.Phones == null)
             {
@@ -251,7 +269,7 @@ namespace NAuth.Domain.Impl.Services
                 }
                 else
                 {
-                    phone.Phone = StringUtils.OnlyNumbers(phone.Phone.Trim());
+                    phone.Phone = await _stringClient.OnlyNumbersAsync(phone.Phone.Trim());
                     if (string.IsNullOrEmpty(phone.Phone))
                     {
                         throw new Exception($"{phone.Phone} is not a valid phone");
@@ -260,7 +278,7 @@ namespace NAuth.Domain.Impl.Services
             }
         }
 
-        private void ValidateAddresses(UserInfo user) {
+        private async Task ValidateAddresses(UserInfo user) {
             if (user.Addresses == null)
             {
                 return;
@@ -273,7 +291,7 @@ namespace NAuth.Domain.Impl.Services
                 }
                 else
                 {
-                    addr.ZipCode = StringUtils.OnlyNumbers(addr.ZipCode);
+                    addr.ZipCode = await _stringClient.OnlyNumbersAsync(addr.ZipCode);
                     if (string.IsNullOrEmpty(addr.ZipCode))
                     {
                         throw new Exception($"{addr.ZipCode} is not a valid zip code");
@@ -302,7 +320,7 @@ namespace NAuth.Domain.Impl.Services
             }
         }
 
-        public IUserModel Insert(UserInfo user)
+        public async Task<IUserModel> Insert(UserInfo user)
         {
             var model = _userFactory.BuildUserModel();
             if (string.IsNullOrEmpty(user.Name))
@@ -315,7 +333,7 @@ namespace NAuth.Domain.Impl.Services
             }
             else
             {
-                if (!EmailValidator.IsValidEmail(user.Email))
+                if (!await _mailClient.IsValidEmailAsync(user.Email))
                 {
                     throw new Exception("Email is not valid");
                 }
@@ -331,14 +349,14 @@ namespace NAuth.Domain.Impl.Services
             }
             if (!string.IsNullOrEmpty(user.IdDocument))
             {
-                user.IdDocument = StringUtils.OnlyNumbers(user.IdDocument);
-                if (!DocumentoUtils.ValidarCpfOuCnpj(user.IdDocument))
+                user.IdDocument = await _stringClient.OnlyNumbersAsync(user.IdDocument);
+                if (!await _documentClient.validarCpfOuCnpjAsync(user.IdDocument))
                 {
                     throw new Exception($"{user.IdDocument} is not a valid CPF or CNPJ");
                 }
             }
-            ValidatePhones(user);
-            ValidateAddresses(user);
+            await ValidatePhones(user);
+            await ValidateAddresses(user);
 
             model.Slug = user.Slug;
             model.Name = user.Name;
@@ -349,7 +367,7 @@ namespace NAuth.Domain.Impl.Services
             model.CreatedAt = DateTime.Now;
             model.UpdatedAt = DateTime.Now;
             model.Hash = GetUniqueToken();
-            model.Slug = GenerateSlug(model);
+            model.Slug = await GenerateSlug(model);
 
             var md = model.Insert(_userFactory);
 
@@ -359,10 +377,10 @@ namespace NAuth.Domain.Impl.Services
 
             md.ChangePassword(user.UserId, user.Password, _userFactory);
 
-            return model;
+            return md;
         }
 
-        public IUserModel Update(UserInfo user)
+        public async Task<IUserModel> Update(UserInfo user)
         {
             IUserModel model = null;
             if (!(user.UserId > 0))
@@ -384,7 +402,7 @@ namespace NAuth.Domain.Impl.Services
             }
             else
             {
-                if (!EmailValidator.IsValidEmail(user.Email))
+                if (!await _mailClient.IsValidEmailAsync(user.Email))
                 {
                     throw new Exception("Email is not valid");
                 }
@@ -396,14 +414,14 @@ namespace NAuth.Domain.Impl.Services
             }
             if (!string.IsNullOrEmpty(user.IdDocument))
             {
-                user.IdDocument = StringUtils.OnlyNumbers(user.IdDocument);
-                if (!DocumentoUtils.ValidarCpfOuCnpj(user.IdDocument))
+                user.IdDocument = await _stringClient.OnlyNumbersAsync(user.IdDocument);
+                if (!await _documentClient.validarCpfOuCnpjAsync(user.IdDocument))
                 {
                     throw new Exception($"{user.IdDocument} is not a valid CPF or CNPJ");
                 }
             }
-            ValidatePhones(user);
-            ValidateAddresses(user);
+            await ValidatePhones(user);
+            await ValidateAddresses(user);
 
             model.Slug = user.Slug;
             model.Name = user.Name;
@@ -412,7 +430,7 @@ namespace NAuth.Domain.Impl.Services
             model.IdDocument = user.IdDocument;
             model.PixKey = user.PixKey;
             model.UpdatedAt = DateTime.Now;
-            model.Slug = GenerateSlug(model);
+            model.Slug = await GenerateSlug(model);
 
             model.Update(_userFactory);
 
@@ -456,7 +474,7 @@ namespace NAuth.Domain.Impl.Services
             return null;
         }
 
-        public UserInfo GetUserInfoFromModel(IUserModel md)
+        public async Task<UserInfo> GetUserInfoFromModel(IUserModel md)
         {
             if (md == null)
                 return null;
@@ -465,7 +483,7 @@ namespace NAuth.Domain.Impl.Services
                 UserId = md.UserId,
                 Hash = md.Hash,
                 Slug = md.Slug,
-                ImageUrl = _imageService.GetImageUrl(md.Image),
+                ImageUrl = await _fileClient.GetFileUrlAsync(GetBucketName(), md.Image),
                 Name = md.Name,
                 Email = md.Email,
                 IdDocument = md.IdDocument,
