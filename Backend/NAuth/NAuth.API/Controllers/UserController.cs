@@ -9,6 +9,7 @@ using NAuth.Domain.Interfaces.Models;
 using NAuth.Domain.Interfaces.Services;
 using NAuth.DTO.Domain;
 using NAuth.DTO.User;
+using NTools.ACL.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,19 +24,19 @@ namespace NAuth.API.Controllers
     {
 
         private readonly IUserService _userService;
-        private readonly IImageService _imageService;
+        private readonly IFileClient _fileClient;
         private readonly IUserDomainFactory _userFactory;
 
-        public UserController(IUserService userService, IImageService imageService, IUserDomainFactory userFactory)
+        public UserController(IUserService userService, IFileClient fileClient, IUserDomainFactory userFactory)
         {
             _userService = userService;
-            _imageService = imageService;
+            _fileClient = fileClient;
             _userFactory = userFactory;
         }
 
         [Authorize]
         [HttpPost("uploadImageUser")]
-        public ActionResult<StringResult> UploadImageUser(IFormFile file)
+        public async Task<ActionResult<StringResult>> UploadImageUser(IFormFile file)
         {
             try
             {
@@ -49,10 +50,11 @@ namespace NAuth.API.Controllers
                     return StatusCode(401, "Not Authorized");
                 }
 
-                var fileName = _imageService.InsertToUser(file.OpenReadStream(), userSession.UserId);
+                //var fileName = await _fileClient.UploadFileAsync(_userService.GetBucketName(), file.OpenReadStream(), userSession.UserId);
+                var fileName = await _fileClient.UploadFileAsync(_userService.GetBucketName(), file);
                 return new StringResult()
                 {
-                    Value = _imageService.GetImageUrl(fileName)
+                    Value = await _fileClient.GetFileUrlAsync(_userService.GetBucketName(), fileName)
                 };
             }
             catch (Exception ex)
@@ -63,7 +65,7 @@ namespace NAuth.API.Controllers
 
         [HttpGet("getMe")]
         [Authorize]
-        public ActionResult<UserResult> GetMe()
+        public async Task<ActionResult<UserResult>> GetMe()
         {
             try
             {
@@ -80,7 +82,7 @@ namespace NAuth.API.Controllers
 
                 return new UserResult()
                 {
-                    User = _userService.GetUserInfoFromModel(user)
+                    User = await _userService.GetUserInfoFromModel(user)
                 };
             }
             catch (Exception ex)
@@ -90,7 +92,7 @@ namespace NAuth.API.Controllers
         }
 
         [HttpGet("getByToken/{token}")]
-        public ActionResult<UserResult> GetByToken(string token)
+        public async Task<ActionResult<UserResult>> GetByToken(string token)
         {
             try
             {
@@ -102,7 +104,7 @@ namespace NAuth.API.Controllers
 
                 return new UserResult()
                 {
-                    User = _userService.GetUserInfoFromModel(user)
+                    User = await _userService.GetUserInfoFromModel(user)
                 };
             }
             catch (Exception ex)
@@ -112,7 +114,7 @@ namespace NAuth.API.Controllers
         }
 
         [HttpGet("getById/{userId}")]
-        public ActionResult<UserResult> GetById(long userId)
+        public async Task<ActionResult<UserResult>> GetById(long userId)
         {
             try
             {
@@ -124,7 +126,7 @@ namespace NAuth.API.Controllers
 
                 return new UserResult()
                 {
-                    User = _userService.GetUserInfoFromModel(user)
+                    User = await _userService.GetUserInfoFromModel(user)
                 };
             }
             catch (Exception ex)
@@ -134,7 +136,7 @@ namespace NAuth.API.Controllers
         }
 
         [HttpGet("getByEmail/{email}")]
-        public ActionResult<UserResult> GetByEmail(string email)
+        public async Task<ActionResult<UserResult>> GetByEmail(string email)
         {
             try
             {
@@ -145,7 +147,7 @@ namespace NAuth.API.Controllers
                 }
                 return new UserResult()
                 {
-                    User = _userService.GetUserInfoFromModel(user)
+                    User = await _userService.GetUserInfoFromModel(user)
                 };
             }
             catch (Exception ex)
@@ -155,7 +157,7 @@ namespace NAuth.API.Controllers
         }
 
         [HttpGet("getBySlug/{slug}")]
-        public ActionResult<UserResult> GetBySlug(string slug)
+        public async Task<ActionResult<UserResult>> GetBySlug(string slug)
         {
             try
             {
@@ -166,7 +168,7 @@ namespace NAuth.API.Controllers
                 }
                 return new UserResult()
                 {
-                    User = _userService.GetUserInfoFromModel(user)
+                    User = await _userService.GetUserInfoFromModel(user)
                 };
             }
             catch (Exception ex)
@@ -176,7 +178,7 @@ namespace NAuth.API.Controllers
         }
 
         [HttpPost("insert")]
-        public ActionResult<UserResult> Insert([FromBody] UserInfo user)
+        public async Task<ActionResult<UserResult>> Insert([FromBody] UserInfo user)
         {
             try
             {
@@ -184,10 +186,10 @@ namespace NAuth.API.Controllers
                 {
                     return new UserResult() { User = null, Sucesso = false, Mensagem = "User is empty" };
                 }
-                var newUser = _userService.Insert(user);
+                var newUser = await _userService.Insert(user);
                 return new UserResult()
                 {
-                    User = _userService.GetUserInfoFromModel(newUser)
+                    User = await _userService.GetUserInfoFromModel(newUser)
                 };
             }
             catch (Exception ex)
@@ -198,7 +200,7 @@ namespace NAuth.API.Controllers
 
         [Authorize]
         [HttpPost("update")]
-        public ActionResult<UserResult> Update([FromBody] UserInfo user)
+        public async Task<ActionResult<UserResult>> Update([FromBody] UserInfo user)
         {
             try
             {
@@ -216,10 +218,10 @@ namespace NAuth.API.Controllers
                     throw new Exception("Only can update your user");
                 }
 
-                var updatedUser = _userService.Update(user);
+                var updatedUser = await _userService.Update(user);
                 return new UserResult()
                 {
-                    User = _userService.GetUserInfoFromModel(updatedUser)
+                    User = await _userService.GetUserInfoFromModel(updatedUser)
                 };
             }
             catch (Exception ex)
@@ -229,7 +231,7 @@ namespace NAuth.API.Controllers
         }
 
         [HttpPost("loginWithEmail")]
-        public ActionResult<UserTokenResult> LoginWithEmail([FromBody]LoginParam param)
+        public async Task<ActionResult<UserTokenResult>> LoginWithEmail([FromBody]LoginParam param)
         {
             try
             {
@@ -247,11 +249,11 @@ namespace NAuth.API.Controllers
                 {
                     ipAddr = Request.Headers["X-Forwarded-For"].FirstOrDefault();
                 }
-                var token = _userService.CreateToken(user.UserId, ipAddr, userAgent, fingerprint);
+                var token = await _userService.CreateToken(user.UserId, ipAddr, userAgent, fingerprint);
                 return new UserTokenResult()
                 {
                     Token = token.Token,
-                    User = _userService.GetUserInfoFromModel(user)
+                    User = await _userService.GetUserInfoFromModel(user)
                 };
             }
             catch (Exception ex)
@@ -363,14 +365,16 @@ namespace NAuth.API.Controllers
         }
 
         [HttpGet("list/{take}")]
-        public ActionResult<UserListResult> list(int take)
+        public async Task<ActionResult<UserListResult>> list(int take)
         {
             try
             {
+                var userModels = _userService.ListUsers(take);
+                var userInfos = await Task.WhenAll(userModels.Select(x => _userService.GetUserInfoFromModel(x)));
                 return new UserListResult
                 {
                     Sucesso = true,
-                    Users = _userService.ListUsers(take).Select(x => _userService.GetUserInfoFromModel(x)).ToList()
+                    Users = userInfos.ToList()
                 };
             }
             catch (Exception ex)

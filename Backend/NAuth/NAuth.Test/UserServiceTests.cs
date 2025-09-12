@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
 using Xunit;
+using Microsoft.Extensions.Options;
 using NAuth.Domain.Impl.Services;
 using NAuth.Domain.Interfaces.Factory;
 using NAuth.Domain.Interfaces.Models;
 using NAuth.Domain.Interfaces.Services;
-using NAuth.DTO.MailerSend;
 using NAuth.DTO.User;
+using NAuth.DTO.Settings;
+using NTools.ACL.Interfaces;
+using NTools.DTO.MailerSend;
 
 namespace NAuth.Test;
 
@@ -19,23 +22,35 @@ public class UserServiceTests
         Mock<IUserTokenDomainFactory>? tokenFactory = null,
         Mock<IUserPhoneDomainFactory>? phoneFactory = null,
         Mock<IUserAddressDomainFactory>? addrFactory = null,
-        Mock<IMailerSendService>? mailer = null,
-        Mock<IImageService>? image = null)
+        Mock<IMailClient>? mailClient = null,
+        Mock<IFileClient>? fileClient = null,
+        Mock<IStringClient>? stringClient = null,
+        Mock<IDocumentClient>? documentClient = null,
+        Mock<IOptions<NAuthSetting>>? nauthOptions = null
+    )
     {
         userFactory ??= new Mock<IUserDomainFactory>();
         tokenFactory ??= new Mock<IUserTokenDomainFactory>();
         phoneFactory ??= new Mock<IUserPhoneDomainFactory>();
         addrFactory ??= new Mock<IUserAddressDomainFactory>();
-        mailer ??= new Mock<IMailerSendService>();
-        image ??= new Mock<IImageService>();
+        mailClient ??= new Mock<IMailClient>();
+        fileClient ??= new Mock<IFileClient>();
+        stringClient ??= new Mock<IStringClient>();
+        documentClient ??= new Mock<IDocumentClient>();
+        nauthOptions ??= new Mock<IOptions<NAuthSetting>>();
+        nauthOptions.SetupGet(o => o.Value).Returns(new NAuthSetting());
 
         return new UserService(
+            nauthOptions.Object,
             userFactory.Object,
             phoneFactory.Object,
             addrFactory.Object,
             tokenFactory.Object,
-            mailer.Object,
-            image.Object);
+            mailClient.Object,
+            fileClient.Object,
+            stringClient.Object,
+            documentClient.Object
+        );
     }
 
     [Fact]
@@ -250,14 +265,24 @@ public class UserServiceTests
     [InlineData(1, "", "UA", "fp")]
     [InlineData(1, "127.0.0.1", "", "fp")]
     [InlineData(1, "127.0.0.1", "UA", "")]
-    public void CreateToken_InvalidArguments_ThrowsException(long userId, string ip, string ua, string fingerprint)
+    public async Task CreateToken_InvalidArguments_ThrowsException(long userId, string ip, string ua, string fingerprint)
     {
-        var service = CreateService();
-        Assert.Throws<Exception>(() => service.CreateToken(userId, ip, ua, fingerprint));
+        var mailClient = new Mock<IMailClient>();
+        var fileClient = new Mock<IFileClient>();
+        var stringClient = new Mock<IStringClient>();
+        var documentClient = new Mock<IDocumentClient>();
+
+        var service = CreateService(
+            mailClient: mailClient,
+            fileClient: fileClient,
+            stringClient: stringClient,
+            documentClient: documentClient
+        );
+        await Assert.ThrowsAsync<Exception>(() => service.CreateToken(userId, ip, ua, fingerprint));
     }
 
     [Fact]
-    public void CreateToken_ValidArguments_CallsInsertAndReturnsModel()
+    public async Task CreateToken_ValidArguments_CallsInsertAndReturnsModel()
     {
         var tokenModel = new Mock<IUserTokenModel>();
         tokenModel.SetupAllProperties();
@@ -265,9 +290,22 @@ public class UserServiceTests
         tokenFactory.Setup(f => f.BuildUserTokenModel()).Returns(tokenModel.Object);
         tokenModel.Setup(m => m.Insert(tokenFactory.Object)).Returns(tokenModel.Object);
 
-        var service = CreateService(tokenFactory: tokenFactory);
+        var stringClient = new Mock<IStringClient>();
+        stringClient.Setup(m => m.GenerateShortUniqueStringAsync()).ReturnsAsync("tokentest");
 
-        var result = service.CreateToken(1, "127.0.0.1", "UA", "fp");
+        var mailClient = new Mock<IMailClient>();
+        var fileClient = new Mock<IFileClient>();
+        var documentClient = new Mock<IDocumentClient>();
+
+        var service = CreateService(
+            tokenFactory: tokenFactory,
+            mailClient: mailClient,
+            fileClient: fileClient,
+            stringClient: stringClient,
+            documentClient: documentClient
+        );
+
+        var result = await service.CreateToken(1, "127.0.0.1", "UA", "fp");
 
         tokenFactory.Verify(f => f.BuildUserTokenModel(), Times.Once);
         tokenModel.Verify(m => m.Insert(tokenFactory.Object), Times.Once);
@@ -275,7 +313,7 @@ public class UserServiceTests
         Assert.Equal("127.0.0.1", result.IpAddress);
         Assert.Equal("UA", result.UserAgent);
         Assert.Equal("fp", result.Fingerprint);
-        Assert.False(string.IsNullOrEmpty(result.Token));
+        Assert.Equal("tokentest", result.Token);
     }
 
     [Fact]
@@ -336,17 +374,30 @@ public class UserServiceTests
         userModel.Setup(m => m.GetByEmail("mail@test.com", userFactory.Object)).Returns(existingUser.Object);
         userModel.Setup(m => m.GenerateRecoveryHash(10, userFactory.Object)).Returns("hash123");
 
-        var mailer = new Mock<IMailerSendService>();
-        mailer.Setup(m => m.Sendmail(It.IsAny<MailerInfo>())).ReturnsAsync(true);
+        var mailClient = new Mock<IMailClient>();
+        mailClient
+            .Setup(m => m.SendmailAsync(It.IsAny<MailerInfo>()))
+            .Returns((Task<bool>)Task.CompletedTask)
+            .Verifiable();
 
-        var service = CreateService(userFactory: userFactory, mailer: mailer);
+        var fileClient = new Mock<IFileClient>();
+        var stringClient = new Mock<IStringClient>();
+        var documentClient = new Mock<IDocumentClient>();
+
+        var service = CreateService(
+            userFactory: userFactory,
+            mailClient: mailClient,
+            fileClient: fileClient,
+            stringClient: stringClient,
+            documentClient: documentClient
+        );
 
         var result = await service.SendRecoveryEmail("mail@test.com");
 
         userFactory.Verify(f => f.BuildUserModel(), Times.Once);
         userModel.Verify(m => m.GetByEmail("mail@test.com", userFactory.Object), Times.Once);
         userModel.Verify(m => m.GenerateRecoveryHash(10, userFactory.Object), Times.Once);
-        mailer.Verify(m => m.Sendmail(It.Is<MailerInfo>(mail =>
+        mailClient.Verify(m => m.SendmailAsync(It.Is<MailerInfo>(mail =>
             mail.Subject == "[NoChainSwap] Password Recovery Email" &&
             mail.To.Count == 1 &&
             mail.To[0].Email == "mail@test.com" &&
@@ -355,7 +406,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public void Insert_ValidUser_InsertsModelAndRelatedData()
+    public async Task Insert_ValidUser_InsertsModelAndRelatedData()
     {
         var userModel = new Mock<IUserModel>();
         userModel.SetupAllProperties();
@@ -379,7 +430,26 @@ public class UserServiceTests
         var addrFactory = new Mock<IUserAddressDomainFactory>();
         addrFactory.Setup(f => f.BuildUserAddressModel()).Returns(addrModel.Object);
 
-        var service = CreateService(userFactory: userFactory, phoneFactory: phoneFactory, addrFactory: addrFactory);
+        var mailClient = new Mock<IMailClient>();
+        mailClient.Setup(m => m.IsValidEmailAsync(It.IsAny<string>())).ReturnsAsync(true);
+
+        var fileClient = new Mock<IFileClient>();
+        var stringClient = new Mock<IStringClient>();
+        stringClient.Setup(m => m.GenerateSlugAsync(It.IsAny<string>())).ReturnsAsync("slug");
+        stringClient.Setup(m => m.OnlyNumbersAsync(It.IsAny<string>())).ReturnsAsync((string s) => s);
+
+        var documentClient = new Mock<IDocumentClient>();
+        documentClient.Setup(m => m.validarCpfOuCnpjAsync(It.IsAny<string>())).ReturnsAsync(true);
+
+        var service = CreateService(
+            userFactory: userFactory,
+            phoneFactory: phoneFactory,
+            addrFactory: addrFactory,
+            mailClient: mailClient,
+            fileClient: fileClient,
+            stringClient: stringClient,
+            documentClient: documentClient
+        );
 
         var user = new UserInfo
         {
@@ -390,7 +460,7 @@ public class UserServiceTests
             Addresses = new List<UserAddressInfo> { new UserAddressInfo { ZipCode = "12345678", Address = "Street", Complement = "Comp", Neighborhood = "Neigh", City = "City", State = "ST" } }
         };
 
-        var result = service.Insert(user);
+        var result = await service.Insert(user);
 
         userFactory.Verify(f => f.BuildUserModel(), Times.Once);
         userModel.Verify(m => m.GetByEmail("mail@test.com", userFactory.Object), Times.Once);
@@ -407,7 +477,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public void Update_ValidUser_UpdatesModelAndRelatedData()
+    public async Task Update_ValidUser_UpdatesModelAndRelatedData()
     {
         var userModel = new Mock<IUserModel>();
         userModel.SetupAllProperties();
@@ -434,7 +504,26 @@ public class UserServiceTests
         var addrFactory = new Mock<IUserAddressDomainFactory>();
         addrFactory.Setup(f => f.BuildUserAddressModel()).Returns(addrModel.Object);
 
-        var service = CreateService(userFactory: userFactory, phoneFactory: phoneFactory, addrFactory: addrFactory);
+        var mailClient = new Mock<IMailClient>();
+        mailClient.Setup(m => m.IsValidEmailAsync(It.IsAny<string>())).ReturnsAsync(true);
+
+        var fileClient = new Mock<IFileClient>();
+        var stringClient = new Mock<IStringClient>();
+        stringClient.Setup(m => m.GenerateSlugAsync(It.IsAny<string>())).ReturnsAsync("slug");
+        stringClient.Setup(m => m.OnlyNumbersAsync(It.IsAny<string>())).ReturnsAsync((string s) => s);
+
+        var documentClient = new Mock<IDocumentClient>();
+        documentClient.Setup(m => m.validarCpfOuCnpjAsync(It.IsAny<string>())).ReturnsAsync(true);
+
+        var service = CreateService(
+            userFactory: userFactory,
+            phoneFactory: phoneFactory,
+            addrFactory: addrFactory,
+            mailClient: mailClient,
+            fileClient: fileClient,
+            stringClient: stringClient,
+            documentClient: documentClient
+        );
 
         var user = new UserInfo
         {
@@ -445,7 +534,7 @@ public class UserServiceTests
             Addresses = new List<UserAddressInfo> { new UserAddressInfo { ZipCode = "12345678", Address = "Street", Complement = "Comp", Neighborhood = "Neigh", City = "City", State = "ST" } }
         };
 
-        var result = service.Update(user);
+        var result = await service.Update(user);
 
         userFactory.Verify(f => f.BuildUserModel(), Times.Once);
         userModel.Verify(m => m.GetById(42, userFactory.Object), Times.Once);
