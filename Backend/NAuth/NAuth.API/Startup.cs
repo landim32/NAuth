@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using NAuth.Application;
 using NAuth.DTO.Settings;
+using NTools.DTO.Settings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,6 +37,7 @@ namespace NAuth.API
         {
             services.Configure<MailerSendSetting>(Configuration.GetSection("MailerSend"));
             services.Configure<NAuthSetting>(Configuration.GetSection("NAuth"));
+            services.Configure<NToolSetting>(Configuration.GetSection("NTools"));
 
             Initializer.Configure(services, Configuration.GetConnectionString("NAuthContext"));
 
