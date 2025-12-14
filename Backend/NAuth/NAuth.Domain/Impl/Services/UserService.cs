@@ -1,5 +1,6 @@
 ﻿using Core.Domain;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NAuth.Domain.Impl.Models;
 using NAuth.Domain.Interfaces.Factory;
@@ -22,7 +23,8 @@ namespace NAuth.Domain.Impl.Services
 {
     public class UserService : IUserService
     {
-        private readonly IOptions<NAuthSetting> _nauthSetting;
+        private readonly ILogger<UserService> _logger;
+        private readonly NAuthSetting _nauthSetting;
         private readonly IUserDomainFactory _userFactory;
         private readonly IUserPhoneDomainFactory _phoneFactory;
         private readonly IUserAddressDomainFactory _addrFactory;
@@ -33,6 +35,7 @@ namespace NAuth.Domain.Impl.Services
         private readonly IDocumentClient _documentClient;
 
         public UserService(
+            ILogger<UserService> logger,
             IOptions<NAuthSetting> nauthSetting,
             IUserDomainFactory userFactory, 
             IUserPhoneDomainFactory phoneFactory, 
@@ -44,7 +47,8 @@ namespace NAuth.Domain.Impl.Services
             IDocumentClient documentClient
         )
         {
-            _nauthSetting = nauthSetting;
+            _logger = logger;
+            _nauthSetting = nauthSetting.Value;
             _userFactory = userFactory;
             _phoneFactory = phoneFactory;
             _addrFactory = addrFactory;
@@ -57,7 +61,7 @@ namespace NAuth.Domain.Impl.Services
 
         public string GetBucketName()
         {
-            return _nauthSetting.Value.BucketName;
+            return _nauthSetting.BucketName;
         }
 
         public IUserModel LoginWithEmail(string email, string password)
@@ -65,7 +69,11 @@ namespace NAuth.Domain.Impl.Services
             return _userFactory.BuildUserModel().LoginWithEmail(email, password, _userFactory);
         }
 
-        public async Task<IUserTokenModel> CreateToken(long userId, string ipAddress, string userAgent, string fingerprint) { 
+        public async Task<IUserTokenModel> CreateToken(long userId, string ipAddress, string userAgent, string fingerprint) {
+            _logger.LogTrace(
+                "Creating token for user with ID={@userId}, IP={@ipAddress}, UserAgent={@userAgent} and {@fingerprint}", 
+                userId, ipAddress, userAgent, fingerprint
+            );
             if (userId <= 0)
             {
                 throw new Exception("UserId is invalid");
@@ -92,6 +100,9 @@ namespace NAuth.Domain.Impl.Services
             tokenModel.LastAccess = currentDate;
             tokenModel.ExpireAt = currentDate.AddMonths(2);
             tokenModel.Token = await _stringClient.GenerateShortUniqueStringAsync();
+
+            _logger.LogTrace("Generating token string: {@token} expire at {@expireDate}", tokenModel.Token, tokenModel.ExpireAt);
+
             return tokenModel.Insert(_tokenFactory);
         }
 
@@ -110,6 +121,9 @@ namespace NAuth.Domain.Impl.Services
             {
                 throw new Exception("Password cant be empty");
             }
+
+            _logger.LogTrace("Changing password using recovery hash: {@recoveryHash}, new password: {@newPassword}", recoveryHash, newPassword);
+
             var md = _userFactory.BuildUserModel();
             var user = md.GetByRecoveryHash(recoveryHash, _userFactory);
             if (user == null)
@@ -117,6 +131,8 @@ namespace NAuth.Domain.Impl.Services
                 throw new Exception("User not found");
             }
             md.ChangePassword(user.UserId, newPassword, _userFactory);
+
+            _logger.LogTrace("Password successful changed using recovery hash: {@recoveryHash}", recoveryHash);
         }
 
         public void ChangePassword(long userId, string oldPassword, string newPassword)
@@ -148,7 +164,9 @@ namespace NAuth.Domain.Impl.Services
                     throw new Exception("Email or password is wrong");
                 }
             }
+            _logger.LogTrace("Changing password using old password: email: {0}, old password: {1}, new password: {2}", user.Email, oldPassword, newPassword);
             md.ChangePassword(user.UserId, newPassword, _userFactory);
+            _logger.LogTrace("Password successful changed using old password");
         }
 
         public async Task<bool> SendRecoveryEmail(string email)

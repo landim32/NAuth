@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using NAuth.Domain.Impl.Models;
 using NAuth.Domain.Impl.Services;
 using NAuth.Domain.Interfaces.Factory;
@@ -22,13 +23,19 @@ namespace NAuth.API.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-
+        private readonly ILogger<UserController> _logger;
         private readonly IUserService _userService;
         private readonly IFileClient _fileClient;
         private readonly IUserDomainFactory _userFactory;
 
-        public UserController(IUserService userService, IFileClient fileClient, IUserDomainFactory userFactory)
+        public UserController(
+            ILogger<UserController> logger,
+            IUserService userService, 
+            IFileClient fileClient, 
+            IUserDomainFactory userFactory
+        )
         {
+            _logger = logger;
             _userService = userService;
             _fileClient = fileClient;
             _userFactory = userFactory;
@@ -42,16 +49,19 @@ namespace NAuth.API.Controllers
             {
                 if (file == null || file.Length == 0)
                 {
+                    _logger.LogError("No file uploaded");
                     return BadRequest("No file uploaded");
                 }
                 var userSession = _userService.GetUserInSession(HttpContext);
                 if (userSession == null)
                 {
+                    _logger.LogError("Not Authorized");
                     return StatusCode(401, "Not Authorized");
                 }
 
                 //var fileName = await _fileClient.UploadFileAsync(_userService.GetBucketName(), file.OpenReadStream(), userSession.UserId);
                 var fileName = await _fileClient.UploadFileAsync(_userService.GetBucketName(), file);
+                _logger.LogInformation("File upload successfully, filename: {@filename}", fileName);
                 return new StringResult()
                 {
                     Value = await _fileClient.GetFileUrlAsync(_userService.GetBucketName(), fileName)
@@ -59,6 +69,7 @@ namespace NAuth.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message, ex);
                 return StatusCode(500, ex.Message);
             }
         }
@@ -72,13 +83,17 @@ namespace NAuth.API.Controllers
                 var userSession = _userService.GetUserInSession(HttpContext);
                 if (userSession == null)
                 {
+                    _logger.LogError("Not Authorized");
                     return StatusCode(401, "Not Authorized");
                 }
                 var user = _userService.GetUserByID(userSession.UserId);
                 if (user == null)
                 {
+                    _logger.LogError("User Not Found with ID {@userId}", userSession.UserId);
                     return new UserResult() { User = null, Sucesso = false, Mensagem = "User Not Found" };
                 }
+
+                _logger.LogInformation("getMe() = User(UserId: {@ID}, Name: {@name})", user.UserId, user.Name);
 
                 return new UserResult()
                 {
@@ -87,6 +102,7 @@ namespace NAuth.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message, ex);
                 return StatusCode(500, ex.Message);
             }
         }
@@ -99,8 +115,11 @@ namespace NAuth.API.Controllers
                 var user = _userService.GetUserByToken(token);
                 if (user == null)
                 {
+                    _logger.LogError("User with token not found {@token}", token);
                     return new UserResult() { User = null, Sucesso = false, Mensagem = "User Not Found" };
                 }
+
+                _logger.LogInformation("GetByToken(token: {@token}) = User(UserId: {@ID}, Email: {@email}, Name: {@name})", token, user.UserId, user.Email, user.Name);
 
                 return new UserResult()
                 {
@@ -109,6 +128,7 @@ namespace NAuth.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message, ex);
                 return StatusCode(500, ex.Message);
             }
         }
@@ -121,8 +141,11 @@ namespace NAuth.API.Controllers
                 var user = _userService.GetUserByID(userId);
                 if (user == null)
                 {
+                    _logger.LogError("User Not Found with ID {@userId}", userId);
                     return new UserResult() { User = null, Sucesso = false, Mensagem = "User Not Found" };
                 }
+
+                _logger.LogInformation("GetById(userId: {@userId}) = User(UserId: {@ID}, Email: {@email}, Name: {@name})", userId, user.UserId, user.Email, user.Name);
 
                 return new UserResult()
                 {
@@ -131,6 +154,7 @@ namespace NAuth.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message, ex);
                 return StatusCode(500, ex.Message);
             }
         }
@@ -143,8 +167,12 @@ namespace NAuth.API.Controllers
                 var user = _userService.GetUserByEmail(email);
                 if (user == null)
                 {
+                    _logger.LogError("User with email not found {@email}", email);
                     return new UserResult() { User = null, Sucesso = false, Mensagem = "User with email not found" };
                 }
+
+                _logger.LogInformation("GetByEmail(email: {@email}) = User(UserId: {@ID}, Email: {@email}, Name: {@name})", email, user.UserId, user.Email, user.Name);
+
                 return new UserResult()
                 {
                     User = await _userService.GetUserInfoFromModel(user)
@@ -152,6 +180,7 @@ namespace NAuth.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message, ex);
                 return StatusCode(500, ex.Message);
             }
         }
@@ -164,8 +193,12 @@ namespace NAuth.API.Controllers
                 var user = _userService.GetBySlug(slug);
                 if (user == null)
                 {
-                    return new UserResult() { User = null, Sucesso = false, Mensagem = "User with email not found" };
+                    _logger.LogError("User with slug not found {@slug}", slug);
+                    return new UserResult() { User = null, Sucesso = false, Mensagem = "User with slug not found" };
                 }
+
+                _logger.LogInformation("GetBySlug(slug: {@slug}) = User(UserId: {@ID}, Email: {@email}, Name: {@name})", slug, user.UserId, user.Email, user.Name);
+
                 return new UserResult()
                 {
                     User = await _userService.GetUserInfoFromModel(user)
@@ -173,6 +206,7 @@ namespace NAuth.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message, ex);
                 return StatusCode(500, ex.Message);
             }
         }
@@ -184,9 +218,13 @@ namespace NAuth.API.Controllers
             {
                 if (user == null)
                 {
+                    _logger.LogError("User is empty");
                     return new UserResult() { User = null, Sucesso = false, Mensagem = "User is empty" };
                 }
                 var newUser = await _userService.Insert(user);
+
+                _logger.LogInformation("User sucessfully inserted (UserId: {@ID}, Email: {@email}, Name: {@name})", newUser.UserId, newUser.Email, newUser.Name);
+
                 return new UserResult()
                 {
                     User = await _userService.GetUserInfoFromModel(newUser)
@@ -194,6 +232,7 @@ namespace NAuth.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message, ex);
                 return StatusCode(500, ex.Message);
             }
         }
@@ -206,19 +245,25 @@ namespace NAuth.API.Controllers
             {
                 if (user == null)
                 {
+                    _logger.LogError("User is empty");
                     return new UserResult() { User = null, Sucesso = false, Mensagem = "User is empty" };
                 }
                 var userSession = _userService.GetUserInSession(HttpContext);
                 if (userSession == null)
                 {
+                    _logger.LogError("Not Authorized");
                     return StatusCode(401, "Not Authorized");
                 }
                 if (userSession.UserId != user.UserId)
                 {
+                    _logger.LogError("Only can update your user ({@userSession} != {@userId})", userSession.UserId, user.UserId);
                     throw new Exception("Only can update your user");
                 }
 
                 var updatedUser = await _userService.Update(user);
+
+                _logger.LogInformation("User sucessfully updated (UserId: {@ID}, Email: {@email}, Name: {@name})", updatedUser.UserId, updatedUser.Email, updatedUser.Name);
+
                 return new UserResult()
                 {
                     User = await _userService.GetUserInfoFromModel(updatedUser)
@@ -226,6 +271,7 @@ namespace NAuth.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message, ex);
                 return StatusCode(500, ex.Message);
             }
         }
@@ -238,6 +284,8 @@ namespace NAuth.API.Controllers
                 var user = _userService.LoginWithEmail(param.Email, param.Password);
                 if (user == null)
                 {
+                    _logger.LogTrace("Email: {@email}, Password: {@password}", param.Email, param.Password);
+                    _logger.LogError("Email or password is wrong");
                     return new UserTokenResult() { User = null, Sucesso = false, Mensagem = "Email or password is wrong" };
                 }
                 var fingerprint = Request.Headers["X-Device-Fingerprint"].FirstOrDefault();
@@ -250,6 +298,9 @@ namespace NAuth.API.Controllers
                     ipAddr = Request.Headers["X-Forwarded-For"].FirstOrDefault();
                 }
                 var token = await _userService.CreateToken(user.UserId, ipAddr, userAgent, fingerprint);
+
+                _logger.LogInformation("Token sucessfully created (Token: {@token})", token);
+
                 return new UserTokenResult()
                 {
                     Token = token.Token,
@@ -258,6 +309,7 @@ namespace NAuth.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message, ex);
                 return StatusCode(500, ex.Message);
             }
         }
@@ -271,21 +323,28 @@ namespace NAuth.API.Controllers
                 var userSession = _userService.GetUserInSession(HttpContext);
                 if (userSession == null)
                 {
+                    _logger.LogError("Not Authorized");
                     return StatusCode(401, "Not Authorized");
                 }
                 var user = _userService.GetUserByID(userSession.UserId);
                 if (user == null)
                 {
+                    _logger.LogError("User with ID not found {@userId}", userSession.UserId);
                     return new UserResult() { User = null, Sucesso = false, Mensagem = "User Not Found" };
                 }
+
+                var hasPassword = _userService.HasPassword(user.UserId);
+                _logger.LogInformation("User has password: {@hasPassword}", hasPassword);
+
                 return new StatusResult
                 {
-                    Sucesso = _userService.HasPassword(user.UserId),
+                    Sucesso = hasPassword,
                     Mensagem = "Password verify successfully"
                 };
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message, ex);
                 return StatusCode(500, ex.Message);
             }
         }
@@ -299,14 +358,20 @@ namespace NAuth.API.Controllers
                 var userSession = _userService.GetUserInSession(HttpContext);
                 if (userSession == null)
                 {
+                    _logger.LogError("Not Authorized");
                     return StatusCode(401, "Not Authorized");
                 }
                 var user = _userService.GetUserByID(userSession.UserId);
                 if (user == null)
                 {
+                    _logger.LogError("User with ID not found {@userId}", userSession.UserId);
                     return new UserResult() { User = null, Sucesso = false, Mensagem = "Email or password is wrong" };
                 }
+
                 _userService.ChangePassword(user.UserId, param.OldPassword, param.NewPassword);
+
+                _logger.LogInformation("Password successfully changed, UserId: {@userId}, Email: {@email}, Name: {@name}", user.UserId, user.Email, user.Name);
+
                 return new StatusResult
                 {
                     Sucesso = true,
@@ -315,6 +380,7 @@ namespace NAuth.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message, ex);
                 return StatusCode(500, ex.Message);
             }
         }
@@ -327,13 +393,17 @@ namespace NAuth.API.Controllers
                 var user = _userService.GetUserByEmail(email);
                 if (user == null)
                 {
+                    _logger.LogError("User with email not found {@email}", email);
                     return new StatusResult
                     {
                         Sucesso = false,
                         Mensagem = "Email not exist"
                     };
                 }
+
                 await _userService.SendRecoveryEmail(email);
+                _logger.LogInformation("Send recovery email, Email: {@email}", email);
+
                 return new StatusResult
                 {
                     Sucesso = true,
@@ -342,6 +412,7 @@ namespace NAuth.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message, ex);
                 return StatusCode(500, ex.Message);
             }
         }
@@ -352,6 +423,8 @@ namespace NAuth.API.Controllers
             try
             {
                 _userService.ChangePasswordUsingHash(param.RecoveryHash, param.NewPassword);
+                _logger.LogInformation("Change password using hash, Hash: {@hash}", param.RecoveryHash);
+
                 return new StatusResult
                 {
                     Sucesso = true,
@@ -360,6 +433,7 @@ namespace NAuth.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message, ex);
                 return StatusCode(500, ex.Message);
             }
         }
@@ -371,6 +445,9 @@ namespace NAuth.API.Controllers
             {
                 var userModels = _userService.ListUsers(take);
                 var userInfos = await Task.WhenAll(userModels.Select(x => _userService.GetUserInfoFromModel(x)));
+
+                _logger.LogInformation("list(take: {@take}) successfully", take);
+
                 return new UserListResult
                 {
                     Sucesso = true,
@@ -379,6 +456,7 @@ namespace NAuth.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message, ex);
                 return StatusCode(500, ex.Message);
             }
         }
