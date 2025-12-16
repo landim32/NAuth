@@ -1,21 +1,14 @@
-﻿using DB.Infra.Context;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using NAuth.Domain.Impl.Models;
-using NAuth.Domain.Impl.Services;
-using NAuth.Domain.Interfaces.Factory;
-using NAuth.Domain.Interfaces.Models;
-using NAuth.Domain.Interfaces.Services;
+using NAuth.Domain.Factory.Interfaces;
+using NAuth.Domain.Services.Interfaces;
 using NAuth.DTO.Domain;
 using NAuth.DTO.User;
 using NTools.ACL.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mail;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace NAuth.API.Controllers
@@ -30,8 +23,8 @@ namespace NAuth.API.Controllers
 
         public UserController(
             ILogger<UserController> logger,
-            IUserService userService, 
-            IFileClient fileClient, 
+            IUserService userService,
+            IFileClient fileClient,
             IUserDomainFactory userFactory
         )
         {
@@ -277,7 +270,7 @@ namespace NAuth.API.Controllers
         }
 
         [HttpPost("loginWithEmail")]
-        public async Task<ActionResult<UserTokenResult>> LoginWithEmail([FromBody]LoginParam param)
+        public async Task<ActionResult<UserTokenResult>> LoginWithEmail([FromBody] LoginParam param)
         {
             try
             {
@@ -351,7 +344,7 @@ namespace NAuth.API.Controllers
 
         [Authorize]
         [HttpPost("changePassword")]
-        public ActionResult<StatusResult> ChangePassword([FromBody]ChangePasswordParam param)
+        public ActionResult<StatusResult> ChangePassword([FromBody] ChangePasswordParam param)
         {
             try
             {

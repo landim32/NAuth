@@ -1,0 +1,45 @@
+﻿using NAuth.Domain.Factory.Interfaces;
+using NAuth.Domain.Models.Models;
+using NAuth.Infra.Interfaces;
+using NAuth.Infra.Interfaces.Repository;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace NAuth.Domain.Models
+{
+    public class UserAddressModel : IUserAddressModel
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IUserAddressRepository<IUserAddressModel, IUserAddressDomainFactory> _repositoryAddr;
+
+        public UserAddressModel(IUnitOfWork unitOfWork, IUserAddressRepository<IUserAddressModel, IUserAddressDomainFactory> repositoryAddr)
+        {
+            _unitOfWork = unitOfWork;
+            _repositoryAddr = repositoryAddr;
+        }
+
+        public long AddressId { get; set; }
+        public long UserId { get; set; }
+        public string ZipCode { get; set; }
+        public string Address { get; set; }
+        public string Complement { get; set; }
+        public string Neighborhood { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+
+        public void DeleteAllByUser(long userId)
+        {
+            _repositoryAddr.DeleteAllByUser(userId);
+        }
+
+        public IUserAddressModel Insert(IUserAddressDomainFactory factory)
+        {
+            return _repositoryAddr.Insert(this, factory);
+        }
+
+        public IEnumerable<IUserAddressModel> ListByUser(long userId, IUserAddressDomainFactory factory)
+        {
+            return _repositoryAddr.ListByUser(userId, factory).ToList();
+        }
+    }
+}

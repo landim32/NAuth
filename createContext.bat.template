@@ -1,4 +1,0 @@
-@echo off
-cd .\Backend\NAuth\DB.Infra
-dotnet ef dbcontext scaffold "Host=localhost;Port=25060;Database=nauth;Username=admin;Password=password" Npgsql.EntityFrameworkCore.PostgreSQL --context NAuthContext --output-dir Context -f
-pause

@@ -2,24 +2,16 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using NAuth.Application;
 using NAuth.DTO.Settings;
 using NTools.DTO.Settings;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Mime;
-using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace NAuth.API
 {
@@ -45,9 +37,10 @@ namespace NAuth.API
             services.AddHealthChecks();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { 
-                    Title = "NAuth.API", 
-                    Version = "v1" 
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "NAuth.API",
+                    Version = "v1"
                 });
             });
             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
@@ -72,7 +65,8 @@ namespace NAuth.API
                 {
                     c.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi2_0;
                 });
-                app.UseSwaggerUI(c => {
+                app.UseSwaggerUI(c =>
+                {
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "NAuth.API v1");
                     //c.RoutePrefix = string.Empty;
                 });

@@ -1,14 +1,11 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using NAuth.DTO.User;
+using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using NAuth.ACL;
-using NAuth.DTO.User;
 
 namespace NAuth.ACL
 {
@@ -37,7 +34,7 @@ namespace NAuth.ACL
                 return AuthenticateResult.Fail("Missing Authorization Header");
             }
 
-            UserInfo? user = null; 
+            UserInfo? user = null;
             try
             {
                 var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
@@ -54,7 +51,8 @@ namespace NAuth.ACL
                 {
                     user = await _userClient.GetByTokenAsync(token);
                 }
-                if (user == null) {
+                if (user == null)
+                {
                     return AuthenticateResult.Fail("Invalid Session");
                 }
             }
@@ -62,7 +60,7 @@ namespace NAuth.ACL
             {
                 return AuthenticateResult.Fail(e.Message + "\n" + e.InnerException?.Message);
             }
-            
+
             var claims = new[] {
                 new Claim("UserInfo",  JsonConvert.SerializeObject(new UserInfo() {
                      UserId = user.UserId,

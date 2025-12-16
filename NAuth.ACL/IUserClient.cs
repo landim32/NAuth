@@ -1,8 +1,5 @@
 using Microsoft.AspNetCore.Http;
-using NAuth.DTO.Domain;
 using NAuth.DTO.User;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace NAuth.ACL
 {

@@ -4,17 +4,12 @@ using NAuth.DTO.Domain;
 using NAuth.DTO.Settings;
 using NAuth.DTO.User;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace NAuth.ACL
 {
-    public class UserClient: IUserClient
+    public class UserClient : IUserClient
     {
         private readonly HttpClient _httpClient;
         private readonly IOptions<NAuthSetting> _nauthSetting;

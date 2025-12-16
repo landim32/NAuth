@@ -17,17 +17,17 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NAuth.DTO\NAuth.DTO.csproj" />
-    <ProjectReference Include="..\Core.Domain\Core.Domain.csproj" />
+    <ProjectReference Include="..\NAuth.Infra.Interfaces\NAuth.Infra.Interfaces.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Impl\Services\AuthService.cs" />
-    <Compile Remove="Interfaces\Services\IAuthService.cs" />
+    <Compile Remove="Services\AuthService.cs" />
+    <Compile Remove="Services\Interfaces\IAuthService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="System.Drawing.Common" />
     <None Remove="SixLabors.ImageSharp" />
-    <None Remove="Interfaces\Models\WithDraw\" />
+    <None Remove="Models\Interfaces\WithDraw\" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="NTools.ACL">

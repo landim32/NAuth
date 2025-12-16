@@ -1,26 +1,20 @@
-﻿using Core.Domain;
-using Core.Domain.Cloud;
-using Core.Domain.Repository;
-using DB.Infra;
-using DB.Infra.Context;
-using DB.Infra.Repository;
-using NAuth.Domain.Impl.Core;
-using NAuth.Domain.Impl.Factory;
-using NAuth.Domain.Impl.Services;
-using NAuth.Domain.Interfaces.Core;
-using NAuth.Domain.Interfaces.Factory;
-using NAuth.Domain.Interfaces.Models;
-using NAuth.Domain.Interfaces.Services;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using NAuth.Domain;
-using LocalAuthHandler = NAuth.Domain.LocalAuthHandler;
-using System.Configuration;
-using NAuth.ACL;
-using NTools.ACL.Interfaces;
+using NAuth.Domain.Factory;
+using NAuth.Domain.Factory.Interfaces;
+using NAuth.Domain.Models.Models;
+using NAuth.Domain.Services;
+using NAuth.Domain.Services.Interfaces;
+using NAuth.Infra;
+using NAuth.Infra.Context;
+using NAuth.Infra.Interfaces;
+using NAuth.Infra.Interfaces.Repository;
+using NAuth.Infra.Repository;
 using NTools.ACL;
+using NTools.ACL.Interfaces;
+using System;
+using LocalAuthHandler = NAuth.Domain.LocalAuthHandler;
 
 namespace NAuth.Application
 {
@@ -28,7 +22,7 @@ namespace NAuth.Application
     {
         private static void injectDependency(Type serviceType, Type implementationType, IServiceCollection services, bool scoped = true)
         {
-            if(scoped)
+            if (scoped)
                 services.AddScoped(serviceType, implementationType);
             else
                 services.AddTransient(serviceType, implementationType);
@@ -43,7 +37,6 @@ namespace NAuth.Application
             #region Infra
             injectDependency(typeof(NAuthContext), typeof(NAuthContext), services, scoped);
             injectDependency(typeof(IUnitOfWork), typeof(UnitOfWork), services, scoped);
-            injectDependency(typeof(ILogCore), typeof(LogCore), services, scoped);
             #endregion
 
             #region Repository

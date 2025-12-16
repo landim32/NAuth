@@ -1,19 +1,15 @@
-﻿using System;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Security.Claims;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
-using NAuth.Domain.Interfaces.Models;
-using NAuth.Domain.Interfaces.Services;
-using NAuth.DTO.User;
-using Core.Domain;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NAuth.Domain.Models.Models;
+using NAuth.Domain.Services.Interfaces;
+using NAuth.DTO.User;
 using Newtonsoft.Json;
-using NAuth.Domain.Impl.Models;
+using System;
+using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
 
 namespace NAuth.Domain
 {
@@ -39,7 +35,7 @@ namespace NAuth.Domain
                 return AuthenticateResult.Fail("Missing Authorization Header");
             }
 
-            IUserModel user = null; 
+            IUserModel user = null;
             try
             {
                 var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
@@ -50,7 +46,8 @@ namespace NAuth.Domain
                 }
 
                 user = _userService.GetUserByToken(token);
-                if (user == null) {
+                if (user == null)
+                {
                     return AuthenticateResult.Fail("Invalid Session");
                 }
 
@@ -59,7 +56,7 @@ namespace NAuth.Domain
             {
                 return AuthenticateResult.Fail("Invalid Authorization Header");
             }
-            
+
             var claims = new[] {
                 new Claim("UserInfo",  JsonConvert.SerializeObject(new UserInfo() {
                      UserId = user.UserId,

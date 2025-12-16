@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Core.Domain\Core.Domain.csproj" />
     <ProjectReference Include="..\NAuth.ACL\NAuth.ACL.csproj" />
     <ProjectReference Include="..\NAuth.Application\NAuth.Application.csproj" />
     <ProjectReference Include="..\NAuth.Domain\NAuth.Domain.csproj" />

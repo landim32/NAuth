@@ -1,5 +1,4 @@
 ﻿using NAuth.DTO.Domain;
-using System;
 using System.Text.Json.Serialization;
 
 namespace NAuth.DTO.User
