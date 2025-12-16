@@ -1,9 +1,8 @@
-﻿using NAuth.DTO.Domain;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace NAuth.DTO.User
 {
-    public class UserTokenResult : StatusResult
+    public class UserTokenResult
     {
         [JsonPropertyName("token")]
         public string Token { get; set; }
