@@ -37,7 +37,12 @@ namespace NAuth.ACL
             UserInfo? user = null;
             try
             {
-                var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+                var authHeaderValue = Request.Headers["Authorization"].ToString();
+                if (string.IsNullOrWhiteSpace(authHeaderValue))
+                {
+                    return AuthenticateResult.Fail("Missing Authorization Token");
+                }
+                var authHeader = AuthenticationHeaderValue.Parse(authHeaderValue);
                 var token = authHeader.Parameter;
                 if (string.IsNullOrEmpty(token))
                 {

@@ -8,8 +8,8 @@ namespace NAuth.Domain.Factory
 {
     public class UserDocumentDomainFactory : IUserDocumentDomainFactory
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IUserDocumentRepository<IUserDocumentModel, IUserDocumentDomainFactory> _repositoryDocument;
+        protected readonly IUnitOfWork _unitOfWork;
+        protected readonly IUserDocumentRepository<IUserDocumentModel, IUserDocumentDomainFactory> _repositoryDocument;
 
         public UserDocumentDomainFactory(IUnitOfWork unitOfWork, IUserDocumentRepository<IUserDocumentModel, IUserDocumentDomainFactory> repositoryDocument)
         {

@@ -48,8 +48,12 @@ namespace NAuth.Application
 
             #endregion
 
-            #region Service
-            injectDependency(typeof(IUserService), typeof(UserService), services, scoped);
+            #region Factory
+            injectDependency(typeof(IUserAddressDomainFactory), typeof(UserAddressDomainFactory), services, scoped);
+            injectDependency(typeof(IUserDocumentDomainFactory), typeof(UserDocumentDomainFactory), services, scoped);
+            injectDependency(typeof(IUserPhoneDomainFactory), typeof(UserPhoneDomainFactory), services, scoped);
+            injectDependency(typeof(IUserTokenDomainFactory), typeof(UserTokenDomainFactory), services, scoped);
+            injectDependency(typeof(IUserDomainFactory), typeof(UserDomainFactory), services, scoped);
             #endregion
 
             #region Clients
@@ -59,14 +63,24 @@ namespace NAuth.Application
             injectDependency(typeof(IDocumentClient), typeof(DocumentClient), services, scoped);
             #endregion
 
-            //injectDependency(typeof(IUserClient), typeof(UserClient), services, scoped);
+            #region Service Wrappers
+            services.AddScoped<UserDomainFactories>(sp => new UserDomainFactories(
+                sp.GetRequiredService<IUserDomainFactory>(),
+                sp.GetRequiredService<IUserPhoneDomainFactory>(),
+                sp.GetRequiredService<IUserAddressDomainFactory>(),
+                sp.GetRequiredService<IUserTokenDomainFactory>()
+            ));
 
-            #region Factory
-            injectDependency(typeof(IUserAddressDomainFactory), typeof(UserAddressDomainFactory), services, scoped);
-            injectDependency(typeof(IUserDocumentDomainFactory), typeof(UserDocumentDomainFactory), services, scoped);
-            injectDependency(typeof(IUserPhoneDomainFactory), typeof(UserPhoneDomainFactory), services, scoped);
-            injectDependency(typeof(IUserTokenDomainFactory), typeof(UserTokenDomainFactory), services, scoped);
-            injectDependency(typeof(IUserDomainFactory), typeof(UserDomainFactory), services, scoped);
+            services.AddScoped<ExternalClients>(sp => new ExternalClients(
+                sp.GetRequiredService<IMailClient>(),
+                sp.GetRequiredService<IFileClient>(),
+                sp.GetRequiredService<IStringClient>(),
+                sp.GetRequiredService<IDocumentClient>()
+            ));
+            #endregion
+
+            #region Service
+            injectDependency(typeof(IUserService), typeof(UserService), services, scoped);
             #endregion
 
 

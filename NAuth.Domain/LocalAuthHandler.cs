@@ -28,11 +28,11 @@ namespace NAuth.Domain
             _userService = userService;
         }
 
-        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
+        protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             if (!Request.Headers.ContainsKey("Authorization"))
             {
-                return AuthenticateResult.Fail("Missing Authorization Header");
+                return Task.FromResult(AuthenticateResult.Fail("Missing Authorization Header"));
             }
 
             IUserModel user = null;
@@ -42,19 +42,19 @@ namespace NAuth.Domain
                 var token = authHeader.Parameter;
                 if (string.IsNullOrEmpty(token))
                 {
-                    return AuthenticateResult.Fail("Missing Authorization Token");
+                    return Task.FromResult(AuthenticateResult.Fail("Missing Authorization Token"));
                 }
 
                 user = _userService.GetUserByToken(token);
                 if (user == null)
                 {
-                    return AuthenticateResult.Fail("Invalid Session");
+                    return Task.FromResult(AuthenticateResult.Fail("Invalid Session"));
                 }
 
             }
             catch (Exception)
             {
-                return AuthenticateResult.Fail("Invalid Authorization Header");
+                return Task.FromResult(AuthenticateResult.Fail("Invalid Authorization Header"));
             }
 
             var claims = new[] {
@@ -69,7 +69,7 @@ namespace NAuth.Domain
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, Scheme.Name);
 
-            return AuthenticateResult.Success(ticket);
+            return Task.FromResult(AuthenticateResult.Success(ticket));
         }
     }
 }

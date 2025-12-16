@@ -68,7 +68,6 @@ namespace NAuth.API
                 app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "NAuth.API v1");
-                    //c.RoutePrefix = string.Empty;
                 });
             }
             else

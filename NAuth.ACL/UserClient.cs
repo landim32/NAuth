@@ -10,6 +10,9 @@ namespace NAuth.ACL
 {
     public class UserClient : IUserClient
     {
+        private const string ApplicationJsonMediaType = "application/json";
+        private const string BearerAuthenticationScheme = "Bearer";
+
         private readonly HttpClient _httpClient;
         private readonly IOptions<NAuthSetting> _nauthSetting;
 
@@ -24,7 +27,7 @@ namespace NAuth.ACL
 
         public UserInfo? GetUserInSession(HttpContext httpContext)
         {
-            if (httpContext.User.Claims.Count() > 0)
+            if (httpContext.User.Claims.Any())
             {
                 return JsonConvert.DeserializeObject<UserInfo>(httpContext.User.Claims.First().Value);
             }
@@ -33,7 +36,7 @@ namespace NAuth.ACL
 
         public async Task<UserInfo?> GetMeAsync(string token)
         {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(BearerAuthenticationScheme, token);
             var response = await _httpClient.GetAsync($"{_nauthSetting.Value.ApiUrl}/getMe");
             response.EnsureSuccessStatusCode();
             return JsonConvert.DeserializeObject<UserInfo>(await response.Content.ReadAsStringAsync());
@@ -58,7 +61,7 @@ namespace NAuth.ACL
             var response = await _httpClient.GetAsync($"{_nauthSetting.Value.ApiUrl}/getByEmail/{email}");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<UserInfo>(await response.Content.ReadAsStringAsync());
+            return JsonConvert.DeserializeObject<UserInfo>(json);
         }
 
         public async Task<UserInfo?> GetBySlugAsync(string slug)
@@ -66,38 +69,40 @@ namespace NAuth.ACL
             var response = await _httpClient.GetAsync($"{_nauthSetting.Value.ApiUrl}/getBySlug/{slug}");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<UserInfo>(await response.Content.ReadAsStringAsync());
+            return JsonConvert.DeserializeObject<UserInfo>(json);
         }
 
         public async Task<UserInfo?> InsertAsync(UserInfo user)
         {
-            var content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, ApplicationJsonMediaType);
             var response = await _httpClient.PostAsync($"{_nauthSetting.Value.ApiUrl}/insert", content);
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<UserInfo>(await response.Content.ReadAsStringAsync());
+            return JsonConvert.DeserializeObject<UserInfo>(json);
         }
 
         public async Task<UserInfo?> UpdateAsync(UserInfo user, string token)
         {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(BearerAuthenticationScheme, token);
+            var content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, ApplicationJsonMediaType);
             var response = await _httpClient.PostAsync($"{_nauthSetting.Value.ApiUrl}/update", content);
             response.EnsureSuccessStatusCode();
-            return JsonConvert.DeserializeObject<UserInfo>(await response.Content.ReadAsStringAsync());
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<UserInfo>(json);
         }
 
         public async Task<UserInfo?> LoginWithEmailAsync(LoginParam param)
         {
-            var content = new StringContent(JsonConvert.SerializeObject(param), Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonConvert.SerializeObject(param), Encoding.UTF8, ApplicationJsonMediaType);
             var response = await _httpClient.PostAsync($"{_nauthSetting.Value.ApiUrl}/loginWithEmail", content);
             response.EnsureSuccessStatusCode();
-            return JsonConvert.DeserializeObject<UserInfo>(await response.Content.ReadAsStringAsync());
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<UserInfo>(json);
         }
 
         public async Task<bool> HasPasswordAsync(string token)
         {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(BearerAuthenticationScheme, token);
             var response = await _httpClient.GetAsync($"{_nauthSetting.Value.ApiUrl}/hasPassword");
             response.EnsureSuccessStatusCode();
             return JsonConvert.DeserializeObject<bool>(await response.Content.ReadAsStringAsync());
@@ -105,8 +110,8 @@ namespace NAuth.ACL
 
         public async Task<bool> ChangePasswordAsync(ChangePasswordParam param, string token)
         {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var content = new StringContent(JsonConvert.SerializeObject(param), Encoding.UTF8, "application/json");
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(BearerAuthenticationScheme, token);
+            var content = new StringContent(JsonConvert.SerializeObject(param), Encoding.UTF8, ApplicationJsonMediaType);
             var response = await _httpClient.PostAsync($"{_nauthSetting.Value.ApiUrl}/changePassword", content);
             response.EnsureSuccessStatusCode();
             return JsonConvert.DeserializeObject<bool>(await response.Content.ReadAsStringAsync());
@@ -121,7 +126,7 @@ namespace NAuth.ACL
 
         public async Task<bool> ChangePasswordUsingHashAsync(ChangePasswordUsingHashParam param)
         {
-            var content = new StringContent(JsonConvert.SerializeObject(param), Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonConvert.SerializeObject(param), Encoding.UTF8, ApplicationJsonMediaType);
             var response = await _httpClient.PostAsync($"{_nauthSetting.Value.ApiUrl}/changePasswordUsingHash", content);
             response.EnsureSuccessStatusCode();
             return JsonConvert.DeserializeObject<bool>(await response.Content.ReadAsStringAsync());
@@ -135,10 +140,9 @@ namespace NAuth.ACL
             return JsonConvert.DeserializeObject<IList<UserInfo>>(json);
         }
 
-        // Para upload de imagem, utilize MultipartFormDataContent
         public async Task<string> UploadImageUserAsync(Stream fileStream, string fileName, string token)
         {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(BearerAuthenticationScheme, token);
             using var content = new MultipartFormDataContent();
             content.Add(new StreamContent(fileStream), "file", fileName);
             var response = await _httpClient.PostAsync($"{_nauthSetting.Value.ApiUrl}/uploadImageUser", content);

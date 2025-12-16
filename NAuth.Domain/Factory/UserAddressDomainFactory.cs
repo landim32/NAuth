@@ -8,8 +8,8 @@ namespace NAuth.Domain.Factory
 {
     public class UserAddressDomainFactory : IUserAddressDomainFactory
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IUserAddressRepository<IUserAddressModel, IUserAddressDomainFactory> _repositoryAddr;
+        protected readonly IUnitOfWork _unitOfWork;
+        protected readonly IUserAddressRepository<IUserAddressModel, IUserAddressDomainFactory> _repositoryAddr;
 
         public UserAddressDomainFactory(IUnitOfWork unitOfWork, IUserAddressRepository<IUserAddressModel, IUserAddressDomainFactory> repositoryAddr)
         {

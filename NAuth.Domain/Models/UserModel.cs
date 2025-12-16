@@ -7,10 +7,17 @@ using System.Collections.Generic;
 
 namespace NAuth.Domain.Models
 {
+    public class UserNotFoundException : Exception
+    {
+        public UserNotFoundException() : base(UserModel.UserNotFoundMessage) { }
+    }
+
     public class UserModel : IUserModel
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IUserRepository<IUserModel, IUserDomainFactory> _repositoryUser;
+        protected readonly IUnitOfWork _unitOfWork;
+        protected readonly IUserRepository<IUserModel, IUserDomainFactory> _repositoryUser;
+
+        public const string UserNotFoundMessage = "User not found";
 
         public UserModel(IUnitOfWork unitOfWork, IUserRepository<IUserModel, IUserDomainFactory> repositoryUser)
         {
@@ -20,7 +27,6 @@ namespace NAuth.Domain.Models
 
         public long UserId { get; set; }
         public string Hash { get; set; }
-        //public string Token { get; set; }
         public string Slug { get; set; }
         public string Image { get; set; }
         public string Name { get; set; }
@@ -48,21 +54,6 @@ namespace NAuth.Domain.Models
                 return Convert.ToHexString(hashBytes);
             }
         }
-
-        /*
-
-        public IUserModel GetByToken(string token, IUserDomainFactory factory)
-        {
-            return _repositoryUser.GetByToken(token, factory);
-        }
-
-        public string GenerateNewToken(IUserDomainFactory factory)
-        {
-            var token = CreateMD5(Guid.NewGuid().ToString());
-            _repositoryUser.UpdateToken(this.UserId, token);
-            return token;
-        }
-        */
 
         public IUserModel Insert(IUserDomainFactory factory)
         {
@@ -98,7 +89,7 @@ namespace NAuth.Domain.Models
             var user = _repositoryUser.GetByEmail(email, factory);
             if (user == null)
             {
-                throw new Exception("User not found");
+                throw new UserNotFoundException();
             }
             string encryptPwd = CreateMD5(user.Hash + "|" + password);
             return _repositoryUser.LoginWithEmail(email, encryptPwd, factory);
@@ -114,7 +105,7 @@ namespace NAuth.Domain.Models
             var user = _repositoryUser.GetById(userId, factory);
             if (user == null)
             {
-                throw new Exception("User not found");
+                throw new UserNotFoundException();
             }
             string encryptPwd = CreateMD5(user.Hash + "|" + password);
             _repositoryUser.ChangePassword(userId, encryptPwd);
@@ -125,7 +116,7 @@ namespace NAuth.Domain.Models
             var user = _repositoryUser.GetUserByRecoveryHash(recoveryHash, factory);
             if (user == null)
             {
-                throw new Exception("User not found");
+                throw new UserNotFoundException();
             }
             string encryptPwd = CreateMD5(user.Hash + "|" + password);
             _repositoryUser.ChangePassword(user.UserId, encryptPwd);
@@ -136,7 +127,7 @@ namespace NAuth.Domain.Models
             var user = _repositoryUser.GetById(userId, factory);
             if (user == null)
             {
-                throw new Exception("User not found");
+                throw new UserNotFoundException();
             }
             string recoveryHash = CreateMD5(user.Hash + "|" + Guid.NewGuid().ToString());
             _repositoryUser.UpdateRecoveryHash(userId, recoveryHash);

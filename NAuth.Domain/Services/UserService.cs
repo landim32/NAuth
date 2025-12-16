@@ -12,47 +12,79 @@ using NTools.DTO.MailerSend;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace NAuth.Domain.Services
 {
+    // Definição de exceção customizada para uso em validações de domínio
+    [Serializable]
+    public class UserValidationException : Exception
+    {
+        public UserValidationException() { }
+        public UserValidationException(string message) : base(message) { }
+        public UserValidationException(string message, Exception inner) : base(message, inner) { }
+        protected UserValidationException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
+
+    public class UserDomainFactories
+    {
+        public IUserDomainFactory UserFactory { get; }
+        public IUserPhoneDomainFactory PhoneFactory { get; }
+        public IUserAddressDomainFactory AddressFactory { get; }
+        public IUserTokenDomainFactory TokenFactory { get; }
+
+        public UserDomainFactories(
+            IUserDomainFactory userFactory,
+            IUserPhoneDomainFactory phoneFactory,
+            IUserAddressDomainFactory addressFactory,
+            IUserTokenDomainFactory tokenFactory)
+        {
+            UserFactory = userFactory;
+            PhoneFactory = phoneFactory;
+            AddressFactory = addressFactory;
+            TokenFactory = tokenFactory;
+        }
+    }
+
+    public class ExternalClients
+    {
+        public IMailClient MailClient { get; }
+        public IFileClient FileClient { get; }
+        public IStringClient StringClient { get; }
+        public IDocumentClient DocumentClient { get; }
+
+        public ExternalClients(
+            IMailClient mailClient,
+            IFileClient fileClient,
+            IStringClient stringClient,
+            IDocumentClient documentClient)
+        {
+            MailClient = mailClient;
+            FileClient = fileClient;
+            StringClient = stringClient;
+            DocumentClient = documentClient;
+        }
+    }
+
     public class UserService : IUserService
     {
         private readonly ILogger<UserService> _logger;
         private readonly NAuthSetting _nauthSetting;
-        private readonly IUserDomainFactory _userFactory;
-        private readonly IUserPhoneDomainFactory _phoneFactory;
-        private readonly IUserAddressDomainFactory _addrFactory;
-        private readonly IUserTokenDomainFactory _tokenFactory;
-        private readonly IMailClient _mailClient;
-        private readonly IFileClient _fileClient;
-        private readonly IStringClient _stringClient;
-        private readonly IDocumentClient _documentClient;
+        private readonly UserDomainFactories _factories;
+        private readonly ExternalClients _clients;
 
         public UserService(
             ILogger<UserService> logger,
             IOptions<NAuthSetting> nauthSetting,
-            IUserDomainFactory userFactory,
-            IUserPhoneDomainFactory phoneFactory,
-            IUserAddressDomainFactory addrFactory,
-            IUserTokenDomainFactory tokenFactory,
-            IMailClient mailClient,
-            IFileClient fileClient,
-            IStringClient stringClient,
-            IDocumentClient documentClient
-        )
+            UserDomainFactories factories,
+            ExternalClients clients)
         {
             _logger = logger;
             _nauthSetting = nauthSetting.Value;
-            _userFactory = userFactory;
-            _phoneFactory = phoneFactory;
-            _addrFactory = addrFactory;
-            _tokenFactory = tokenFactory;
-            _mailClient = mailClient;
-            _fileClient = fileClient;
-            _stringClient = stringClient;
-            _documentClient = documentClient;
+            _factories = factories;
+            _clients = clients;
         }
 
         public string GetBucketName()
@@ -62,7 +94,7 @@ namespace NAuth.Domain.Services
 
         public IUserModel LoginWithEmail(string email, string password)
         {
-            return _userFactory.BuildUserModel().LoginWithEmail(email, password, _userFactory);
+            return _factories.UserFactory.BuildUserModel().LoginWithEmail(email, password, _factories.UserFactory);
         }
 
         public async Task<IUserTokenModel> CreateToken(long userId, string ipAddress, string userAgent, string fingerprint)
@@ -71,24 +103,10 @@ namespace NAuth.Domain.Services
                 "Creating token for user with ID={@userId}, IP={@ipAddress}, UserAgent={@userAgent} and {@fingerprint}",
                 userId, ipAddress, userAgent, fingerprint
             );
-            if (userId <= 0)
-            {
-                throw new Exception("UserId is invalid");
-            }
-            if (string.IsNullOrEmpty(ipAddress))
-            {
-                throw new Exception("IP Address is empty");
-            }
-            if (string.IsNullOrEmpty(userAgent))
-            {
-                throw new Exception("User Agent is empty");
-            }
-            if (string.IsNullOrEmpty(fingerprint))
-            {
-                throw new Exception("Fingerprint is empty");
-            }
+            ValidateTokenParameters(userId, ipAddress, userAgent, fingerprint);
+
             var currentDate = DateTime.Now;
-            var tokenModel = _tokenFactory.BuildUserTokenModel();
+            var tokenModel = _factories.TokenFactory.BuildUserTokenModel();
             tokenModel.UserId = userId;
             tokenModel.IpAddress = ipAddress;
             tokenModel.UserAgent = userAgent;
@@ -96,38 +114,58 @@ namespace NAuth.Domain.Services
             tokenModel.CreatedAt = currentDate;
             tokenModel.LastAccess = currentDate;
             tokenModel.ExpireAt = currentDate.AddMonths(2);
-            tokenModel.Token = await _stringClient.GenerateShortUniqueStringAsync();
+            tokenModel.Token = await _clients.StringClient.GenerateShortUniqueStringAsync();
 
             _logger.LogTrace("Generating token string: {@token} expire at {@expireDate}", tokenModel.Token, tokenModel.ExpireAt);
 
-            return tokenModel.Insert(_tokenFactory);
+            return tokenModel.Insert(_factories.TokenFactory);
+        }
+
+        private void ValidateTokenParameters(long userId, string ipAddress, string userAgent, string fingerprint)
+        {
+            if (userId <= 0)
+            {
+                throw new UserValidationException("UserId is invalid");
+            }
+            if (string.IsNullOrEmpty(ipAddress))
+            {
+                throw new UserValidationException("IP Address is empty");
+            }
+            if (string.IsNullOrEmpty(userAgent))
+            {
+                throw new UserValidationException("User Agent is empty");
+            }
+            if (string.IsNullOrEmpty(fingerprint))
+            {
+                throw new UserValidationException("Fingerprint is empty");
+            }
         }
 
         public bool HasPassword(long userId)
         {
-            return _userFactory.BuildUserModel().HasPassword(userId, _userFactory);
+            return _factories.UserFactory.BuildUserModel().HasPassword(userId, _factories.UserFactory);
         }
 
         public void ChangePasswordUsingHash(string recoveryHash, string newPassword)
         {
             if (string.IsNullOrEmpty(recoveryHash))
             {
-                throw new Exception("Recovery hash cant be empty");
+                throw new UserValidationException("Recovery hash cant be empty");
             }
             if (string.IsNullOrEmpty(newPassword))
             {
-                throw new Exception("Password cant be empty");
+                throw new UserValidationException("Password cant be empty");
             }
 
             _logger.LogTrace("Changing password using recovery hash: {@recoveryHash}, new password: {@newPassword}", recoveryHash, newPassword);
 
-            var md = _userFactory.BuildUserModel();
-            var user = md.GetByRecoveryHash(recoveryHash, _userFactory);
+            var md = _factories.UserFactory.BuildUserModel();
+            var user = md.GetByRecoveryHash(recoveryHash, _factories.UserFactory);
             if (user == null)
             {
-                throw new Exception("User not found");
+                throw new UserValidationException("User not found");
             }
-            md.ChangePassword(user.UserId, newPassword, _userFactory);
+            md.ChangePassword(user.UserId, newPassword, _factories.UserFactory);
 
             _logger.LogTrace("Password successful changed using recovery hash: {@recoveryHash}", recoveryHash);
         }
@@ -137,32 +175,32 @@ namespace NAuth.Domain.Services
             bool hasPassword = HasPassword(userId);
             if (hasPassword && string.IsNullOrEmpty(oldPassword))
             {
-                throw new Exception("Old password cant be empty");
+                throw new UserValidationException("Old password cant be empty");
             }
             if (string.IsNullOrEmpty(newPassword))
             {
-                throw new Exception("New password cant be empty");
+                throw new UserValidationException("New password cant be empty");
             }
-            var md = _userFactory.BuildUserModel();
-            var user = md.GetById(userId, _userFactory);
+            var md = _factories.UserFactory.BuildUserModel();
+            var user = md.GetById(userId, _factories.UserFactory);
             if (user == null)
             {
-                throw new Exception("User not found");
+                throw new UserValidationException("User not found");
             }
             if (string.IsNullOrEmpty(user.Email))
             {
-                throw new Exception("To change password you need a email");
+                throw new UserValidationException("To change password you need a email");
             }
             if (hasPassword)
             {
-                var mdUser = md.LoginWithEmail(user.Email, oldPassword, _userFactory);
+                var mdUser = md.LoginWithEmail(user.Email, oldPassword, _factories.UserFactory);
                 if (mdUser == null)
                 {
-                    throw new Exception("Email or password is wrong");
+                    throw new UserValidationException("Email or password is wrong");
                 }
             }
             _logger.LogTrace("Changing password using old password: email: {0}, old password: {1}, new password: {2}", user.Email, oldPassword, newPassword);
-            md.ChangePassword(user.UserId, newPassword, _userFactory);
+            md.ChangePassword(user.UserId, newPassword, _factories.UserFactory);
             _logger.LogTrace("Password successful changed using old password");
         }
 
@@ -170,23 +208,30 @@ namespace NAuth.Domain.Services
         {
             if (string.IsNullOrEmpty(email))
             {
-                throw new Exception("Email cant be empty");
+                throw new UserValidationException("Email cant be empty");
             }
-            var md = _userFactory.BuildUserModel();
-            var user = md.GetByEmail(email, _userFactory);
+            var md = _factories.UserFactory.BuildUserModel();
+            var user = md.GetByEmail(email, _factories.UserFactory);
             if (user == null)
             {
-                throw new Exception("User not found");
+                throw new UserValidationException("User not found");
             }
-            var recoveryHash = md.GenerateRecoveryHash(user.UserId, _userFactory);
+            var recoveryHash = md.GenerateRecoveryHash(user.UserId, _factories.UserFactory);
             var recoveryUrl = $"https://nochainswap.org/recoverypassword/{recoveryHash}";
 
+            var mail = BuildRecoveryEmail(user, recoveryUrl);
+            await _clients.MailClient.SendmailAsync(mail);
+            return await Task.FromResult(true);
+        }
+
+        private MailerInfo BuildRecoveryEmail(IUserModel user, string recoveryUrl)
+        {
             var textMessage =
                 $"Hi {user.Name},\r\n\r\n" +
                 "We received a request to reset your password. If you made this request, " +
                 "please click the link below to reset your password:\r\n\r\n" +
                 recoveryUrl + "\r\n\r\n" +
-                "If you didn’t request a password reset, please ignore this email or contact " +
+                "If you didn't request a password reset, please ignore this email or contact " +
                 "our support team if you have any concerns.\r\n\r\n" +
                 "Best regards,\r\n" +
                 "NoChainSwap Team";
@@ -195,12 +240,12 @@ namespace NAuth.Domain.Services
                 "We received a request to reset your password. If you made this request, " +
                 "please click the link below to reset your password:<br />\r\n<br />\r\n" +
                 $"<a href=\"{recoveryUrl}\">{recoveryUrl}</a><br />\r\n<br />\r\n" +
-                "If you didn’t request a password reset, please ignore this email or contact " +
+                "If you didn't request a password reset, please ignore this email or contact " +
                 "our support team if you have any concerns.<br />\r\n<br />\r\n" +
                 "Best regards,<br />\r\n" +
                 "<b>NoChainSwap Team</b>";
 
-            var mail = new MailerInfo
+            return new MailerInfo
             {
                 From = new MailerRecipientInfo
                 {
@@ -217,8 +262,6 @@ namespace NAuth.Domain.Services
                 Text = textMessage,
                 Html = htmlMessage
             };
-            await _mailClient.SendmailAsync(mail);
-            return await Task.FromResult(true);
         }
 
         private async Task<string> GenerateSlug(IUserModel md)
@@ -227,7 +270,7 @@ namespace NAuth.Domain.Services
             int c = 0;
             do
             {
-                newSlug = await _stringClient.GenerateSlugAsync(!string.IsNullOrEmpty(md.Slug) ? md.Slug : md.Name);
+                newSlug = await _clients.StringClient.GenerateSlugAsync(!string.IsNullOrEmpty(md.Slug) ? md.Slug : md.Name);
                 if (c > 0)
                 {
                     newSlug += c.ToString();
@@ -243,10 +286,10 @@ namespace NAuth.Domain.Services
             {
                 foreach (var phone in user.Phones)
                 {
-                    var modelPhone = _phoneFactory.BuildUserPhoneModel();
+                    var modelPhone = _factories.PhoneFactory.BuildUserPhoneModel();
                     modelPhone.UserId = user.UserId;
                     modelPhone.Phone = phone.Phone;
-                    modelPhone.Insert(_phoneFactory);
+                    modelPhone.Insert(_factories.PhoneFactory);
                 }
             }
         }
@@ -257,7 +300,7 @@ namespace NAuth.Domain.Services
             {
                 foreach (var addr in user.Addresses)
                 {
-                    var modelAddr = _addrFactory.BuildUserAddressModel();
+                    var modelAddr = _factories.AddressFactory.BuildUserAddressModel();
                     modelAddr.UserId = user.UserId;
                     modelAddr.ZipCode = addr.ZipCode;
                     modelAddr.Address = addr.Address;
@@ -265,7 +308,7 @@ namespace NAuth.Domain.Services
                     modelAddr.Neighborhood = addr.Neighborhood;
                     modelAddr.City = addr.City;
                     modelAddr.State = addr.State;
-                    modelAddr.Insert(_addrFactory);
+                    modelAddr.Insert(_factories.AddressFactory);
                 }
             }
         }
@@ -280,14 +323,14 @@ namespace NAuth.Domain.Services
             {
                 if (string.IsNullOrEmpty(phone.Phone))
                 {
-                    throw new Exception($"Phone is empty");
+                    throw new UserValidationException("Phone is empty");
                 }
                 else
                 {
-                    phone.Phone = await _stringClient.OnlyNumbersAsync(phone.Phone.Trim());
+                    phone.Phone = await _clients.StringClient.OnlyNumbersAsync(phone.Phone.Trim());
                     if (string.IsNullOrEmpty(phone.Phone))
                     {
-                        throw new Exception($"{phone.Phone} is not a valid phone");
+                        throw new UserValidationException($"{phone.Phone} is not a valid phone");
                     }
                 }
             }
@@ -299,80 +342,58 @@ namespace NAuth.Domain.Services
             {
                 return;
             }
+
             foreach (var addr in user.Addresses)
             {
+                ValidateAddressFields(addr);
+                await ValidateAndNormalizeZipCode(addr);
+            }
+        }
+
+        private void ValidateAddressFields(UserAddressInfo addr)
+        {
+            if (string.IsNullOrEmpty(addr.ZipCode))
+            {
+                throw new UserValidationException("ZipCode is empty");
+            }
+            if (string.IsNullOrEmpty(addr.Address))
+            {
+                throw new UserValidationException("Address is empty");
+            }
+            if (string.IsNullOrEmpty(addr.Complement))
+            {
+                throw new UserValidationException("Address is empty");
+            }
+            if (string.IsNullOrEmpty(addr.Neighborhood))
+            {
+                throw new UserValidationException("Neighborhood is empty");
+            }
+            if (string.IsNullOrEmpty(addr.City))
+            {
+                throw new UserValidationException("City is empty");
+            }
+            if (string.IsNullOrEmpty(addr.State))
+            {
+                throw new UserValidationException("State is empty");
+            }
+        }
+
+        private async Task ValidateAndNormalizeZipCode(UserAddressInfo addr)
+        {
+            if (!string.IsNullOrEmpty(addr.ZipCode))
+            {
+                addr.ZipCode = await _clients.StringClient.OnlyNumbersAsync(addr.ZipCode);
                 if (string.IsNullOrEmpty(addr.ZipCode))
                 {
-                    throw new Exception($"ZipCode is empty");
-                }
-                else
-                {
-                    addr.ZipCode = await _stringClient.OnlyNumbersAsync(addr.ZipCode);
-                    if (string.IsNullOrEmpty(addr.ZipCode))
-                    {
-                        throw new Exception($"{addr.ZipCode} is not a valid zip code");
-                    }
-                }
-                if (string.IsNullOrEmpty(addr.Address))
-                {
-                    throw new Exception("Address is empty");
-                }
-                if (string.IsNullOrEmpty(addr.Complement))
-                {
-                    throw new Exception("Address is empty");
-                }
-                if (string.IsNullOrEmpty(addr.Neighborhood))
-                {
-                    throw new Exception("Neighborhood is empty");
-                }
-                if (string.IsNullOrEmpty(addr.City))
-                {
-                    throw new Exception("City is empty");
-                }
-                if (string.IsNullOrEmpty(addr.State))
-                {
-                    throw new Exception("State is empty");
+                    throw new UserValidationException($"{addr.ZipCode} is not a valid zip code");
                 }
             }
         }
 
         public async Task<IUserModel> Insert(UserInfo user)
         {
-            var model = _userFactory.BuildUserModel();
-            if (string.IsNullOrEmpty(user.Name))
-            {
-                throw new Exception("Name is empty");
-            }
-            if (string.IsNullOrEmpty(user.Email))
-            {
-                throw new Exception("Email is empty");
-            }
-            else
-            {
-                if (!await _mailClient.IsValidEmailAsync(user.Email))
-                {
-                    throw new Exception("Email is not valid");
-                }
-                var userWithEmail = model.GetByEmail(user.Email, _userFactory);
-                if (userWithEmail != null)
-                {
-                    throw new Exception("User with email already registered");
-                }
-            }
-            if (string.IsNullOrEmpty(user.Password))
-            {
-                throw new Exception("Password is empty");
-            }
-            if (!string.IsNullOrEmpty(user.IdDocument))
-            {
-                user.IdDocument = await _stringClient.OnlyNumbersAsync(user.IdDocument);
-                if (!await _documentClient.validarCpfOuCnpjAsync(user.IdDocument))
-                {
-                    throw new Exception($"{user.IdDocument} is not a valid CPF or CNPJ");
-                }
-            }
-            await ValidatePhones(user);
-            await ValidateAddresses(user);
+            var model = _factories.UserFactory.BuildUserModel();
+            await ValidateUserForInsert(user, model);
 
             model.Slug = user.Slug;
             model.Name = user.Name;
@@ -385,15 +406,53 @@ namespace NAuth.Domain.Services
             model.Hash = GetUniqueToken();
             model.Slug = await GenerateSlug(model);
 
-            var md = model.Insert(_userFactory);
+            var md = model.Insert(_factories.UserFactory);
 
             user.UserId = md.UserId;
             InsertPhones(user);
             InsertAddresses(user);
 
-            md.ChangePassword(user.UserId, user.Password, _userFactory);
+            md.ChangePassword(user.UserId, user.Password, _factories.UserFactory);
 
             return md;
+        }
+
+        private async Task ValidateUserForInsert(UserInfo user, IUserModel model)
+        {
+            if (string.IsNullOrEmpty(user.Name))
+            {
+                throw new UserValidationException("Name is empty");
+            }
+            if (string.IsNullOrEmpty(user.Email))
+            {
+                throw new UserValidationException("Email is empty");
+            }
+            else
+            {
+                if (!await _clients.MailClient.IsValidEmailAsync(user.Email))
+                {
+                    throw new UserValidationException("Email is not valid");
+                }
+                var userWithEmail = model.GetByEmail(user.Email, _factories.UserFactory);
+                if (userWithEmail != null)
+                {
+                    throw new UserValidationException("User with email already registered");
+                }
+            }
+            if (string.IsNullOrEmpty(user.Password))
+            {
+                throw new UserValidationException("Password is empty");
+            }
+            if (!string.IsNullOrEmpty(user.IdDocument))
+            {
+                user.IdDocument = await _clients.StringClient.OnlyNumbersAsync(user.IdDocument);
+                if (!await _clients.DocumentClient.validarCpfOuCnpjAsync(user.IdDocument))
+                {
+                    throw new UserValidationException($"{user.IdDocument} is not a valid CPF or CNPJ");
+                }
+            }
+            await ValidatePhones(user);
+            await ValidateAddresses(user);
         }
 
         public async Task<IUserModel> Update(UserInfo user)
@@ -401,43 +460,19 @@ namespace NAuth.Domain.Services
             IUserModel model = null;
             if (!(user.UserId > 0))
             {
-                throw new Exception("User not found");
+                throw new UserValidationException("User not found");
             }
             if (string.IsNullOrEmpty(user.Name))
             {
-                throw new Exception("Name is empty");
+                throw new UserValidationException("Name is empty");
             }
-            model = _userFactory.BuildUserModel().GetById(user.UserId, _userFactory);
+            model = _factories.UserFactory.BuildUserModel().GetById(user.UserId, _factories.UserFactory);
             if (model == null)
             {
-                throw new Exception("User not exists");
+                throw new UserValidationException("User not exists");
             }
-            if (string.IsNullOrEmpty(user.Email))
-            {
-                throw new Exception("Email is empty");
-            }
-            else
-            {
-                if (!await _mailClient.IsValidEmailAsync(user.Email))
-                {
-                    throw new Exception("Email is not valid");
-                }
-                var userWithEmail = model.GetByEmail(user.Email, _userFactory);
-                if (userWithEmail != null && userWithEmail.UserId != model.UserId)
-                {
-                    throw new Exception("User with email already registered");
-                }
-            }
-            if (!string.IsNullOrEmpty(user.IdDocument))
-            {
-                user.IdDocument = await _stringClient.OnlyNumbersAsync(user.IdDocument);
-                if (!await _documentClient.validarCpfOuCnpjAsync(user.IdDocument))
-                {
-                    throw new Exception($"{user.IdDocument} is not a valid CPF or CNPJ");
-                }
-            }
-            await ValidatePhones(user);
-            await ValidateAddresses(user);
+            
+            await ValidateUserForUpdate(user, model);
 
             model.Slug = user.Slug;
             model.Name = user.Name;
@@ -448,37 +483,67 @@ namespace NAuth.Domain.Services
             model.UpdatedAt = DateTime.Now;
             model.Slug = await GenerateSlug(model);
 
-            model.Update(_userFactory);
+            model.Update(_factories.UserFactory);
 
-            var modelPhone = _phoneFactory.BuildUserPhoneModel();
+            var modelPhone = _factories.PhoneFactory.BuildUserPhoneModel();
             modelPhone.DeleteAllByUser(model.UserId);
             InsertPhones(user);
 
-            var modelAddr = _addrFactory.BuildUserAddressModel();
+            var modelAddr = _factories.AddressFactory.BuildUserAddressModel();
             modelAddr.DeleteAllByUser(model.UserId);
             InsertAddresses(user);
 
             return model;
         }
 
+        private async Task ValidateUserForUpdate(UserInfo user, IUserModel model)
+        {
+            if (string.IsNullOrEmpty(user.Email))
+            {
+                throw new UserValidationException("Email is empty");
+            }
+            else
+            {
+                if (!await _clients.MailClient.IsValidEmailAsync(user.Email))
+                {
+                    throw new UserValidationException("Email is not valid");
+                }
+                var userWithEmail = model.GetByEmail(user.Email, _factories.UserFactory);
+                if (userWithEmail != null && userWithEmail.UserId != model.UserId)
+                {
+                    throw new UserValidationException("User with email already registered");
+                }
+            }
+            if (!string.IsNullOrEmpty(user.IdDocument))
+            {
+                user.IdDocument = await _clients.StringClient.OnlyNumbersAsync(user.IdDocument);
+                if (!await _clients.DocumentClient.validarCpfOuCnpjAsync(user.IdDocument))
+                {
+                    throw new UserValidationException($"{user.IdDocument} is not a valid CPF or CNPJ");
+                }
+            }
+            await ValidatePhones(user);
+            await ValidateAddresses(user);
+        }
+
         public IUserModel GetUserByEmail(string email)
         {
-            return _userFactory.BuildUserModel().GetByEmail(email, _userFactory);
+            return _factories.UserFactory.BuildUserModel().GetByEmail(email, _factories.UserFactory);
         }
 
         public IUserModel GetUserByID(long userId)
         {
-            return _userFactory.BuildUserModel().GetById(userId, _userFactory);
+            return _factories.UserFactory.BuildUserModel().GetById(userId, _factories.UserFactory);
         }
 
         public IUserModel GetUserByToken(string token)
         {
-            var tokenModel = _tokenFactory.BuildUserTokenModel().GetByToken(token, _tokenFactory);
+            var tokenModel = _factories.TokenFactory.BuildUserTokenModel().GetByToken(token, _factories.TokenFactory);
             if (tokenModel == null)
             {
                 return null;
             }
-            return _userFactory.BuildUserModel().GetById(tokenModel.UserId, _userFactory);
+            return _factories.UserFactory.BuildUserModel().GetById(tokenModel.UserId, _factories.UserFactory);
         }
 
         public UserInfo GetUserInSession(HttpContext httpContext)
@@ -499,7 +564,7 @@ namespace NAuth.Domain.Services
                 UserId = md.UserId,
                 Hash = md.Hash,
                 Slug = md.Slug,
-                ImageUrl = await _fileClient.GetFileUrlAsync(GetBucketName(), md.Image),
+                ImageUrl = await _clients.FileClient.GetFileUrlAsync(GetBucketName(), md.Image),
                 Name = md.Name,
                 Email = md.Email,
                 IdDocument = md.IdDocument,
@@ -508,14 +573,14 @@ namespace NAuth.Domain.Services
                 CreatedAt = md.CreatedAt,
                 UpdatedAt = md.UpdatedAt,
                 IsAdmin = md.IsAdmin,
-                Phones = _phoneFactory.BuildUserPhoneModel()
-                    .ListByUser(md.UserId, _phoneFactory)
+                Phones = _factories.PhoneFactory.BuildUserPhoneModel()
+                    .ListByUser(md.UserId, _factories.PhoneFactory)
                     .Select(x => new UserPhoneInfo
                     {
                         Phone = x.Phone
                     }).ToList(),
-                Addresses = _addrFactory.BuildUserAddressModel()
-                    .ListByUser(md.UserId, _addrFactory)
+                Addresses = _factories.AddressFactory.BuildUserAddressModel()
+                    .ListByUser(md.UserId, _factories.AddressFactory)
                     .Select(x => new UserAddressInfo
                     {
                         ZipCode = x.ZipCode,
@@ -571,17 +636,17 @@ namespace NAuth.Domain.Services
 
         public IUserModel GetByStripeId(string stripeId)
         {
-            return _userFactory.BuildUserModel().GetByStripeId(stripeId, _userFactory);
+            return _factories.UserFactory.BuildUserModel().GetByStripeId(stripeId, _factories.UserFactory);
         }
 
         public IUserModel GetBySlug(string slug)
         {
-            return _userFactory.BuildUserModel().GetBySlug(slug, _userFactory);
+            return _factories.UserFactory.BuildUserModel().GetBySlug(slug, _factories.UserFactory);
         }
 
         public IList<IUserModel> ListUsers(int take)
         {
-            return _userFactory.BuildUserModel().ListUsers(take, _userFactory).ToList();
+            return _factories.UserFactory.BuildUserModel().ListUsers(take, _factories.UserFactory).ToList();
         }
     }
 }

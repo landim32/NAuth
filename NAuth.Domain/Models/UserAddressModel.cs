@@ -9,8 +9,8 @@ namespace NAuth.Domain.Models
 {
     public class UserAddressModel : IUserAddressModel
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IUserAddressRepository<IUserAddressModel, IUserAddressDomainFactory> _repositoryAddr;
+        protected readonly IUnitOfWork _unitOfWork;
+        protected readonly IUserAddressRepository<IUserAddressModel, IUserAddressDomainFactory> _repositoryAddr;
 
         public UserAddressModel(IUnitOfWork unitOfWork, IUserAddressRepository<IUserAddressModel, IUserAddressDomainFactory> repositoryAddr)
         {

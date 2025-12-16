@@ -9,8 +9,8 @@ namespace NAuth.Domain.Models
 {
     public class UserDocumentModel : IUserDocumentModel
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IUserDocumentRepository<IUserDocumentModel, IUserDocumentDomainFactory> _repositoryDocument;
+        protected readonly IUnitOfWork _unitOfWork;
+        protected readonly IUserDocumentRepository<IUserDocumentModel, IUserDocumentDomainFactory> _repositoryDocument;
 
         public UserDocumentModel(IUnitOfWork unitOfWork, IUserDocumentRepository<IUserDocumentModel, IUserDocumentDomainFactory> repositoryDocument)
         {

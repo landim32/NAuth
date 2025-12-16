@@ -9,8 +9,8 @@ namespace NAuth.Domain.Models
 {
     public class UserPhoneModel : IUserPhoneModel
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IUserPhoneRepository<IUserPhoneModel, IUserPhoneDomainFactory> _repositoryPhone;
+        protected readonly IUnitOfWork _unitOfWork;
+        protected readonly IUserPhoneRepository<IUserPhoneModel, IUserPhoneDomainFactory> _repositoryPhone;
 
         public UserPhoneModel(IUnitOfWork unitOfWork, IUserPhoneRepository<IUserPhoneModel, IUserPhoneDomainFactory> repositoryPhone)
         {

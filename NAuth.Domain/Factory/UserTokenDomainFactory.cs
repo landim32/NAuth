@@ -8,8 +8,8 @@ namespace NAuth.Domain.Factory
 {
     public class UserTokenDomainFactory : IUserTokenDomainFactory
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IUserTokenRepository<IUserTokenModel, IUserTokenDomainFactory> _repositoryToken;
+        protected readonly IUnitOfWork _unitOfWork;
+        protected readonly IUserTokenRepository<IUserTokenModel, IUserTokenDomainFactory> _repositoryToken;
 
         public UserTokenDomainFactory(IUnitOfWork unitOfWork, IUserTokenRepository<IUserTokenModel, IUserTokenDomainFactory> repositoryToken)
         {

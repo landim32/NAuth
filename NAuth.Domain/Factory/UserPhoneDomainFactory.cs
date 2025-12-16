@@ -8,8 +8,8 @@ namespace NAuth.Domain.Factory
 {
     public class UserPhoneDomainFactory : IUserPhoneDomainFactory
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IUserPhoneRepository<IUserPhoneModel, IUserPhoneDomainFactory> _repositoryPhone;
+        protected readonly IUnitOfWork _unitOfWork;
+        protected readonly IUserPhoneRepository<IUserPhoneModel, IUserPhoneDomainFactory> _repositoryPhone;
 
         public UserPhoneDomainFactory(IUnitOfWork unitOfWork, IUserPhoneRepository<IUserPhoneModel, IUserPhoneDomainFactory> repositoryPhone)
         {
