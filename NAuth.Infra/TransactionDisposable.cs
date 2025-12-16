@@ -9,31 +9,54 @@ namespace NAuth.Infra
     {
         private readonly ILogger<TransactionDisposable> _logger;
         private readonly IDbContextTransaction _transaction;
+        private bool _disposed;
 
         public TransactionDisposable(ILogger<TransactionDisposable> logger, IDbContextTransaction transaction)
         {
             _logger = logger;
             _transaction = transaction;
+            _disposed = false;
         }
 
         public void Commit()
         {
+            ThrowIfDisposed();
             _logger.LogTrace("Finalizando bloco de transação.");
             _transaction.Commit();
         }
 
+        public void Rollback()
+        {
+            ThrowIfDisposed();
+            _logger.LogTrace("Rollback do bloco de transação.");
+            _transaction.Rollback();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _logger.LogTrace("Liberando transação da memória.");
+                    _transaction.Dispose();
+                }
+                _disposed = true;
+            }
+        }
+
         public void Dispose()
         {
-            _logger.LogTrace("Liberando transação da memória.");
-            _transaction.Dispose();
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        public void Rollback()
+        private void ThrowIfDisposed()
         {
-            _logger.LogTrace("Rollback do bloco de transação.");
-            _transaction.Rollback();
-
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(TransactionDisposable));
+            }
         }
     }
 }

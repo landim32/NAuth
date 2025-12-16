@@ -75,6 +75,8 @@ namespace NAuth.Domain.Services
         private readonly UserDomainFactories _factories;
         private readonly ExternalClients _clients;
 
+        private const string UserNotFoundMessage = "User not found";
+
         public UserService(
             ILogger<UserService> logger,
             IOptions<NAuthSetting> nauthSetting,
@@ -163,7 +165,7 @@ namespace NAuth.Domain.Services
             var user = md.GetByRecoveryHash(recoveryHash, _factories.UserFactory);
             if (user == null)
             {
-                throw new UserValidationException("User not found");
+                throw new UserValidationException(UserNotFoundMessage);
             }
             md.ChangePassword(user.UserId, newPassword, _factories.UserFactory);
 
@@ -185,7 +187,7 @@ namespace NAuth.Domain.Services
             var user = md.GetById(userId, _factories.UserFactory);
             if (user == null)
             {
-                throw new UserValidationException("User not found");
+                throw new UserValidationException(UserNotFoundMessage);
             }
             if (string.IsNullOrEmpty(user.Email))
             {
@@ -214,7 +216,7 @@ namespace NAuth.Domain.Services
             var user = md.GetByEmail(email, _factories.UserFactory);
             if (user == null)
             {
-                throw new UserValidationException("User not found");
+                throw new UserValidationException(UserNotFoundMessage);
             }
             var recoveryHash = md.GenerateRecoveryHash(user.UserId, _factories.UserFactory);
             var recoveryUrl = $"https://nochainswap.org/recoverypassword/{recoveryHash}";
@@ -460,7 +462,7 @@ namespace NAuth.Domain.Services
             IUserModel model = null;
             if (!(user.UserId > 0))
             {
-                throw new UserValidationException("User not found");
+                throw new UserValidationException(UserNotFoundMessage);
             }
             if (string.IsNullOrEmpty(user.Name))
             {
