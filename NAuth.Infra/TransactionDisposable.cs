@@ -53,10 +53,7 @@ namespace NAuth.Infra
 
         private void ThrowIfDisposed()
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(TransactionDisposable));
-            }
+            ObjectDisposedException.ThrowIf(_disposed, nameof(TransactionDisposable));
         }
     }
 }
