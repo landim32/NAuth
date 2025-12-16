@@ -317,6 +317,10 @@ namespace NAuth.API.Controllers
 
         [Authorize]
         [HttpPost("changePassword")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public ActionResult ChangePassword([FromBody] ChangePasswordParam param)
         {
             try

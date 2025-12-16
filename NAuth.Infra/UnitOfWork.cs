@@ -10,26 +10,24 @@ namespace NAuth.Infra
 
         private readonly NAuthContext _ccsContext;
         private readonly ILogger<UnitOfWork> _logger;
-        private readonly ILogger<TransactionDisposable> _transactionLogger;
 
-        public UnitOfWork(ILogger<UnitOfWork> logger, ILogger<TransactionDisposable> transactionLogger, NAuthContext ccsContext)
+        public UnitOfWork(ILogger<UnitOfWork> logger, NAuthContext ccsContext)
         {
             this._ccsContext = ccsContext;
             _logger = logger;
-            _transactionLogger = transactionLogger;
         }
 
         public ITransaction BeginTransaction()
         {
-            try
-            {
-                _logger.LogTrace("Iniciando bloco de transação.");
-                return new TransactionDisposable(_transactionLogger, _ccsContext.Database.BeginTransaction());
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            _logger.LogTrace("Iniciando bloco de transação.");
+            // Corrigido: cria um logger específico para TransactionDisposable
+            var transactionLogger = _logger is ILoggerFactory loggerFactory
+                ? loggerFactory.CreateLogger<TransactionDisposable>()
+                : (ILogger<TransactionDisposable>)Activator.CreateInstance(
+                    typeof(Logger<TransactionDisposable>),
+                    _logger
+                );
+            return new TransactionDisposable(transactionLogger, _ccsContext.Database.BeginTransaction());
         }
     }
 }

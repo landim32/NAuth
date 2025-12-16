@@ -137,7 +137,8 @@ namespace NAuth.ACL
             var response = await _httpClient.GetAsync($"{_nauthSetting.Value.ApiUrl}/list/{take}");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<IList<UserInfo>>(json);
+            var result = JsonConvert.DeserializeObject<IList<UserInfo>>(json);
+            return result ?? new List<UserInfo>();
         }
 
         public async Task<string> UploadImageUserAsync(Stream fileStream, string fileName, string token)

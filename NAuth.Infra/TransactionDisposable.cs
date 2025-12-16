@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using NAuth.Infra.Interfaces;
+using System;
 
 namespace NAuth.Infra
 {
@@ -25,6 +26,7 @@ namespace NAuth.Infra
         {
             _logger.LogTrace("Liberando transação da memória.");
             _transaction.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         public void Rollback()

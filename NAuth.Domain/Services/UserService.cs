@@ -121,7 +121,7 @@ namespace NAuth.Domain.Services
             return tokenModel.Insert(_factories.TokenFactory);
         }
 
-        private void ValidateTokenParameters(long userId, string ipAddress, string userAgent, string fingerprint)
+        private static void ValidateTokenParameters(long userId, string ipAddress, string userAgent, string fingerprint)
         {
             if (userId <= 0)
             {
@@ -224,7 +224,7 @@ namespace NAuth.Domain.Services
             return await Task.FromResult(true);
         }
 
-        private MailerInfo BuildRecoveryEmail(IUserModel user, string recoveryUrl)
+        private static MailerInfo BuildRecoveryEmail(IUserModel user, string recoveryUrl)
         {
             var textMessage =
                 $"Hi {user.Name},\r\n\r\n" +
@@ -350,7 +350,7 @@ namespace NAuth.Domain.Services
             }
         }
 
-        private void ValidateAddressFields(UserAddressInfo addr)
+        private static void ValidateAddressFields(UserAddressInfo addr)
         {
             if (string.IsNullOrEmpty(addr.ZipCode))
             {
