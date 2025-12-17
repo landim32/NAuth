@@ -99,7 +99,7 @@ namespace NAuth.Test.Domain.Services
 
             _mockUserFactory.Setup(f => f.BuildUserModel()).Returns(_mockUserModel.Object);
             _mockUserModel.Setup(m => m.GetByEmail(user.Email, _mockUserFactory.Object))
-                .Returns((IUserModel)null);
+                .Returns((IUserModel)null!);
             _mockUserModel.Setup(m => m.ExistSlug(It.IsAny<long>(), It.IsAny<string>()))
                 .Returns(false);
             _mockUserModel.Setup(m => m.Insert(_mockUserFactory.Object))
@@ -223,7 +223,7 @@ namespace NAuth.Test.Domain.Services
 
             _mockUserFactory.Setup(f => f.BuildUserModel()).Returns(_mockUserModel.Object);
             _mockUserModel.Setup(m => m.GetByEmail(user.Email, _mockUserFactory.Object))
-                .Returns((IUserModel)null);
+                .Returns((IUserModel)null!);
             _mockMailClient.Setup(m => m.IsValidEmailAsync(user.Email))
                 .ReturnsAsync(true);
 
@@ -248,7 +248,7 @@ namespace NAuth.Test.Domain.Services
 
             _mockUserFactory.Setup(f => f.BuildUserModel()).Returns(_mockUserModel.Object);
             _mockUserModel.Setup(m => m.GetByEmail(user.Email, _mockUserFactory.Object))
-                .Returns((IUserModel)null);
+                .Returns((IUserModel)null!);
             _mockMailClient.Setup(m => m.IsValidEmailAsync(user.Email))
                 .ReturnsAsync(true);
             _mockStringClient.Setup(s => s.OnlyNumbersAsync(user.IdDocument))
@@ -299,7 +299,7 @@ namespace NAuth.Test.Domain.Services
             _mockAddressFactory.Setup(f => f.BuildUserAddressModel()).Returns(mockAddressModel.Object);
 
             _mockUserModel.Setup(m => m.GetByEmail(user.Email, _mockUserFactory.Object))
-                .Returns((IUserModel)null);
+                .Returns((IUserModel)null!);
             _mockUserModel.Setup(m => m.ExistSlug(It.IsAny<long>(), It.IsAny<string>()))
                 .Returns(false);
             _mockUserModel.Setup(m => m.Insert(_mockUserFactory.Object))
@@ -345,7 +345,7 @@ namespace NAuth.Test.Domain.Services
             _mockRoleFactory.Setup(f => f.BuildRoleModel()).Returns(mockRoleModel.Object);
 
             _mockUserModel.Setup(m => m.GetByEmail(user.Email, _mockUserFactory.Object))
-                .Returns((IUserModel)null);
+                .Returns((IUserModel)null!);
             _mockUserModel.Setup(m => m.ExistSlug(It.IsAny<long>(), It.IsAny<string>()))
                 .Returns(false);
             _mockUserModel.Setup(m => m.Insert(_mockUserFactory.Object))
@@ -398,7 +398,7 @@ namespace NAuth.Test.Domain.Services
             _mockUserModel.Setup(m => m.GetById(user.UserId, _mockUserFactory.Object))
                 .Returns(_mockUserModel.Object);
             _mockUserModel.Setup(m => m.GetByEmail(user.Email, _mockUserFactory.Object))
-                .Returns((IUserModel)null);
+                .Returns((IUserModel)null!);
             _mockUserModel.Setup(m => m.ExistSlug(It.IsAny<long>(), It.IsAny<string>()))
                 .Returns(false);
 
@@ -456,7 +456,7 @@ namespace NAuth.Test.Domain.Services
 
             _mockUserFactory.Setup(f => f.BuildUserModel()).Returns(_mockUserModel.Object);
             _mockUserModel.Setup(m => m.GetById(user.UserId, _mockUserFactory.Object))
-                .Returns((IUserModel)null);
+                .Returns((IUserModel)null!);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => 

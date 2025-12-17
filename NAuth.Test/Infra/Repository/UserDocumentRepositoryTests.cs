@@ -206,8 +206,8 @@ namespace NAuth.Test.Infra.Repository
             // Assert
             var updatedDoc1 = _context.UserDocuments.Find(doc1.DocumentId);
             var unchangedDoc2 = _context.UserDocuments.Find(doc2.DocumentId);
-            Assert.Equal("updated-doc1", updatedDoc1.Base64);
-            Assert.Equal("doc2", unchangedDoc2.Base64);
+            Assert.Equal("updated-doc1", updatedDoc1?.Base64);
+            Assert.Equal("doc2", unchangedDoc2?.Base64);
         }
 
         [Fact]
@@ -233,7 +233,7 @@ namespace NAuth.Test.Infra.Repository
 
             // Assert
             var updatedDoc = _context.UserDocuments.Find(document.DocumentId);
-            Assert.Equal((int)DocumentTypeEnum.IdentificationDocument, updatedDoc.DocumentType);
+            Assert.Equal((int)DocumentTypeEnum.IdentificationDocument, updatedDoc?.DocumentType);
         }
 
         #endregion

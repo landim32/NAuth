@@ -175,8 +175,8 @@ namespace NAuth.Test.Infra.Repository
             // Assert
             var updatedUser1 = _context.Users.Find(user1.UserId);
             var unchangedUser2 = _context.Users.Find(user2.UserId);
-            Assert.Equal("Updated User1", updatedUser1.Name);
-            Assert.Equal("User2", unchangedUser2.Name);
+            Assert.Equal("Updated User1", updatedUser1?.Name);
+            Assert.Equal("User2", unchangedUser2?.Name);
         }
 
         #endregion
@@ -601,8 +601,8 @@ namespace NAuth.Test.Infra.Repository
 
             // Assert
             var updatedUser = _context.Users.Find(user.UserId);
-            Assert.Equal("new_recovery_hash", updatedUser.RecoveryHash);
-            Assert.True(updatedUser.UpdatedAt >= beforeUpdate && updatedUser.UpdatedAt <= afterUpdate);
+            Assert.Equal("new_recovery_hash", updatedUser?.RecoveryHash);
+            Assert.True(updatedUser?.UpdatedAt >= beforeUpdate && updatedUser.UpdatedAt <= afterUpdate);
         }
 
         #endregion
