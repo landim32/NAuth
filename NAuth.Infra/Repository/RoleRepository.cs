@@ -16,7 +16,7 @@ namespace NAuth.Infra.Repository
             _context = context;
         }
 
-        private IRoleModel DbToModel(IRoleDomainFactory factory, Role role)
+        private static IRoleModel DbToModel(IRoleDomainFactory factory, Role role)
         {
             var model = factory.BuildRoleModel();
             model.RoleId = role.RoleId;
@@ -25,7 +25,7 @@ namespace NAuth.Infra.Repository
             return model;
         }
 
-        private void ModelToDb(IRoleModel model, Role row)
+        private static void ModelToDb(IRoleModel model, Role row)
         {
             row.RoleId = model.RoleId;
             row.Slug = model.Slug;

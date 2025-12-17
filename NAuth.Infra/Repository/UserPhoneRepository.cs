@@ -10,14 +10,14 @@ namespace NAuth.Infra.Repository
 {
     public class UserPhoneRepository : IUserPhoneRepository<IUserPhoneModel, IUserPhoneDomainFactory>
     {
-        private NAuthContext _ccsContext;
+        protected readonly NAuthContext _ccsContext;
 
         public UserPhoneRepository(NAuthContext ccsContext)
         {
             _ccsContext = ccsContext;
         }
 
-        private IUserPhoneModel DbToModel(IUserPhoneDomainFactory factory, UserPhone row)
+        private static IUserPhoneModel DbToModel(IUserPhoneDomainFactory factory, UserPhone row)
         {
             var md = factory.BuildUserPhoneModel();
             md.PhoneId = row.PhoneId;
@@ -26,7 +26,7 @@ namespace NAuth.Infra.Repository
             return md;
         }
 
-        private void ModelToDb(IUserPhoneModel md, UserPhone row)
+        private static void ModelToDb(IUserPhoneModel md, UserPhone row)
         {
             row.PhoneId = md.PhoneId;
             row.UserId = md.UserId;

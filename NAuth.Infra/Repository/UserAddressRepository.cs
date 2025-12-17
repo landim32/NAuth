@@ -10,14 +10,14 @@ namespace NAuth.Infra.Repository
 {
     public class UserAddressRepository : IUserAddressRepository<IUserAddressModel, IUserAddressDomainFactory>
     {
-        private NAuthContext _ccsContext;
+        protected readonly NAuthContext _ccsContext;
 
         public UserAddressRepository(NAuthContext ccsContext)
         {
             _ccsContext = ccsContext;
         }
 
-        private IUserAddressModel DbToModel(IUserAddressDomainFactory factory, UserAddress row)
+        private static IUserAddressModel DbToModel(IUserAddressDomainFactory factory, UserAddress row)
         {
             var md = factory.BuildUserAddressModel();
             md.AddressId = row.AddressId;
@@ -31,7 +31,7 @@ namespace NAuth.Infra.Repository
             return md;
         }
 
-        private void ModelToDb(IUserAddressModel md, UserAddress row)
+        private static void ModelToDb(IUserAddressModel md, UserAddress row)
         {
             row.AddressId = md.AddressId;
             row.UserId = md.UserId;

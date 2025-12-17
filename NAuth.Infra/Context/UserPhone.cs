@@ -1,4 +1,7 @@
-﻿namespace NAuth.Infra.Context;
+﻿using System;
+using System.Collections.Generic;
+
+namespace NAuth.Infra.Context;
 
 public partial class UserPhone
 {

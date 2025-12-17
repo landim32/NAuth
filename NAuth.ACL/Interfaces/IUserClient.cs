@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using NAuth.DTO.User;
 
-namespace NAuth.ACL
+namespace NAuth.ACL.Interfaces
 {
     public interface IUserClient
     {

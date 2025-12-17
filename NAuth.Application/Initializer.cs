@@ -43,7 +43,6 @@ namespace NAuth.Application
             injectDependency(typeof(IUserAddressRepository<IUserAddressModel, IUserAddressDomainFactory>), typeof(UserAddressRepository), services, scoped);
             injectDependency(typeof(IUserDocumentRepository<IUserDocumentModel, IUserDocumentDomainFactory>), typeof(UserDocumentRepository), services, scoped);
             injectDependency(typeof(IUserPhoneRepository<IUserPhoneModel, IUserPhoneDomainFactory>), typeof(UserPhoneRepository), services, scoped);
-            injectDependency(typeof(IUserTokenRepository<IUserTokenModel, IUserTokenDomainFactory>), typeof(UserTokenRepository), services, scoped);
             injectDependency(typeof(IUserRepository<IUserModel, IUserDomainFactory>), typeof(UserRepository), services, scoped);
             injectDependency(typeof(IRoleRepository<IRoleModel, IRoleDomainFactory>), typeof(RoleRepository), services, scoped);
             injectDependency(typeof(IUserRoleRepository<IRoleModel, IRoleDomainFactory>), typeof(UserRoleRepository), services, scoped);
@@ -53,7 +52,6 @@ namespace NAuth.Application
             injectDependency(typeof(IUserAddressDomainFactory), typeof(UserAddressDomainFactory), services, scoped);
             injectDependency(typeof(IUserDocumentDomainFactory), typeof(UserDocumentDomainFactory), services, scoped);
             injectDependency(typeof(IUserPhoneDomainFactory), typeof(UserPhoneDomainFactory), services, scoped);
-            injectDependency(typeof(IUserTokenDomainFactory), typeof(UserTokenDomainFactory), services, scoped);
             injectDependency(typeof(IUserDomainFactory), typeof(UserDomainFactory), services, scoped);
             injectDependency(typeof(IRoleDomainFactory), typeof(RoleDomainFactory), services, scoped);
             #endregion
@@ -70,7 +68,6 @@ namespace NAuth.Application
                 sp.GetRequiredService<IUserDomainFactory>(),
                 sp.GetRequiredService<IUserPhoneDomainFactory>(),
                 sp.GetRequiredService<IUserAddressDomainFactory>(),
-                sp.GetRequiredService<IUserTokenDomainFactory>(),
                 sp.GetRequiredService<IRoleDomainFactory>()
             ));
 

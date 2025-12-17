@@ -21,7 +21,6 @@ namespace NAuth.Domain.Services.Interfaces
         IUserModel GetUserByEmail(string email);
         IUserModel GetBySlug(string slug);
         IUserModel GetUserByID(long userId);
-        IUserModel GetUserByToken(string token);
         IUserModel GetByStripeId(string stripeId);
         UserInfo GetUserInSession(HttpContext httpContext);
         Task<UserInfo> GetUserInfoFromModel(IUserModel md);

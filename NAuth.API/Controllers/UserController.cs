@@ -95,29 +95,6 @@ namespace NAuth.API.Controllers
             }
         }
 
-        [HttpGet("getByToken/{token}")]
-        public async Task<ActionResult<UserInfo>> GetByToken(string token)
-        {
-            try
-            {
-                var user = _userService.GetUserByToken(token);
-                if (user == null)
-                {
-                    _logger.LogError("User with token not found {Token}", token);
-                    return NotFound(UserNotFoundMessage);
-                }
-
-                _logger.LogInformation("GetByToken(token: {@token}) = User(UserId: {@ID}, Email: {@email}, Name: {@name})", token, user.UserId, user.Email, user.Name);
-
-                return Ok(await _userService.GetUserInfoFromModel(user));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ExceptionOccurredMessage, ex.Message);
-                return StatusCode(500, ex.Message);
-            }
-        }
-
         [HttpGet("getById/{userId}")]
         public async Task<ActionResult<UserInfo>> GetById(long userId)
         {

@@ -51,14 +51,14 @@ namespace NAuth.Domain.Models
             return _repositoryUser.GetById(userId, factory);
         }
 
-        private string HashPassword(string password)
+        private static string HashPassword(string password)
         {
             // BCrypt automaticamente gera um salt e usa work factor de 12 (padrão)
             // Isso torna o hashing mais lento e seguro contra ataques de força bruta
             return BCrypt.Net.BCrypt.HashPassword(password, workFactor: 12);
         }
 
-        private bool VerifyPassword(string password, string hashedPassword)
+        private static bool VerifyPassword(string password, string hashedPassword)
         {
             // BCrypt compara a senha com o hash de forma segura
             return BCrypt.Net.BCrypt.Verify(password, hashedPassword);

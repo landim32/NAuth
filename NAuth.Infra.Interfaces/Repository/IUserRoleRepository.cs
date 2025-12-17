@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace NAuth.Infra.Interfaces.Repository
 {
-    public interface IUserRoleRepository<TRoleModel, TRoleFactory>
+    public interface IUserRoleRepository<out TRoleModel, TRoleFactory>
     {
         IEnumerable<TRoleModel> ListRolesByUser(long userId, TRoleFactory factory);
         void AddRoleToUser(long userId, long roleId);

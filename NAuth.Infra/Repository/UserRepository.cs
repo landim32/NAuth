@@ -18,7 +18,7 @@ namespace NAuth.Infra.Repository
             _ccsContext = ccsContext;
         }
 
-        private IUserModel DbToModel(IUserDomainFactory factory, User u)
+        private static IUserModel DbToModel(IUserDomainFactory factory, User u)
         {
             var md = factory.BuildUserModel();
             md.UserId = u.UserId;
@@ -34,7 +34,7 @@ namespace NAuth.Infra.Repository
             return md;
         }
 
-        private void ModelToDb(IUserModel md, User row)
+        private static void ModelToDb(IUserModel md, User row)
         {
             row.UserId = md.UserId;
             row.Hash = md.Hash;

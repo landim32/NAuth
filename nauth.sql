@@ -23,33 +23,20 @@ CREATE TABLE user_phones (
     phone character varying(30) NOT NULL
 );
 
-CREATE TABLE user_tokens (
-    token_id bigint NOT NULL,
-    user_id bigint NOT NULL,
-    created_at timestamp without time zone NOT NULL,
-    last_access timestamp without time zone NOT NULL,
-    expire_at timestamp without time zone NOT NULL,
-    fingerprint character varying(40) NOT NULL,
-    ip_address character varying(64) NOT NULL,
-    token character varying(128) NOT NULL,
-    user_agent character varying(512) NOT NULL
-);
-
 CREATE TABLE users (
     user_id bigint NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     hash character varying(128),
+    slug character varying(140) NOT NULL,
     email character varying(180) NOT NULL,
     name character varying(120) NOT NULL,
     password character varying(255),
     is_admin boolean DEFAULT false NOT NULL,
-    token character varying(128),
     recovery_hash character varying(128),
     id_document character varying(30),
     birth_date timestamp without time zone,
     pix_key character varying(180),
-    slug character varying(140) NOT NULL,
     stripe_id character varying(120),
     image character varying(150)
 );
@@ -93,13 +80,6 @@ CREATE SEQUENCE user_phones_id_seq
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-	
-CREATE SEQUENCE user_tokens_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
 
 CREATE SEQUENCE role_id_seq
     START WITH 1
@@ -113,7 +93,6 @@ ALTER SEQUENCE user_id_seq OWNED BY users.user_id;
 ALTER SEQUENCE user_addresses_id_seq OWNED BY user_addresses.address_id;
 ALTER SEQUENCE user_documents_id_seq OWNED BY user_documents.document_id;
 ALTER SEQUENCE user_phones_id_seq OWNED BY user_phones.phone_id;
-ALTER SEQUENCE user_tokens_id_seq OWNED BY user_tokens.token_id;
 ALTER SEQUENCE role_id_seq OWNED BY roles.role_id;
 
 -- SET SEQUENCES TO DEFAULT VALUE
@@ -121,7 +100,6 @@ ALTER TABLE ONLY users ALTER COLUMN user_id SET DEFAULT nextval('user_id_seq'::r
 ALTER TABLE ONLY user_addresses ALTER COLUMN address_id SET DEFAULT nextval('user_addresses_id_seq'::regclass);
 ALTER TABLE ONLY user_documents ALTER COLUMN document_id SET DEFAULT nextval('user_documents_id_seq'::regclass);
 ALTER TABLE ONLY user_phones ALTER COLUMN phone_id SET DEFAULT nextval('user_phones_id_seq'::regclass);
-ALTER TABLE ONLY user_tokens ALTER COLUMN token_id SET DEFAULT nextval('user_tokens_id_seq'::regclass);
 ALTER TABLE ONLY roles ALTER COLUMN role_id SET DEFAULT nextval('role_id_seq'::regclass);
 
 -- PRIMARY KEYS
@@ -137,9 +115,6 @@ ALTER TABLE ONLY user_documents
 ALTER TABLE ONLY user_phones
     ADD CONSTRAINT user_phones_pkey PRIMARY KEY (phone_id);
 
-ALTER TABLE ONLY user_tokens
-    ADD CONSTRAINT user_tokens_pkey PRIMARY KEY (token_id);
-
 ALTER TABLE ONLY roles
     ADD CONSTRAINT roles_pkey PRIMARY KEY (role_id);
 
@@ -147,9 +122,6 @@ ALTER TABLE ONLY user_roles
     ADD CONSTRAINT user_roles_pkey PRIMARY KEY (user_id, role_id);
 
 -- FOREIGN KEYS
-ALTER TABLE ONLY user_tokens
-    ADD CONSTRAINT fk_token_user FOREIGN KEY (user_id) REFERENCES users(user_id);
-
 ALTER TABLE ONLY user_addresses
     ADD CONSTRAINT fk_user_address FOREIGN KEY (user_id) REFERENCES users(user_id);
 
@@ -176,7 +148,6 @@ INSERT INTO users (
 	name, 
 	password, 
 	is_admin, 
-	token, 
 	recovery_hash, 
 	id_document, 
 	birth_date, 
@@ -193,7 +164,6 @@ INSERT INTO users (
 	'Rodrigo Landim Carneiro', 
 	NULL, 
 	true, 
-	NULL, 
 	'first-access', 
 	NULL, 
 	NULL, 

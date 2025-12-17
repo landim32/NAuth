@@ -106,8 +106,7 @@ namespace NAuth.API.Controllers
                     Name = role.Name
                 };
 
-                _logger.LogInformation("GetBySlug(slug: {Slug}) = Role(RoleId: {ID}, Slug: {Slug}, Name: {Name})", 
-                    slug, role.RoleId, role.Slug, role.Name);
+                _logger.LogInformation("GetBySlug(slug: {Slug}) = Role(RoleId: {ID}, Name: {Name})", slug, role.RoleId, role.Name);
 
                 return Ok(roleInfo);
             }

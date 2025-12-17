@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+using NAuth.ACL.Interfaces;
 using NAuth.DTO.Settings;
 using NAuth.DTO.User;
 using Newtonsoft.Json;

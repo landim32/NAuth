@@ -38,20 +38,17 @@ namespace NAuth.Domain.Services
         public IUserDomainFactory UserFactory { get; }
         public IUserPhoneDomainFactory PhoneFactory { get; }
         public IUserAddressDomainFactory AddressFactory { get; }
-        public IUserTokenDomainFactory TokenFactory { get; }
         public IRoleDomainFactory RoleFactory { get; }
 
         public UserDomainFactories(
             IUserDomainFactory userFactory,
             IUserPhoneDomainFactory phoneFactory,
             IUserAddressDomainFactory addressFactory,
-            IUserTokenDomainFactory tokenFactory,
             IRoleDomainFactory roleFactory)
         {
             UserFactory = userFactory;
             PhoneFactory = phoneFactory;
             AddressFactory = addressFactory;
-            TokenFactory = tokenFactory;
             RoleFactory = roleFactory;
         }
     }
@@ -113,7 +110,7 @@ namespace NAuth.Domain.Services
         public async Task<string> CreateToken(long userId, string ipAddress, string userAgent, string fingerprint)
         {
             _logger.LogTrace(
-                "Creating JWT token for user with ID={@userId}, IP={@ipAddress}, UserAgent={@userAgent} and {@fingerprint}",
+                "Creating JWT token for user with ID={UserId}, IP={IpAddress}, UserAgent={UserAgent} and {Fingerprint}",
                 userId, ipAddress, userAgent, fingerprint
             );
             ValidateTokenParameters(userId, ipAddress, userAgent, fingerprint);
@@ -329,7 +326,7 @@ namespace NAuth.Domain.Services
 
         private void InsertPhones(UserInfo user)
         {
-            if (user.Phones != null && user.Phones.Count() > 0)
+            if (user.Phones != null && user.Phones.Any())
             {
                 foreach (var phone in user.Phones)
                 {
@@ -343,7 +340,7 @@ namespace NAuth.Domain.Services
 
         private void InsertAddresses(UserInfo user)
         {
-            if (user.Addresses != null && user.Addresses.Count() > 0)
+            if (user.Addresses != null && user.Addresses.Any())
             {
                 foreach (var addr in user.Addresses)
                 {
@@ -362,7 +359,7 @@ namespace NAuth.Domain.Services
 
         private void InsertRoles(UserInfo user)
         {
-            if (user.Roles != null && user.Roles.Count() > 0)
+            if (user.Roles != null && user.Roles.Any())
             {
                 var userModel = _factories.UserFactory.BuildUserModel();
                 foreach (var role in user.Roles)
@@ -378,19 +375,20 @@ namespace NAuth.Domain.Services
             {
                 return;
             }
-            
+
             var roleModel = _factories.RoleFactory.BuildRoleModel();
-            foreach (var role in user.Roles)
+            var roleIds = user.Roles.Select(role => role.RoleId);
+            foreach (var roleId in roleIds)
             {
-                if (role.RoleId <= 0)
+                if (roleId <= 0)
                 {
                     throw new UserValidationException("RoleId is invalid");
                 }
-                
-                var existingRole = roleModel.GetById(role.RoleId, _factories.RoleFactory);
+
+                var existingRole = roleModel.GetById(roleId, _factories.RoleFactory);
                 if (existingRole == null)
                 {
-                    throw new UserValidationException($"Role with ID {role.RoleId} does not exist");
+                    throw new UserValidationException($"Role with ID {roleId} does not exist");
                 }
             }
         }
@@ -511,7 +509,7 @@ namespace NAuth.Domain.Services
                 {
                     _logger.LogError(ex, "Error inserting user with email {Email}", user.Email);
                     transaction.Rollback();
-                    throw;
+                    throw new InvalidOperationException($"Error inserting user with email {user.Email}", ex);
                 }
             }
         }
@@ -610,7 +608,7 @@ namespace NAuth.Domain.Services
                 {
                     _logger.LogError(ex, "Error updating user {UserId}", user.UserId);
                     transaction.Rollback();
-                    throw;
+                    throw new InvalidOperationException($"Error updating user {user.UserId}", ex);
                 }
             }
         }
@@ -654,16 +652,6 @@ namespace NAuth.Domain.Services
         public IUserModel GetUserByID(long userId)
         {
             return _factories.UserFactory.BuildUserModel().GetById(userId, _factories.UserFactory);
-        }
-
-        public IUserModel GetUserByToken(string token)
-        {
-            var tokenModel = _factories.TokenFactory.BuildUserTokenModel().GetByToken(token, _factories.TokenFactory);
-            if (tokenModel == null)
-            {
-                return null;
-            }
-            return _factories.UserFactory.BuildUserModel().GetById(tokenModel.UserId, _factories.UserFactory);
         }
 
         public UserInfo GetUserInSession(HttpContext httpContext)

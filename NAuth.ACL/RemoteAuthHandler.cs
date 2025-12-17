@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using NAuth.ACL.Interfaces;
 using NAuth.DTO.Settings;
 using NAuth.DTO.User;
 using Newtonsoft.Json;
@@ -138,9 +139,9 @@ namespace NAuth.ACL
 
                 return AuthenticateResult.Success(ticket);
             }
-            catch (SecurityTokenExpiredException)
+            catch (SecurityTokenExpiredException ex)
             {
-                Logger.LogWarning("Token has expired");
+                Logger.LogWarning(ex, "Token has expired");
                 return AuthenticateResult.Fail("Token has expired");
             }
             catch (SecurityTokenException ex)

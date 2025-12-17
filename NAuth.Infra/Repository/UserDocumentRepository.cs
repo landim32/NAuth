@@ -10,14 +10,14 @@ namespace NAuth.Infra.Repository
 {
     public class UserDocumentRepository : IUserDocumentRepository<IUserDocumentModel, IUserDocumentDomainFactory>
     {
-        private NAuthContext _ccsContext;
+        protected readonly NAuthContext _ccsContext;
 
         public UserDocumentRepository(NAuthContext ccsContext)
         {
             _ccsContext = ccsContext;
         }
 
-        private IUserDocumentModel DbToModel(IUserDocumentDomainFactory factory, UserDocument row)
+        private static IUserDocumentModel DbToModel(IUserDocumentDomainFactory factory, UserDocument row)
         {
             var md = factory.BuildUserDocumentModel();
             md.DocumentId = row.DocumentId;
@@ -27,7 +27,7 @@ namespace NAuth.Infra.Repository
             return md;
         }
 
-        private void ModelToDb(IUserDocumentModel md, UserDocument row)
+        private static void ModelToDb(IUserDocumentModel md, UserDocument row)
         {
             row.DocumentId = md.DocumentId;
             row.UserId = md.UserId;

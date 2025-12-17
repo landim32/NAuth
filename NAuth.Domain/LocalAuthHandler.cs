@@ -102,9 +102,9 @@ namespace NAuth.Domain
 
                 return AuthenticateResult.Success(ticket);
             }
-            catch (SecurityTokenExpiredException)
+            catch (SecurityTokenExpiredException ex)
             {
-                Logger.LogWarning("Token has expired");
+                Logger.LogWarning(ex, "Token has expired");
                 return AuthenticateResult.Fail("Token has expired");
             }
             catch (SecurityTokenException ex)

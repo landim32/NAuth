@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace NAuth.Infra.Context;
 
@@ -23,8 +24,6 @@ public partial class NAuthContext : DbContext
     public virtual DbSet<UserDocument> UserDocuments { get; set; }
 
     public virtual DbSet<UserPhone> UserPhones { get; set; }
-
-    public virtual DbSet<UserToken> UserTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -83,7 +82,7 @@ public partial class NAuthContext : DbContext
                 .HasMaxLength(120)
                 .HasColumnName("name");
             entity.Property(e => e.Password)
-                .HasMaxLength(128)
+                .HasMaxLength(255)
                 .HasColumnName("password");
             entity.Property(e => e.PixKey)
                 .HasMaxLength(180)
@@ -98,9 +97,6 @@ public partial class NAuthContext : DbContext
             entity.Property(e => e.StripeId)
                 .HasMaxLength(120)
                 .HasColumnName("stripe_id");
-            entity.Property(e => e.Token)
-                .HasMaxLength(128)
-                .HasColumnName("token");
             entity.Property(e => e.UpdatedAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("updated_at");
@@ -199,48 +195,6 @@ public partial class NAuthContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_user_phone");
-        });
-
-        modelBuilder.Entity<UserToken>(entity =>
-        {
-            entity.HasKey(e => e.TokenId).HasName("user_tokens_pkey");
-
-            entity.ToTable("user_tokens");
-
-            entity.Property(e => e.TokenId)
-                .HasDefaultValueSql("nextval('user_tokens_id_seq'::regclass)")
-                .HasColumnName("token_id");
-            entity.Property(e => e.CreatedAt)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("created_at");
-            entity.Property(e => e.ExpireAt)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("expire_at");
-            entity.Property(e => e.Fingerprint)
-                .IsRequired()
-                .HasMaxLength(40)
-                .HasColumnName("fingerprint");
-            entity.Property(e => e.IpAddress)
-                .IsRequired()
-                .HasMaxLength(64)
-                .HasColumnName("ip_address");
-            entity.Property(e => e.LastAccess)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("last_access");
-            entity.Property(e => e.Token)
-                .IsRequired()
-                .HasMaxLength(128)
-                .HasColumnName("token");
-            entity.Property(e => e.UserAgent)
-                .IsRequired()
-                .HasMaxLength(512)
-                .HasColumnName("user_agent");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
-
-            entity.HasOne(d => d.User).WithMany(p => p.UserTokens)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("fk_token_user");
         });
 
         OnModelCreatingPartial(modelBuilder);

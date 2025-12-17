@@ -13,6 +13,8 @@ public partial class User
 
     public string Hash { get; set; }
 
+    public string Slug { get; set; }
+
     public string Email { get; set; }
 
     public string Name { get; set; }
@@ -21,8 +23,6 @@ public partial class User
 
     public bool IsAdmin { get; set; }
 
-    public string Token { get; set; }
-
     public string RecoveryHash { get; set; }
 
     public string IdDocument { get; set; }
@@ -30,8 +30,6 @@ public partial class User
     public DateTime? BirthDate { get; set; }
 
     public string PixKey { get; set; }
-
-    public string Slug { get; set; }
 
     public string StripeId { get; set; }
 
@@ -42,8 +40,6 @@ public partial class User
     public virtual ICollection<UserDocument> UserDocuments { get; set; } = new List<UserDocument>();
 
     public virtual ICollection<UserPhone> UserPhones { get; set; } = new List<UserPhone>();
-
-    public virtual ICollection<UserToken> UserTokens { get; set; } = new List<UserToken>();
 
     public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
 }
