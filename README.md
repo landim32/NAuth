@@ -3,11 +3,11 @@
 ![.NET](https://img.shields.io/badge/.NET-8.0-blue)
 ![Docker](https://img.shields.io/badge/Docker-Ready-brightgreen)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
-![[Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=landim32_NAuth&metric=alert_status)](https://sonarcloud.io/project/overview?id=landim32_NAuth)
-![[Coverage](https://sonarcloud.io/api/project_badges/measure?project=landim32_NAuth&metric=coverage)](https://sonarcloud.io/project/overview?id=landim32_NAuth)
-![[Bugs](https://sonarcloud.io/api/project_badges/measure?project=landim32_NAuth&metric=bugs)](https://sonarcloud.io/project/overview?id=landim32_NAuth)
-![[Code Smells](https://sonarcloud.io/api/project_badges/measure?project=landim32_NAuth&metric=code_smells)](https://sonarcloud.io/project/overview?id=landim32_NAuth)
-![[Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=landim32_NAuth&metric=vulnerabilities)](https://sonarcloud.io/project/overview?id=landim32_NAuth)
+![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=landim32_NAuth&metric=alert_status)](https://sonarcloud.io/project/overview?id=landim32_NAuth)
+![Coverage](https://sonarcloud.io/api/project_badges/measure?project=landim32_NAuth&metric=coverage)](https://sonarcloud.io/project/overview?id=landim32_NAuth)
+![Bugs](https://sonarcloud.io/api/project_badges/measure?project=landim32_NAuth&metric=bugs)](https://sonarcloud.io/project/overview?id=landim32_NAuth)
+![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=landim32_NAuth&metric=code_smells)](https://sonarcloud.io/project/overview?id=landim32_NAuth)
+![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=landim32_NAuth&metric=vulnerabilities)](https://sonarcloud.io/project/overview?id=landim32_NAuth)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ## Overview
