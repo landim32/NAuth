@@ -11,7 +11,7 @@ namespace NAuth.Infra.Repository
     public class UserRepository : IUserRepository<IUserModel, IUserDomainFactory>
     {
 
-        private NAuthContext _ccsContext;
+        protected readonly NAuthContext _ccsContext;
 
         public UserRepository(NAuthContext ccsContext)
         {

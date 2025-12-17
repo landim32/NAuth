@@ -33,5 +33,11 @@ namespace NAuth.Domain.Models.Models
         void ChangePassword(long userId, string password, IUserDomainFactory factory);
         string GenerateRecoveryHash(long userId, IUserDomainFactory factory);
         bool ExistSlug(long userId, string slug);
+        IEnumerable<IRoleModel> ListRoles(long userId, IRoleDomainFactory roleFactory);
+        void AddRole(long userId, long roleId);
+        void RemoveRole(long userId, long roleId);
+        void RemoveAllRoles(long userId);
+        bool HasRole(long userId, long roleId);
+        bool HasRoleBySlug(long userId, string roleSlug);
     }
 }

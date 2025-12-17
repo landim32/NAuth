@@ -6,6 +6,7 @@ using NAuth.Domain.Models.Models;
 using NAuth.Domain.Services.Interfaces;
 using NAuth.DTO.Settings;
 using NAuth.DTO.User;
+using NAuth.Infra.Interfaces;
 using Newtonsoft.Json;
 using NTools.ACL.Interfaces;
 using NTools.DTO.MailerSend;
@@ -34,17 +35,20 @@ namespace NAuth.Domain.Services
         public IUserPhoneDomainFactory PhoneFactory { get; }
         public IUserAddressDomainFactory AddressFactory { get; }
         public IUserTokenDomainFactory TokenFactory { get; }
+        public IRoleDomainFactory RoleFactory { get; }
 
         public UserDomainFactories(
             IUserDomainFactory userFactory,
             IUserPhoneDomainFactory phoneFactory,
             IUserAddressDomainFactory addressFactory,
-            IUserTokenDomainFactory tokenFactory)
+            IUserTokenDomainFactory tokenFactory,
+            IRoleDomainFactory roleFactory)
         {
             UserFactory = userFactory;
             PhoneFactory = phoneFactory;
             AddressFactory = addressFactory;
             TokenFactory = tokenFactory;
+            RoleFactory = roleFactory;
         }
     }
 
@@ -74,6 +78,7 @@ namespace NAuth.Domain.Services
         private readonly NAuthSetting _nauthSetting;
         private readonly UserDomainFactories _factories;
         private readonly ExternalClients _clients;
+        private readonly IUnitOfWork _unitOfWork;
 
         private const string UserNotFoundMessage = "User not found";
 
@@ -81,12 +86,14 @@ namespace NAuth.Domain.Services
             ILogger<UserService> logger,
             IOptions<NAuthSetting> nauthSetting,
             UserDomainFactories factories,
-            ExternalClients clients)
+            ExternalClients clients,
+            IUnitOfWork unitOfWork)
         {
             _logger = logger;
             _nauthSetting = nauthSetting.Value;
             _factories = factories;
             _clients = clients;
+            _unitOfWork = unitOfWork;
         }
 
         public string GetBucketName()
@@ -315,6 +322,41 @@ namespace NAuth.Domain.Services
             }
         }
 
+        private void InsertRoles(UserInfo user)
+        {
+            if (user.Roles != null && user.Roles.Count() > 0)
+            {
+                var userModel = _factories.UserFactory.BuildUserModel();
+                foreach (var role in user.Roles)
+                {
+                    userModel.AddRole(user.UserId, role.RoleId);
+                }
+            }
+        }
+
+        private void ValidateRoles(UserInfo user)
+        {
+            if (user.Roles == null)
+            {
+                return;
+            }
+            
+            var roleModel = _factories.RoleFactory.BuildRoleModel();
+            foreach (var role in user.Roles)
+            {
+                if (role.RoleId <= 0)
+                {
+                    throw new UserValidationException("RoleId is invalid");
+                }
+                
+                var existingRole = roleModel.GetById(role.RoleId, _factories.RoleFactory);
+                if (existingRole == null)
+                {
+                    throw new UserValidationException($"Role with ID {role.RoleId} does not exist");
+                }
+            }
+        }
+
         private async Task ValidatePhones(UserInfo user)
         {
             if (user.Phones == null)
@@ -394,29 +436,46 @@ namespace NAuth.Domain.Services
 
         public async Task<IUserModel> Insert(UserInfo user)
         {
-            var model = _factories.UserFactory.BuildUserModel();
-            await ValidateUserForInsert(user, model);
+            using (var transaction = _unitOfWork.BeginTransaction())
+            {
+                try
+                {
+                    var model = _factories.UserFactory.BuildUserModel();
+                    await ValidateUserForInsert(user, model);
 
-            model.Slug = user.Slug;
-            model.Name = user.Name;
-            model.Email = user.Email;
-            model.BirthDate = user.BirthDate;
-            model.IdDocument = user.IdDocument;
-            model.PixKey = user.PixKey;
-            model.CreatedAt = DateTime.Now;
-            model.UpdatedAt = DateTime.Now;
-            model.Hash = GetUniqueToken();
-            model.Slug = await GenerateSlug(model);
+                    model.Slug = user.Slug;
+                    model.Name = user.Name;
+                    model.Email = user.Email;
+                    model.BirthDate = user.BirthDate;
+                    model.IdDocument = user.IdDocument;
+                    model.PixKey = user.PixKey;
+                    model.CreatedAt = DateTime.Now;
+                    model.UpdatedAt = DateTime.Now;
+                    model.Hash = GetUniqueToken();
+                    model.Slug = await GenerateSlug(model);
 
-            var md = model.Insert(_factories.UserFactory);
+                    var md = model.Insert(_factories.UserFactory);
 
-            user.UserId = md.UserId;
-            InsertPhones(user);
-            InsertAddresses(user);
+                    user.UserId = md.UserId;
+                    InsertPhones(user);
+                    InsertAddresses(user);
+                    InsertRoles(user);
 
-            md.ChangePassword(user.UserId, user.Password, _factories.UserFactory);
+                    md.ChangePassword(user.UserId, user.Password, _factories.UserFactory);
 
-            return md;
+                    transaction.Commit();
+                    
+                    _logger.LogInformation("User {UserId} inserted successfully with email {Email}", md.UserId, md.Email);
+                    
+                    return md;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error inserting user with email {Email}", user.Email);
+                    transaction.Rollback();
+                    throw;
+                }
+            }
         }
 
         private async Task ValidateUserForInsert(UserInfo user, IUserModel model)
@@ -455,47 +514,67 @@ namespace NAuth.Domain.Services
             }
             await ValidatePhones(user);
             await ValidateAddresses(user);
+            ValidateRoles(user);
         }
 
         public async Task<IUserModel> Update(UserInfo user)
         {
-            IUserModel model = null;
-            if (!(user.UserId > 0))
+            using (var transaction = _unitOfWork.BeginTransaction())
             {
-                throw new UserValidationException(UserNotFoundMessage);
+                try
+                {
+                    IUserModel model = null;
+                    if (!(user.UserId > 0))
+                    {
+                        throw new UserValidationException(UserNotFoundMessage);
+                    }
+                    if (string.IsNullOrEmpty(user.Name))
+                    {
+                        throw new UserValidationException("Name is empty");
+                    }
+                    model = _factories.UserFactory.BuildUserModel().GetById(user.UserId, _factories.UserFactory);
+                    if (model == null)
+                    {
+                        throw new UserValidationException("User not exists");
+                    }
+                    
+                    await ValidateUserForUpdate(user, model);
+
+                    model.Slug = user.Slug;
+                    model.Name = user.Name;
+                    model.Email = user.Email;
+                    model.BirthDate = user.BirthDate;
+                    model.IdDocument = user.IdDocument;
+                    model.PixKey = user.PixKey;
+                    model.UpdatedAt = DateTime.Now;
+                    model.Slug = await GenerateSlug(model);
+
+                    model.Update(_factories.UserFactory);
+
+                    var modelPhone = _factories.PhoneFactory.BuildUserPhoneModel();
+                    modelPhone.DeleteAllByUser(model.UserId);
+                    InsertPhones(user);
+
+                    var modelAddr = _factories.AddressFactory.BuildUserAddressModel();
+                    modelAddr.DeleteAllByUser(model.UserId);
+                    InsertAddresses(user);
+
+                    model.RemoveAllRoles(model.UserId);
+                    InsertRoles(user);
+
+                    transaction.Commit();
+                    
+                    _logger.LogInformation("User {UserId} updated successfully with email {Email}", model.UserId, model.Email);
+                    
+                    return model;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error updating user {UserId}", user.UserId);
+                    transaction.Rollback();
+                    throw;
+                }
             }
-            if (string.IsNullOrEmpty(user.Name))
-            {
-                throw new UserValidationException("Name is empty");
-            }
-            model = _factories.UserFactory.BuildUserModel().GetById(user.UserId, _factories.UserFactory);
-            if (model == null)
-            {
-                throw new UserValidationException("User not exists");
-            }
-            
-            await ValidateUserForUpdate(user, model);
-
-            model.Slug = user.Slug;
-            model.Name = user.Name;
-            model.Email = user.Email;
-            model.BirthDate = user.BirthDate;
-            model.IdDocument = user.IdDocument;
-            model.PixKey = user.PixKey;
-            model.UpdatedAt = DateTime.Now;
-            model.Slug = await GenerateSlug(model);
-
-            model.Update(_factories.UserFactory);
-
-            var modelPhone = _factories.PhoneFactory.BuildUserPhoneModel();
-            modelPhone.DeleteAllByUser(model.UserId);
-            InsertPhones(user);
-
-            var modelAddr = _factories.AddressFactory.BuildUserAddressModel();
-            modelAddr.DeleteAllByUser(model.UserId);
-            InsertAddresses(user);
-
-            return model;
         }
 
         private async Task ValidateUserForUpdate(UserInfo user, IUserModel model)
@@ -526,6 +605,7 @@ namespace NAuth.Domain.Services
             }
             await ValidatePhones(user);
             await ValidateAddresses(user);
+            ValidateRoles(user);
         }
 
         public IUserModel GetUserByEmail(string email)
@@ -575,6 +655,13 @@ namespace NAuth.Domain.Services
                 CreatedAt = md.CreatedAt,
                 UpdatedAt = md.UpdatedAt,
                 IsAdmin = md.IsAdmin,
+                Roles = md.ListRoles(md.UserId, _factories.RoleFactory)
+                    .Select(x => new RoleInfo
+                    {
+                        RoleId = x.RoleId,
+                        Slug = x.Slug,
+                        Name = x.Name
+                    }).ToList(),
                 Phones = _factories.PhoneFactory.BuildUserPhoneModel()
                     .ListByUser(md.UserId, _factories.PhoneFactory)
                     .Select(x => new UserPhoneInfo
@@ -595,7 +682,7 @@ namespace NAuth.Domain.Services
             };
         }
 
-        private string GetUniqueToken()
+        private static string GetUniqueToken()
         {
             using (var crypto = new RNGCryptoServiceProvider())
             {

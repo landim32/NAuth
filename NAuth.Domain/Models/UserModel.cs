@@ -16,13 +16,19 @@ namespace NAuth.Domain.Models
     {
         protected readonly IUnitOfWork _unitOfWork;
         protected readonly IUserRepository<IUserModel, IUserDomainFactory> _repositoryUser;
+        protected readonly IUserRoleRepository<IRoleModel, IRoleDomainFactory> _repositoryUserRole;
 
         public const string UserNotFoundMessage = "User not found";
 
-        public UserModel(IUnitOfWork unitOfWork, IUserRepository<IUserModel, IUserDomainFactory> repositoryUser)
+        public UserModel(
+            IUnitOfWork unitOfWork, 
+            IUserRepository<IUserModel, IUserDomainFactory> repositoryUser,
+            IUserRoleRepository<IRoleModel, IRoleDomainFactory> repositoryUserRole
+        )
         {
             _unitOfWork = unitOfWork;
             _repositoryUser = repositoryUser;
+            _repositoryUserRole = repositoryUserRole;
         }
 
         public long UserId { get; set; }
@@ -142,6 +148,36 @@ namespace NAuth.Domain.Models
         public IUserModel GetByStripeId(string stripeId, IUserDomainFactory factory)
         {
             return _repositoryUser.GetByStripeId(stripeId, factory);
+        }
+
+        public IEnumerable<IRoleModel> ListRoles(long userId, IRoleDomainFactory roleFactory)
+        {
+            return _repositoryUserRole.ListRolesByUser(userId, roleFactory);
+        }
+
+        public void AddRole(long userId, long roleId)
+        {
+            _repositoryUserRole.AddRoleToUser(userId, roleId);
+        }
+
+        public void RemoveRole(long userId, long roleId)
+        {
+            _repositoryUserRole.RemoveRoleFromUser(userId, roleId);
+        }
+
+        public void RemoveAllRoles(long userId)
+        {
+            _repositoryUserRole.RemoveAllRolesFromUser(userId);
+        }
+
+        public bool HasRole(long userId, long roleId)
+        {
+            return _repositoryUserRole.UserHasRole(userId, roleId);
+        }
+
+        public bool HasRoleBySlug(long userId, string roleSlug)
+        {
+            return _repositoryUserRole.UserHasRoleBySlug(userId, roleSlug);
         }
     }
 }
