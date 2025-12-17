@@ -19,12 +19,9 @@ namespace NAuth.ACL
         private readonly IOptions<NAuthSetting> _nauthSetting;
         private readonly ILogger<UserClient> _logger;
 
-        public UserClient(IOptions<NAuthSetting> nauthSetting, ILogger<UserClient> logger)
+        public UserClient(IOptions<NAuthSetting> nauthSetting, ILogger<UserClient> logger, HttpClient httpClient)
         {
-            _httpClient = new HttpClient(new HttpClientHandler
-            {
-                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
-            });
+            _httpClient = httpClient;
             _nauthSetting = nauthSetting;
             _logger = logger;
         }

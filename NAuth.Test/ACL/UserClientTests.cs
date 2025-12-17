@@ -42,7 +42,7 @@ namespace NAuth.Test.ACL
                 BaseAddress = new Uri(_nauthSetting.ApiUrl)
             };
 
-            var userClient = new UserClient(_mockOptions.Object, _mockLogger.Object);
+            var userClient = new UserClient(_mockOptions.Object, _mockLogger.Object, httpClient);
             
             var httpClientField = typeof(UserClient).GetField("_httpClient", 
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
