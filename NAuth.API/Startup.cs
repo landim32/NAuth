@@ -73,10 +73,6 @@ namespace NAuth.API
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "NAuth.API v1");
                 });
             }
-            else
-            {
-                app.UseHttpsRedirection();
-            }
 
             app.UseHealthChecks("/",
                 new HealthCheckOptions()
