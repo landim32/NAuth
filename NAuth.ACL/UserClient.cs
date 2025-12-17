@@ -27,11 +27,26 @@ namespace NAuth.ACL
 
         public UserInfo? GetUserInSession(HttpContext httpContext)
         {
-            if (httpContext.User.Claims.Any())
+            if (httpContext?.User?.Claims == null || !httpContext.User.Claims.Any())
             {
-                return JsonConvert.DeserializeObject<UserInfo>(httpContext.User.Claims.First().Value);
+                return null;
             }
-            return null;
+
+            var claims = httpContext.User.Claims.ToList();
+            
+            var userInfo = new UserInfo
+            {
+                UserId = long.TryParse(claims.FirstOrDefault(c => c.Type == "userId")?.Value, out var userId) ? userId : 0,
+                Name = claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Name)?.Value,
+                Email = claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value,
+                Hash = claims.FirstOrDefault(c => c.Type == "hash")?.Value,
+                IsAdmin = bool.TryParse(claims.FirstOrDefault(c => c.Type == "isAdmin")?.Value, out var isAdmin) && isAdmin,
+                Roles = claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role)
+                    .Select(c => new RoleInfo { Slug = c.Value })
+                    .ToList()
+            };
+
+            return userInfo;
         }
 
         public async Task<UserInfo?> GetMeAsync(string token)

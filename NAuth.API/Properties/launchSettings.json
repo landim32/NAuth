@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "BTCSTXSwap.API": {
+    "NAuth.API": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "swagger",

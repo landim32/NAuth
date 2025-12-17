@@ -10,7 +10,7 @@ namespace NAuth.Domain.Services.Interfaces
     {
         string GetBucketName();
         IUserModel LoginWithEmail(string email, string password);
-        Task<IUserTokenModel> CreateToken(long userId, string ipAddress, string userAgent, string fingerprint);
+        Task<string> CreateToken(long userId, string ipAddress, string userAgent, string fingerprint);
         bool HasPassword(long userId);
         void ChangePasswordUsingHash(string recoveryHash, string newPassword);
         void ChangePassword(long userId, string oldPassword, string newPassword);

@@ -273,7 +273,7 @@ namespace NAuth.API.Controllers
 
                 return Ok(new
                 {
-                    token = token.Token,
+                    token = token,
                     user = await _userService.GetUserInfoFromModel(user)
                 });
             }

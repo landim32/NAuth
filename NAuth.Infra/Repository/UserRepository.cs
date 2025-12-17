@@ -159,6 +159,7 @@ namespace NAuth.Infra.Repository
             var row = _ccsContext.Users.Find(userId);
             row.UpdatedAt = DateTime.Now;
             row.Password = encryptPwd;
+            row.RecoveryHash = null;
             _ccsContext.Users.Update(row);
             _ccsContext.SaveChanges();
         }
@@ -166,6 +167,12 @@ namespace NAuth.Infra.Repository
         public bool ExistSlug(long userId, string slug)
         {
             return _ccsContext.Users.Where(x => x.Slug == slug && (userId == 0 || x.UserId != userId)).Any();
+        }
+
+        public string GetHashedPassword(long userId)
+        {
+            var row = _ccsContext.Users.Find(userId);
+            return row?.Password;
         }
     }
 }

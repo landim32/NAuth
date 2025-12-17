@@ -20,14 +20,7 @@ namespace NAuth.Infra
         public ITransaction BeginTransaction()
         {
             _logger.LogTrace("Iniciando bloco de transação.");
-            // Corrigido: cria um logger específico para TransactionDisposable
-            var transactionLogger = _logger is ILoggerFactory loggerFactory
-                ? loggerFactory.CreateLogger<TransactionDisposable>()
-                : (ILogger<TransactionDisposable>)Activator.CreateInstance(
-                    typeof(Logger<TransactionDisposable>),
-                    _logger
-                );
-            return new TransactionDisposable(transactionLogger, _ccsContext.Database.BeginTransaction());
+            return new TransactionDisposable(_logger, _ccsContext.Database.BeginTransaction());
         }
     }
 }

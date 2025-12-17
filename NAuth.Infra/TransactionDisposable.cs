@@ -7,11 +7,11 @@ namespace NAuth.Infra
 {
     public class TransactionDisposable : ITransaction
     {
-        private readonly ILogger<TransactionDisposable> _logger;
+        private readonly ILogger<UnitOfWork> _logger;
         private readonly IDbContextTransaction _transaction;
         private bool _disposed;
 
-        public TransactionDisposable(ILogger<TransactionDisposable> logger, IDbContextTransaction transaction)
+        public TransactionDisposable(ILogger<UnitOfWork> logger, IDbContextTransaction transaction)
         {
             _logger = logger;
             _transaction = transaction;

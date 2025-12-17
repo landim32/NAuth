@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using NAuth.Domain.Factory.Interfaces;
 using NAuth.Domain.Models.Models;
 using NAuth.Domain.Services.Interfaces;
@@ -12,9 +13,12 @@ using NTools.ACL.Interfaces;
 using NTools.DTO.MailerSend;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace NAuth.Domain.Services
@@ -106,28 +110,62 @@ namespace NAuth.Domain.Services
             return _factories.UserFactory.BuildUserModel().LoginWithEmail(email, password, _factories.UserFactory);
         }
 
-        public async Task<IUserTokenModel> CreateToken(long userId, string ipAddress, string userAgent, string fingerprint)
+        public async Task<string> CreateToken(long userId, string ipAddress, string userAgent, string fingerprint)
         {
             _logger.LogTrace(
-                "Creating token for user with ID={@userId}, IP={@ipAddress}, UserAgent={@userAgent} and {@fingerprint}",
+                "Creating JWT token for user with ID={@userId}, IP={@ipAddress}, UserAgent={@userAgent} and {@fingerprint}",
                 userId, ipAddress, userAgent, fingerprint
             );
             ValidateTokenParameters(userId, ipAddress, userAgent, fingerprint);
 
-            var currentDate = DateTime.Now;
-            var tokenModel = _factories.TokenFactory.BuildUserTokenModel();
-            tokenModel.UserId = userId;
-            tokenModel.IpAddress = ipAddress;
-            tokenModel.UserAgent = userAgent;
-            tokenModel.Fingerprint = fingerprint;
-            tokenModel.CreatedAt = currentDate;
-            tokenModel.LastAccess = currentDate;
-            tokenModel.ExpireAt = currentDate.AddMonths(2);
-            tokenModel.Token = await _clients.StringClient.GenerateShortUniqueStringAsync();
+            var user = _factories.UserFactory.BuildUserModel().GetById(userId, _factories.UserFactory);
+            if (user == null)
+            {
+                throw new UserValidationException(UserNotFoundMessage);
+            }
 
-            _logger.LogTrace("Generating token string: {@token} expire at {@expireDate}", tokenModel.Token, tokenModel.ExpireAt);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_nauthSetting.JwtSecret);
+            
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim("userId", userId.ToString()),
+                new Claim("hash", user.Hash),
+                new Claim("ipAddress", ipAddress),
+                new Claim("userAgent", userAgent),
+                new Claim("fingerprint", fingerprint),
+                new Claim("isAdmin", user.IsAdmin.ToString())
+            };
 
-            return tokenModel.Insert(_factories.TokenFactory);
+            // Adicionar roles como claims
+            var roles = user.ListRoles(userId, _factories.RoleFactory);
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role.Slug));
+            }
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMonths(2),
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature
+                ),
+                Issuer = "NAuth",
+                Audience = "NAuth.API"
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+
+            _logger.LogInformation("JWT token created successfully for user {UserId}, expires at {ExpiresAt}", 
+                userId, tokenDescriptor.Expires);
+
+            return await Task.FromResult(tokenString);
         }
 
         private static void ValidateTokenParameters(long userId, string ipAddress, string userAgent, string fingerprint)
@@ -630,11 +668,26 @@ namespace NAuth.Domain.Services
 
         public UserInfo GetUserInSession(HttpContext httpContext)
         {
-            if (httpContext.User.Claims.Count() > 0)
+            if (httpContext?.User?.Claims == null || !httpContext.User.Claims.Any())
             {
-                return JsonConvert.DeserializeObject<UserInfo>(httpContext.User.Claims.First().Value);
+                return null;
             }
-            return null;
+
+            var claims = httpContext.User.Claims.ToList();
+            
+            var userInfo = new UserInfo
+            {
+                UserId = long.TryParse(claims.FirstOrDefault(c => c.Type == "userId")?.Value, out var userId) ? userId : 0,
+                Name = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value,
+                Email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value,
+                Hash = claims.FirstOrDefault(c => c.Type == "hash")?.Value,
+                IsAdmin = bool.TryParse(claims.FirstOrDefault(c => c.Type == "isAdmin")?.Value, out var isAdmin) && isAdmin,
+                Roles = claims.Where(c => c.Type == ClaimTypes.Role)
+                    .Select(c => new RoleInfo { Slug = c.Value })
+                    .ToList()
+            };
+
+            return userInfo;
         }
 
         public async Task<UserInfo> GetUserInfoFromModel(IUserModel md)

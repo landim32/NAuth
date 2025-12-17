@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using NAuth.Application;
 using NAuth.DTO.Settings;
@@ -30,6 +31,8 @@ namespace NAuth.API
             services.Configure<MailerSendSetting>(Configuration.GetSection("MailerSend"));
             services.Configure<NAuthSetting>(Configuration.GetSection("NAuth"));
             services.Configure<NToolSetting>(Configuration.GetSection("NTools"));
+
+            services.AddHttpClient();
 
             Initializer.Configure(services, Configuration.GetConnectionString("NAuthContext"));
 
@@ -74,7 +77,6 @@ namespace NAuth.API
             {
                 app.UseHttpsRedirection();
             }
-
 
             app.UseHealthChecks("/",
                 new HealthCheckOptions()

@@ -4,6 +4,7 @@ using NAuth.Infra.Interfaces;
 using NAuth.Infra.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
+using BCrypt.Net;
 
 namespace NAuth.Domain.Models
 {
@@ -50,15 +51,17 @@ namespace NAuth.Domain.Models
             return _repositoryUser.GetById(userId, factory);
         }
 
-        private string CreateMD5(string input)
+        private string HashPassword(string password)
         {
-            using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
-            {
-                byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
-                byte[] hashBytes = md5.ComputeHash(inputBytes);
+            // BCrypt automaticamente gera um salt e usa work factor de 12 (padrão)
+            // Isso torna o hashing mais lento e seguro contra ataques de força bruta
+            return BCrypt.Net.BCrypt.HashPassword(password, workFactor: 12);
+        }
 
-                return Convert.ToHexString(hashBytes);
-            }
+        private bool VerifyPassword(string password, string hashedPassword)
+        {
+            // BCrypt compara a senha com o hash de forma segura
+            return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
         }
 
         public IUserModel Insert(IUserDomainFactory factory)
@@ -97,8 +100,19 @@ namespace NAuth.Domain.Models
             {
                 throw new UserNotFoundException();
             }
-            string encryptPwd = CreateMD5(user.Hash + "|" + password);
-            return _repositoryUser.LoginWithEmail(email, encryptPwd, factory);
+            var hashPassword = _repositoryUser.GetHashedPassword(user.UserId);
+            if (string.IsNullOrEmpty(hashPassword))
+            {
+                return null; // Usuário não tem senha definida
+            }
+
+            // Usa verificação BCrypt direta
+            if (!VerifyPassword(password, hashPassword))
+            {
+                return null; // Senha incorreta
+            }
+
+            return user;
         }
 
         public bool HasPassword(long userId, IUserDomainFactory factory)
@@ -113,8 +127,10 @@ namespace NAuth.Domain.Models
             {
                 throw new UserNotFoundException();
             }
-            string encryptPwd = CreateMD5(user.Hash + "|" + password);
-            _repositoryUser.ChangePassword(userId, encryptPwd);
+            
+            // Usa BCrypt para criar o hash da nova senha
+            string hashedPassword = HashPassword(password);
+            _repositoryUser.ChangePassword(userId, hashedPassword);
         }
 
         public void ChangePasswordUsingHash(string recoveryHash, string password, IUserDomainFactory factory)
@@ -124,8 +140,10 @@ namespace NAuth.Domain.Models
             {
                 throw new UserNotFoundException();
             }
-            string encryptPwd = CreateMD5(user.Hash + "|" + password);
-            _repositoryUser.ChangePassword(user.UserId, encryptPwd);
+            
+            // Usa BCrypt para criar o hash da nova senha
+            string hashedPassword = HashPassword(password);
+            _repositoryUser.ChangePassword(user.UserId, hashedPassword);
         }
 
         public string GenerateRecoveryHash(long userId, IUserDomainFactory factory)
@@ -135,7 +153,10 @@ namespace NAuth.Domain.Models
             {
                 throw new UserNotFoundException();
             }
-            string recoveryHash = CreateMD5(user.Hash + "|" + Guid.NewGuid().ToString());
+            
+            // Gera um token seguro para recuperação de senha usando BCrypt
+            string recoveryToken = Guid.NewGuid().ToString() + user.UserId + DateTime.UtcNow.Ticks;
+            string recoveryHash = HashPassword(recoveryToken);
             _repositoryUser.UpdateRecoveryHash(userId, recoveryHash);
             return recoveryHash;
         }

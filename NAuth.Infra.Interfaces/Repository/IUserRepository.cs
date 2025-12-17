@@ -15,5 +15,6 @@
         void ChangePassword(long userId, string encryptPwd);
         bool HasPassword(long userId, TFactory factory);
         bool ExistSlug(long userId, string slug);
+        string GetHashedPassword(long userId);
     }
 }
