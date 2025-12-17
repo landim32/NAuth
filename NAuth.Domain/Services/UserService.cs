@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using NAuth.Domain.Exceptions;
+using NAuth.Domain.Factory;
 using NAuth.Domain.Factory.Interfaces;
 using NAuth.Domain.Models.Models;
 using NAuth.Domain.Services.Interfaces;
@@ -23,36 +25,6 @@ using System.Threading.Tasks;
 
 namespace NAuth.Domain.Services
 {
-    // Definição de exceção customizada para uso em validações de domínio
-    [Serializable]
-    public class UserValidationException : Exception
-    {
-        public UserValidationException() { }
-        public UserValidationException(string message) : base(message) { }
-        public UserValidationException(string message, Exception inner) : base(message, inner) { }
-        protected UserValidationException(SerializationInfo info, StreamingContext context) : base(info, context) { }
-    }
-
-    public class UserDomainFactories
-    {
-        public IUserDomainFactory UserFactory { get; }
-        public IUserPhoneDomainFactory PhoneFactory { get; }
-        public IUserAddressDomainFactory AddressFactory { get; }
-        public IRoleDomainFactory RoleFactory { get; }
-
-        public UserDomainFactories(
-            IUserDomainFactory userFactory,
-            IUserPhoneDomainFactory phoneFactory,
-            IUserAddressDomainFactory addressFactory,
-            IRoleDomainFactory roleFactory)
-        {
-            UserFactory = userFactory;
-            PhoneFactory = phoneFactory;
-            AddressFactory = addressFactory;
-            RoleFactory = roleFactory;
-        }
-    }
-
     public class ExternalClients
     {
         public IMailClient MailClient { get; }
@@ -77,7 +49,7 @@ namespace NAuth.Domain.Services
     {
         private readonly ILogger<UserService> _logger;
         private readonly NAuthSetting _nauthSetting;
-        private readonly UserDomainFactories _factories;
+        private readonly DomainFactory _factories;
         private readonly ExternalClients _clients;
         private readonly IUnitOfWork _unitOfWork;
 
@@ -86,7 +58,7 @@ namespace NAuth.Domain.Services
         public UserService(
             ILogger<UserService> logger,
             IOptions<NAuthSetting> nauthSetting,
-            UserDomainFactories factories,
+            DomainFactory factories,
             ExternalClients clients,
             IUnitOfWork unitOfWork)
         {

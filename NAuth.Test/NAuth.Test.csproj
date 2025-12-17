@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NAuth.ACL\NAuth.ACL.csproj" />
     <ProjectReference Include="..\NAuth.Domain\NAuth.Domain.csproj" />
     <ProjectReference Include="..\NAuth.Infra\NAuth.Infra.csproj" />
   </ItemGroup>

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using NAuth.Domain.Factory;
 using NAuth.Domain.Factory.Interfaces;
 using NAuth.Domain.Models.Models;
 using NAuth.Domain.Services;
@@ -53,7 +54,7 @@ namespace NAuth.Test.Domain.Services
 
             _mockOptions.Setup(o => o.Value).Returns(nauthSetting);
 
-            var factories = new UserDomainFactories(
+            var factories = new DomainFactory(
                 _mockUserFactory.Object,
                 _mockPhoneFactory.Object,
                 _mockAddressFactory.Object,

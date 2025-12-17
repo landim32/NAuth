@@ -64,7 +64,7 @@ namespace NAuth.Application
             #endregion
 
             #region Service Wrappers
-            services.AddScoped<UserDomainFactories>(sp => new UserDomainFactories(
+            services.AddScoped<DomainFactory>(sp => new DomainFactory(
                 sp.GetRequiredService<IUserDomainFactory>(),
                 sp.GetRequiredService<IUserPhoneDomainFactory>(),
                 sp.GetRequiredService<IUserAddressDomainFactory>(),
