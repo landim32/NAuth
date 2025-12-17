@@ -180,7 +180,7 @@ namespace NAuth.Test.Domain.Models
             var roleId = 999L;
             _mockRepository
                 .Setup(r => r.GetById(roleId, _mockFactory.Object))
-                .Returns((IRoleModel)null);
+                .Returns((IRoleModel)null!);
 
             // Act
             var result = _roleModel.GetById(roleId, _mockFactory.Object);
@@ -220,7 +220,7 @@ namespace NAuth.Test.Domain.Models
             var slug = "nonexistent";
             _mockRepository
                 .Setup(r => r.GetBySlug(slug, _mockFactory.Object))
-                .Returns((IRoleModel)null);
+                .Returns((IRoleModel)null!);
 
             // Act
             var result = _roleModel.GetBySlug(slug, _mockFactory.Object);
@@ -237,7 +237,7 @@ namespace NAuth.Test.Domain.Models
             var slug = "";
             _mockRepository
                 .Setup(r => r.GetBySlug(slug, _mockFactory.Object))
-                .Returns((IRoleModel)null);
+                .Returns((IRoleModel)null!);
 
             // Act
             var result = _roleModel.GetBySlug(slug, _mockFactory.Object);
@@ -538,7 +538,7 @@ namespace NAuth.Test.Domain.Models
             var slugExists = _roleModel.ExistSlug(0L, slug);
             
             // Act - Insert if slug doesn't exist
-            IRoleModel result = null;
+            IRoleModel result = null!;
             if (!slugExists)
             {
                 result = _roleModel.Insert(_mockFactory.Object);

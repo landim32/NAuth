@@ -217,7 +217,7 @@ namespace NAuth.Test.Domain
 
             _mockUserService
                 .Setup(x => x.GetUserByID(userId))
-                .Returns((IUserModel)null);
+                .Returns((IUserModel?)null!);
 
             var context = new DefaultHttpContext();
             context.Request.Headers["Authorization"] = $"Bearer {token}";

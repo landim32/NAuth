@@ -187,7 +187,7 @@ namespace NAuth.Test.Domain.Services
 
             _mockUserFactory.Setup(f => f.BuildUserModel()).Returns(_mockUserModel.Object);
             _mockUserModel.Setup(m => m.GetById(userId, _mockUserFactory.Object))
-                .Returns((IUserModel)null);
+                .Returns((IUserModel)null!);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<UserValidationException>(() => 
@@ -287,7 +287,7 @@ namespace NAuth.Test.Domain.Services
 
             _mockUserFactory.Setup(f => f.BuildUserModel()).Returns(_mockUserModel.Object);
             _mockUserModel.Setup(m => m.GetByRecoveryHash(recoveryHash, _mockUserFactory.Object))
-                .Returns((IUserModel)null);
+                .Returns((IUserModel)null!);
 
             // Act & Assert
             var exception = Assert.Throws<UserValidationException>(() => 
@@ -412,7 +412,7 @@ namespace NAuth.Test.Domain.Services
 
             _mockUserFactory.Setup(f => f.BuildUserModel()).Returns(_mockUserModel.Object);
             _mockUserModel.Setup(m => m.GetByEmail(email, _mockUserFactory.Object))
-                .Returns((IUserModel)null);
+                .Returns((IUserModel)null!);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<UserValidationException>(() => 

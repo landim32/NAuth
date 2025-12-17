@@ -92,7 +92,7 @@ namespace NAuth.Test.ACL
             var userClient = CreateUserClient();
 
             // Act
-            var result = userClient.GetUserInSession(null);
+            var result = userClient.GetUserInSession(null!);
 
             // Assert
             Assert.Null(result);
@@ -142,7 +142,7 @@ namespace NAuth.Test.ACL
                     "SendAsync",
                     ItExpr.Is<HttpRequestMessage>(req =>
                         req.Method == HttpMethod.Get &&
-                        req.RequestUri.ToString().Contains("/User/getMe")),
+                        req.RequestUri!.ToString().Contains("/User/getMe")),
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(httpResponse);
 
@@ -185,7 +185,7 @@ namespace NAuth.Test.ACL
                     "SendAsync",
                     ItExpr.Is<HttpRequestMessage>(req =>
                         req.Method == HttpMethod.Get &&
-                        req.RequestUri.ToString().Contains($"/User/getById/{userId}")),
+                        req.RequestUri!.ToString().Contains($"/User/getById/{userId}")),
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(httpResponse);
 
@@ -251,7 +251,7 @@ namespace NAuth.Test.ACL
                     "SendAsync",
                     ItExpr.Is<HttpRequestMessage>(req =>
                         req.Method == HttpMethod.Get &&
-                        req.RequestUri.ToString().Contains($"/User/getByEmail/{email}")),
+                        req.RequestUri!.ToString().Contains($"/User/getByEmail/{email}")),
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(httpResponse);
 
@@ -293,7 +293,7 @@ namespace NAuth.Test.ACL
                     "SendAsync",
                     ItExpr.Is<HttpRequestMessage>(req =>
                         req.Method == HttpMethod.Get &&
-                        req.RequestUri.ToString().Contains($"/User/getBySlug/{slug}")),
+                        req.RequestUri!.ToString().Contains($"/User/getBySlug/{slug}")),
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(httpResponse);
 
@@ -341,7 +341,7 @@ namespace NAuth.Test.ACL
                     "SendAsync",
                     ItExpr.Is<HttpRequestMessage>(req =>
                         req.Method == HttpMethod.Post &&
-                        req.RequestUri.ToString().Contains("/User/insert")),
+                        req.RequestUri!.ToString().Contains("/User/insert")),
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(httpResponse);
 
@@ -384,7 +384,7 @@ namespace NAuth.Test.ACL
                     "SendAsync",
                     ItExpr.Is<HttpRequestMessage>(req =>
                         req.Method == HttpMethod.Post &&
-                        req.RequestUri.ToString().Contains("/User/update")),
+                        req.RequestUri!.ToString().Contains("/User/update")),
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(httpResponse);
 
@@ -432,7 +432,7 @@ namespace NAuth.Test.ACL
                     "SendAsync",
                     ItExpr.Is<HttpRequestMessage>(req =>
                         req.Method == HttpMethod.Post &&
-                        req.RequestUri.ToString().Contains("/User/loginWithEmail")),
+                        req.RequestUri!.ToString().Contains("/User/loginWithEmail")),
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(httpResponse);
 
@@ -467,7 +467,7 @@ namespace NAuth.Test.ACL
                     "SendAsync",
                     ItExpr.Is<HttpRequestMessage>(req =>
                         req.Method == HttpMethod.Get &&
-                        req.RequestUri.ToString().Contains("/User/hasPassword")),
+                        req.RequestUri!.ToString().Contains("/User/hasPassword")),
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(httpResponse);
 
@@ -507,7 +507,7 @@ namespace NAuth.Test.ACL
                     "SendAsync",
                     ItExpr.Is<HttpRequestMessage>(req =>
                         req.Method == HttpMethod.Post &&
-                        req.RequestUri.ToString().Contains("/User/changePassword")),
+                        req.RequestUri!.ToString().Contains("/User/changePassword")),
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(httpResponse);
 
@@ -541,7 +541,7 @@ namespace NAuth.Test.ACL
                     "SendAsync",
                     ItExpr.Is<HttpRequestMessage>(req =>
                         req.Method == HttpMethod.Get &&
-                        req.RequestUri.ToString().Contains($"/User/sendRecoveryMail/{email}")),
+                        req.RequestUri!.ToString().Contains($"/User/sendRecoveryMail/{email}")),
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(httpResponse);
 
@@ -580,7 +580,7 @@ namespace NAuth.Test.ACL
                     "SendAsync",
                     ItExpr.Is<HttpRequestMessage>(req =>
                         req.Method == HttpMethod.Post &&
-                        req.RequestUri.ToString().Contains("/User/changePasswordUsingHash")),
+                        req.RequestUri!.ToString().Contains("/User/changePasswordUsingHash")),
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(httpResponse);
 
@@ -620,7 +620,7 @@ namespace NAuth.Test.ACL
                     "SendAsync",
                     ItExpr.Is<HttpRequestMessage>(req =>
                         req.Method == HttpMethod.Get &&
-                        req.RequestUri.ToString().Contains($"/User/list/{take}")),
+                        req.RequestUri!.ToString().Contains($"/User/list/{take}")),
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(httpResponse);
 
@@ -689,7 +689,7 @@ namespace NAuth.Test.ACL
                     "SendAsync",
                     ItExpr.Is<HttpRequestMessage>(req =>
                         req.Method == HttpMethod.Post &&
-                        req.RequestUri.ToString().Contains("/User/uploadImageUser")),
+                        req.RequestUri!.ToString().Contains("/User/uploadImageUser")),
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(httpResponse);
 
@@ -740,7 +740,7 @@ namespace NAuth.Test.ACL
                     It.IsAny<EventId>(),
                     It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("GetByIdAsync")),
                     It.IsAny<Exception>(),
-                    It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
                 Times.AtLeastOnce);
         }
 

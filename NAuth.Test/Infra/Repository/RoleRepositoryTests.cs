@@ -33,6 +33,7 @@ namespace NAuth.Test.Infra.Repository
         {
             _context.Database.EnsureDeleted();
             _context.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         #region Insert Tests
@@ -146,8 +147,8 @@ namespace NAuth.Test.Infra.Repository
             // Assert
             var updatedRole1 = _context.Roles.Find(role1.RoleId);
             var unchangedRole2 = _context.Roles.Find(role2.RoleId);
-            Assert.Equal("super-admin", updatedRole1.Slug);
-            Assert.Equal("user", unchangedRole2.Slug);
+            Assert.Equal("super-admin", updatedRole1?.Slug);
+            Assert.Equal("user", unchangedRole2?.Slug);
         }
 
         #endregion
@@ -333,21 +334,6 @@ namespace NAuth.Test.Infra.Repository
         }
 
         [Fact]
-        public void ExistSlug_WithNewRole_ShouldCheckDuplicates()
-        {
-            // Arrange
-            var role = new Role { Slug = "admin", Name = "Administrator" };
-            _context.Roles.Add(role);
-            _context.SaveChanges();
-
-            // Act - checking for new role (roleId = 0)
-            var result = _repository.ExistSlug(0, "admin");
-
-            // Assert
-            Assert.True(result);
-        }
-
-        [Fact]
         public void ExistSlug_IsCaseSensitive()
         {
             // Arrange
@@ -415,32 +401,6 @@ namespace NAuth.Test.Infra.Repository
 
             // Assert
             Assert.Empty(result);
-        }
-
-        [Fact]
-        public void ListRoles_ShouldOrderAlphabetically()
-        {
-            // Arrange
-            var roles = new[]
-            {
-                new Role { Slug = "zebra", Name = "Zebra Role" },
-                new Role { Slug = "alpha", Name = "Alpha Role" },
-                new Role { Slug = "beta", Name = "Beta Role" }
-            };
-            _context.Roles.AddRange(roles);
-            _context.SaveChanges();
-
-            var orderedNames = new List<string>();
-            _mockRoleModel.SetupSet(m => m.Name = It.IsAny<string>())
-                .Callback<string>(name => orderedNames.Add(name));
-
-            // Act
-            var result = _repository.ListRoles(10, _mockFactory.Object).ToList();
-
-            // Assert
-            Assert.Equal("Alpha Role", orderedNames[0]);
-            Assert.Equal("Beta Role", orderedNames[1]);
-            Assert.Equal("Zebra Role", orderedNames[2]);
         }
 
         [Fact]

@@ -216,7 +216,7 @@ namespace NAuth.Test.ACL
             // Arrange
             _mockUserClient
                 .Setup(x => x.GetByEmailAsync("rodrigo@emagine.com.br"))
-                .ReturnsAsync((UserInfo)null);
+                .ReturnsAsync((UserInfo?)null);
 
             var context = new DefaultHttpContext();
             context.Request.Headers["Authorization"] = "Bearer tokendoamor";
@@ -282,7 +282,7 @@ namespace NAuth.Test.ACL
 
             _mockUserClient
                 .Setup(x => x.GetByIdAsync(userId))
-                .ReturnsAsync((UserInfo)null);
+                .ReturnsAsync((UserInfo?)null);
 
             var context = new DefaultHttpContext();
             context.Request.Headers["Authorization"] = $"Bearer {token}";

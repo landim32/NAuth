@@ -132,7 +132,7 @@ namespace NAuth.Test.Domain.Models
             var userId = 999L;
             _mockUserRepository
                 .Setup(r => r.GetById(userId, _mockUserFactory.Object))
-                .Returns((IUserModel)null);
+                .Returns((IUserModel)null!);
 
             // Act
             var result = _userModel.GetById(userId, _mockUserFactory.Object);
@@ -172,7 +172,7 @@ namespace NAuth.Test.Domain.Models
             var email = "nonexistent@test.com";
             _mockUserRepository
                 .Setup(r => r.GetByEmail(email, _mockUserFactory.Object))
-                .Returns((IUserModel)null);
+                .Returns((IUserModel)null!);
 
             // Act
             var result = _userModel.GetByEmail(email, _mockUserFactory.Object);
@@ -391,7 +391,7 @@ namespace NAuth.Test.Domain.Models
             
             _mockUserRepository
                 .Setup(r => r.GetByEmail(email, _mockUserFactory.Object))
-                .Returns((IUserModel)null);
+                .Returns((IUserModel)null!);
 
             // Act & Assert
             Assert.Throws<UserNotFoundException>(() => 
@@ -497,7 +497,7 @@ namespace NAuth.Test.Domain.Models
             
             _mockUserRepository
                 .Setup(r => r.GetById(userId, _mockUserFactory.Object))
-                .Returns((IUserModel)null);
+                .Returns((IUserModel)null!);
 
             // Act & Assert
             Assert.Throws<UserNotFoundException>(() => 
@@ -541,7 +541,7 @@ namespace NAuth.Test.Domain.Models
             
             _mockUserRepository
                 .Setup(r => r.GetUserByRecoveryHash(recoveryHash, _mockUserFactory.Object))
-                .Returns((IUserModel)null);
+                .Returns((IUserModel)null!);
 
             // Act & Assert
             Assert.Throws<UserNotFoundException>(() => 
@@ -584,7 +584,7 @@ namespace NAuth.Test.Domain.Models
             
             _mockUserRepository
                 .Setup(r => r.GetById(userId, _mockUserFactory.Object))
-                .Returns((IUserModel)null);
+                .Returns((IUserModel)null!);
 
             // Act & Assert
             Assert.Throws<UserNotFoundException>(() => 
