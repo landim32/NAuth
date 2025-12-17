@@ -1,13 +1,9 @@
 # NAuth - Authentication Framework
 
 ![.NET](https://img.shields.io/badge/.NET-8.0-blue)
-![Docker](https://img.shields.io/badge/Docker-Ready-brightgreen)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=landim32_NAuth&metric=alert_status)](https://sonarcloud.io/project/overview?id=landim32_NAuth)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=landim32_NAuth&metric=coverage)](https://sonarcloud.io/project/overview?id=landim32_NAuth)
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=landim32_NAuth&metric=bugs)](https://sonarcloud.io/project/overview?id=landim32_NAuth)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=landim32_NAuth&metric=code_smells)](https://sonarcloud.io/project/overview?id=landim32_NAuth)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=landim32_NAuth&metric=vulnerabilities)](https://sonarcloud.io/project/overview?id=landim32_NAuth)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ## Overview
@@ -139,11 +135,6 @@ JWT_SECRET=your_jwt_secret_with_at_least_64_characters_for_maximum_security_chan
 API_HTTP_PORT=5004
 API_HTTPS_PORT=5005
 CERTIFICATE_PASSWORD=your_certificate_password_here
-
-# MailerSend Configuration (Optional)
-MAILERSEND__MAILSENDER=noreply@yourdomain.com
-MAILERSEND__APIURL=https://api.mailersend.com/v1/email
-MAILERSEND__APITOKEN=your_mailersend_api_token_here
 ```
 
 ⚠️ **IMPORTANT**: 
@@ -267,10 +258,7 @@ Update JWT configuration in `NAuth.API/appsettings.Development.json`:
 ```json
 {
   "NAuth": {
-    "JwtSecret": "your_jwt_secret_at_least_64_characters_long",
-    "JwtIssuer": "NAuth",
-    "JwtAudience": "NAuthUsers",
-    "JwtExpirationMinutes": 1440
+    "JwtSecret": "your_jwt_secret_at_least_64_characters_long"
   }
 }
 ```
