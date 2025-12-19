@@ -12,8 +12,6 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       PGDATA: /var/lib/postgresql/data/pgdata
-      ConnectionStrings__NAuthContext: ${CONNECTION_STRING}
-      NAuth__JwtSecret: ${JWT_SECRET}
     ports:
       - "${POSTGRES_PORT}:5432"
     volumes:
@@ -45,6 +43,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      postgres-init:
+        condition: service_completed_successfully
     networks:
       - emagine-network
     healthcheck:

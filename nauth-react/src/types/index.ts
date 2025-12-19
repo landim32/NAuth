@@ -1,0 +1,248 @@
+// User & Authentication Types
+export interface UserRole {
+  roleId: number;
+  slug: string;
+  name: string;
+}
+
+export interface UserPhone {
+  phone: string;
+}
+
+export interface UserAddress {
+  zipCode: string;
+  address: string;
+  complement?: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+}
+
+export interface UserInfo {
+  userId: number;
+  slug: string;
+  imageUrl: string;
+  name: string;
+  email: string;
+  hash: string;
+  isAdmin: boolean;
+  birthDate: string;
+  idDocument: string;
+  pixKey?: string;
+  password?: string | null;
+  roles: UserRole[];
+  phones: UserPhone[];
+  addresses: UserAddress[];
+  createAt: string;
+  updateAt: string;
+}
+
+export interface AuthSession {
+  token: string;
+  user: UserInfo;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterData {
+  name: string;
+  email: string;
+  password: string;
+  birthDate?: string;
+  idDocument?: string;
+  pixKey?: string;
+  phones?: UserPhone[];
+  addresses?: UserAddress[];
+  roles?: { roleId: number }[];
+}
+
+export interface ChangePasswordData {
+  oldPassword?: string;
+  newPassword: string;
+}
+
+export interface ResetPasswordData {
+  recoveryHash: string;
+  newPassword: string;
+}
+
+// API Response Types
+export interface ApiResponse<T = any> {
+  data: T;
+  status: number;
+  message?: string;
+}
+
+export interface ApiError {
+  message: string;
+  status: number;
+  errors?: Record<string, string[]>;
+}
+
+// Component Props Types
+export interface NAuthConfig {
+  apiUrl: string;
+  timeout?: number;
+  headers?: Record<string, string>;
+  storageKey?: string;
+  storageType?: 'localStorage' | 'sessionStorage';
+  redirectOnUnauthorized?: string;
+  autoRefreshToken?: boolean;
+  tokenRefreshInterval?: number;
+  enableFingerprinting?: boolean;
+  defaultTheme?: 'light' | 'dark' | 'system';
+  themeStorageKey?: string;
+  onAuthChange?: (user: UserInfo | null) => void;
+  onLogin?: (user: UserInfo) => void;
+  onLogout?: () => void;
+  onError?: (error: Error) => void;
+  passwordMinLength?: number;
+  requireSpecialChar?: boolean;
+  requireNumber?: boolean;
+}
+
+export interface NAuthContextValue {
+  user: UserInfo | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (credentials: LoginCredentials) => Promise<UserInfo>;
+  logout: () => void;
+  register: (data: RegisterData) => Promise<UserInfo>;
+  updateUser: (data: Partial<UserInfo>) => Promise<UserInfo>;
+  changePassword: (data: ChangePasswordData) => Promise<void>;
+  resetPassword: (data: ResetPasswordData) => Promise<void>;
+  sendRecoveryEmail: (email: string) => Promise<void>;
+  hasPassword: () => Promise<boolean>;
+  uploadImage: (file: File) => Promise<string>;
+  refreshUser: () => Promise<UserInfo>;
+}
+
+export type Theme = 'dark' | 'light' | 'system';
+
+export interface ThemeContextValue {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+}
+
+// Form Props
+export interface LoginFormProps {
+  onSuccess?: (user: UserInfo) => void;
+  onError?: (error: Error) => void;
+  showRememberMe?: boolean;
+  showForgotPassword?: boolean;
+  showRegisterLink?: boolean;
+  customSubmitText?: string;
+  redirectAfterLogin?: string;
+  className?: string;
+  styles?: {
+    container?: string;
+    input?: string;
+    button?: string;
+  };
+}
+
+export interface RegisterFormProps {
+  onSuccess?: (user: UserInfo) => void;
+  onError?: (error: Error) => void;
+  steps?: Array<'basic' | 'personal' | 'address'>;
+  showProgressBar?: boolean;
+  showTermsCheckbox?: boolean;
+  termsUrl?: string;
+  validateOnChange?: boolean;
+  validateOnBlur?: boolean;
+  redirectAfterRegister?: string;
+  className?: string;
+}
+
+export interface ProfileFormProps {
+  user?: UserInfo;
+  onSuccess?: (user: UserInfo) => void;
+  onError?: (error: Error) => void;
+  showImageUpload?: boolean;
+  enablePhoneEdit?: boolean;
+  enableAddressEdit?: boolean;
+  enableRoleEdit?: boolean;
+  className?: string;
+}
+
+export interface ForgotPasswordFormProps {
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
+  className?: string;
+}
+
+export interface ResetPasswordFormProps {
+  recoveryHash?: string;
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
+  className?: string;
+}
+
+export interface ChangePasswordFormProps {
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
+  className?: string;
+}
+
+export interface UserTableProps {
+  users?: UserInfo[];
+  pageSize?: number;
+  currentPage?: number;
+  totalPages?: number;
+  searchable?: boolean;
+  filterable?: boolean;
+  sortable?: boolean;
+  columns?: Array<'name' | 'email' | 'roles' | 'phone' | 'createdAt' | 'actions'>;
+  onUserClick?: (user: UserInfo) => void;
+  onEdit?: (user: UserInfo) => void;
+  onDelete?: (user: UserInfo) => void;
+  onPageChange?: (page: number) => void;
+  className?: string;
+}
+
+export interface UserAvatarProps {
+  user?: UserInfo;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  showName?: boolean;
+  className?: string;
+}
+
+export interface UserDashboardProps {
+  className?: string;
+}
+
+export interface UserDetailsCardProps {
+  user: UserInfo;
+  className?: string;
+}
+
+export interface RoleManagerProps {
+  userId?: number;
+  className?: string;
+}
+
+// Constants
+export const API_ENDPOINTS = {
+  LOGIN: '/User/loginWithEmail',
+  GET_ME: '/User/getMe',
+  GET_BY_ID: '/User/getById',
+  GET_BY_EMAIL: '/User/getByEmail',
+  GET_BY_SLUG: '/User/getBySlug',
+  REGISTER: '/User/insert',
+  UPDATE_USER: '/User/update',
+  UPLOAD_IMAGE: '/User/uploadImageUser',
+  HAS_PASSWORD: '/User/hasPassword',
+  CHANGE_PASSWORD: '/User/changePassword',
+  SEND_RECOVERY_EMAIL: '/User/sendRecoveryMail',
+  RESET_PASSWORD: '/User/changePasswordUsingHash',
+  LIST_USERS: '/User/list',
+  LIST_ROLES: '/Role/list',
+  GET_ROLE_BY_ID: '/Role/getById',
+  GET_ROLE_BY_SLUG: '/Role/getBySlug',
+} as const;
+
+export const VERSION = '1.0.0';

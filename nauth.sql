@@ -1,5 +1,9 @@
--- TABLES
-CREATE TABLE user_addresses (
+-- CREATE DATABASE (IF NOT EXISTS)
+SELECT 'CREATE DATABASE nauth'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'nauth')\gexec
+
+-- TABLES (com IF NOT EXISTS)
+CREATE TABLE IF NOT EXISTS user_addresses (
     address_id bigint NOT NULL,
     user_id bigint NOT NULL,
     zip_code character varying(15),
@@ -10,20 +14,20 @@ CREATE TABLE user_addresses (
     state character varying(80)
 );
 
-CREATE TABLE user_documents (
+CREATE TABLE IF NOT EXISTS user_documents (
     document_id bigint NOT NULL,
     user_id bigint,
     document_type integer DEFAULT 0 NOT NULL,
     base64 text
 );
 
-CREATE TABLE user_phones (
+CREATE TABLE IF NOT EXISTS user_phones (
     phone_id bigint NOT NULL,
     user_id bigint NOT NULL,
     phone character varying(30) NOT NULL
 );
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     user_id bigint NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
@@ -41,103 +45,147 @@ CREATE TABLE users (
     image character varying(150)
 );
 
-CREATE TABLE roles (
+CREATE TABLE IF NOT EXISTS roles (
     role_id bigint NOT NULL,
     slug character varying(80) NOT NULL,
     name character varying(80) NOT NULL
 );
 
-CREATE TABLE user_roles (
+CREATE TABLE IF NOT EXISTS user_roles (
     user_id bigint NOT NULL,
     role_id bigint NOT NULL
 );
 
--- SEQUENCES
-CREATE SEQUENCE user_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+-- SEQUENCES (com verificação IF NOT EXISTS)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_sequences WHERE schemaname = 'public' AND sequencename = 'user_id_seq') THEN
+        CREATE SEQUENCE user_id_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
+    END IF;
+END $$;
 
-CREATE SEQUENCE user_addresses_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_sequences WHERE schemaname = 'public' AND sequencename = 'user_addresses_id_seq') THEN
+        CREATE SEQUENCE user_addresses_id_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
+    END IF;
+END $$;
 
-CREATE SEQUENCE user_documents_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_sequences WHERE schemaname = 'public' AND sequencename = 'user_documents_id_seq') THEN
+        CREATE SEQUENCE user_documents_id_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
+    END IF;
+END $$;
 
-CREATE SEQUENCE user_phones_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_sequences WHERE schemaname = 'public' AND sequencename = 'user_phones_id_seq') THEN
+        CREATE SEQUENCE user_phones_id_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
+    END IF;
+END $$;
 
-CREATE SEQUENCE role_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_sequences WHERE schemaname = 'public' AND sequencename = 'role_id_seq') THEN
+        CREATE SEQUENCE role_id_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
+    END IF;
+END $$;
 
--- SET SEQUENCES TO COLUMNS
+-- SET SEQUENCES TO COLUMNS (seguro para executar múltiplas vezes)
 ALTER SEQUENCE user_id_seq OWNED BY users.user_id;
 ALTER SEQUENCE user_addresses_id_seq OWNED BY user_addresses.address_id;
 ALTER SEQUENCE user_documents_id_seq OWNED BY user_documents.document_id;
 ALTER SEQUENCE user_phones_id_seq OWNED BY user_phones.phone_id;
 ALTER SEQUENCE role_id_seq OWNED BY roles.role_id;
 
--- SET SEQUENCES TO DEFAULT VALUE
+-- SET SEQUENCES TO DEFAULT VALUE (seguro para executar múltiplas vezes)
 ALTER TABLE ONLY users ALTER COLUMN user_id SET DEFAULT nextval('user_id_seq'::regclass);
 ALTER TABLE ONLY user_addresses ALTER COLUMN address_id SET DEFAULT nextval('user_addresses_id_seq'::regclass);
 ALTER TABLE ONLY user_documents ALTER COLUMN document_id SET DEFAULT nextval('user_documents_id_seq'::regclass);
 ALTER TABLE ONLY user_phones ALTER COLUMN phone_id SET DEFAULT nextval('user_phones_id_seq'::regclass);
 ALTER TABLE ONLY roles ALTER COLUMN role_id SET DEFAULT nextval('role_id_seq'::regclass);
 
--- PRIMARY KEYS
-ALTER TABLE ONLY users
-    ADD CONSTRAINT users_pkey PRIMARY KEY (user_id);
-	
-ALTER TABLE ONLY user_addresses
-    ADD CONSTRAINT pk_user_addresses PRIMARY KEY (address_id);
-	
-ALTER TABLE ONLY user_documents
-    ADD CONSTRAINT user_documents_pkey PRIMARY KEY (document_id);
+-- PRIMARY KEYS (com verificação IF NOT EXISTS)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'users_pkey') THEN
+        ALTER TABLE ONLY users ADD CONSTRAINT users_pkey PRIMARY KEY (user_id);
+    END IF;
+END $$;
 
-ALTER TABLE ONLY user_phones
-    ADD CONSTRAINT user_phones_pkey PRIMARY KEY (phone_id);
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'pk_user_addresses') THEN
+        ALTER TABLE ONLY user_addresses ADD CONSTRAINT pk_user_addresses PRIMARY KEY (address_id);
+    END IF;
+END $$;
 
-ALTER TABLE ONLY roles
-    ADD CONSTRAINT roles_pkey PRIMARY KEY (role_id);
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'user_documents_pkey') THEN
+        ALTER TABLE ONLY user_documents ADD CONSTRAINT user_documents_pkey PRIMARY KEY (document_id);
+    END IF;
+END $$;
 
-ALTER TABLE ONLY user_roles
-    ADD CONSTRAINT user_roles_pkey PRIMARY KEY (user_id, role_id);
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'user_phones_pkey') THEN
+        ALTER TABLE ONLY user_phones ADD CONSTRAINT user_phones_pkey PRIMARY KEY (phone_id);
+    END IF;
+END $$;
 
--- FOREIGN KEYS
-ALTER TABLE ONLY user_addresses
-    ADD CONSTRAINT fk_user_address FOREIGN KEY (user_id) REFERENCES users(user_id);
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'roles_pkey') THEN
+        ALTER TABLE ONLY roles ADD CONSTRAINT roles_pkey PRIMARY KEY (role_id);
+    END IF;
+END $$;
 
-ALTER TABLE ONLY user_documents
-    ADD CONSTRAINT fk_user_document FOREIGN KEY (user_id) REFERENCES users(user_id);
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'user_roles_pkey') THEN
+        ALTER TABLE ONLY user_roles ADD CONSTRAINT user_roles_pkey PRIMARY KEY (user_id, role_id);
+    END IF;
+END $$;
 
-ALTER TABLE ONLY user_phones
-    ADD CONSTRAINT fk_user_phone FOREIGN KEY (user_id) REFERENCES users(user_id);
+-- FOREIGN KEYS (com verificação IF NOT EXISTS)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_user_address') THEN
+        ALTER TABLE ONLY user_addresses ADD CONSTRAINT fk_user_address FOREIGN KEY (user_id) REFERENCES users(user_id);
+    END IF;
+END $$;
 
-ALTER TABLE ONLY user_roles
-    ADD CONSTRAINT fk_user_role_user FOREIGN KEY (user_id) REFERENCES users(user_id);
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_user_document') THEN
+        ALTER TABLE ONLY user_documents ADD CONSTRAINT fk_user_document FOREIGN KEY (user_id) REFERENCES users(user_id);
+    END IF;
+END $$;
 
-ALTER TABLE ONLY user_roles
-    ADD CONSTRAINT fk_user_role_role FOREIGN KEY (role_id) REFERENCES roles(role_id);
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_user_phone') THEN
+        ALTER TABLE ONLY user_phones ADD CONSTRAINT fk_user_phone FOREIGN KEY (user_id) REFERENCES users(user_id);
+    END IF;
+END $$;
 
--- CREATE ADMIN USER
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_user_role_user') THEN
+        ALTER TABLE ONLY user_roles ADD CONSTRAINT fk_user_role_user FOREIGN KEY (user_id) REFERENCES users(user_id);
+    END IF;
+END $$;
+
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_user_role_role') THEN
+        ALTER TABLE ONLY user_roles ADD CONSTRAINT fk_user_role_role FOREIGN KEY (role_id) REFERENCES roles(role_id);
+    END IF;
+END $$;
+
+-- CREATE ADMIN USER (com ON CONFLICT para evitar duplicatas)
 INSERT INTO users (
 	user_id, 
 	created_at, 
@@ -170,8 +218,9 @@ INSERT INTO users (
 	NULL,
 	NULL, 
 	NULL
-);
---
+)
+ON CONFLICT (user_id) DO NOTHING;
+
 INSERT INTO user_addresses (
 	address_id, 
 	user_id, 
@@ -190,8 +239,9 @@ INSERT INTO user_addresses (
 	'Sobradinho', 
 	'Brasília', 
 	'DF'
-);
---
+)
+ON CONFLICT (address_id) DO NOTHING;
+
 INSERT INTO user_phones (
 	phone_id, 
 	user_id, 
@@ -200,8 +250,9 @@ INSERT INTO user_phones (
 	1, 
 	1, 
 	'61998752588'
-);
---
+)
+ON CONFLICT (phone_id) DO NOTHING;
+
 INSERT INTO roles (
 	role_id,
 	slug,
@@ -210,17 +261,23 @@ INSERT INTO roles (
 	1,
 	'administrator',
 	'Administrator'
-);
---
+)
+ON CONFLICT (role_id) DO NOTHING;
+
 INSERT INTO user_roles (
 	user_id,
 	role_id
 ) VALUES (
 	1,
 	1
-);
---
-SELECT pg_catalog.setval('user_id_seq', 2, true);
-SELECT pg_catalog.setval('user_addresses_id_seq', 2, true);
-SELECT pg_catalog.setval('user_phones_id_seq', 2, true);
-SELECT pg_catalog.setval('role_id_seq', 2, true);
+)
+ON CONFLICT (user_id, role_id) DO NOTHING;
+
+-- AJUSTAR SEQUENCES (apenas se necessário)
+DO $$
+BEGIN
+    PERFORM setval('user_id_seq', GREATEST(2, (SELECT COALESCE(MAX(user_id), 0) + 1 FROM users)), false);
+    PERFORM setval('user_addresses_id_seq', GREATEST(2, (SELECT COALESCE(MAX(address_id), 0) + 1 FROM user_addresses)), false);
+    PERFORM setval('user_phones_id_seq', GREATEST(2, (SELECT COALESCE(MAX(phone_id), 0) + 1 FROM user_phones)), false);
+    PERFORM setval('role_id_seq', GREATEST(2, (SELECT COALESCE(MAX(role_id), 0) + 1 FROM roles)), false);
+END $$;
