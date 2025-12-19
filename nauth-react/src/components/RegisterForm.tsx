@@ -3,15 +3,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
 import { useNAuth } from '../contexts/NAuthContext';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import type { RegisterFormProps } from '../types';
 import { cn } from '../utils/cn';
-import { validateCPF, validateCNPJ, validatePasswordStrength } from '../utils/validators';
+import { validatePasswordStrength } from '../utils/validators';
 
 const registerSchema = z
   .object({
@@ -25,38 +23,17 @@ const registerSchema = z
       .regex(/[0-9]/, 'Password must contain at least one number')
       .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
     confirmPassword: z.string(),
-    birthDate: z.string().optional(),
-    idDocument: z.string().optional(),
-    phone: z.string().optional(),
-    termsAccepted: z.boolean().refine((val) => val === true, {
-      message: 'You must accept the terms and conditions',
-    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ['confirmPassword'],
-  })
-  .refine(
-    (data) => {
-      if (!data.idDocument) return true;
-      const clean = data.idDocument.replace(/[^\d]/g, '');
-      return clean.length === 11 ? validateCPF(clean) : clean.length === 14 ? validateCNPJ(clean) : true;
-    },
-    {
-      message: 'Invalid CPF or CNPJ',
-      path: ['idDocument'],
-    }
-  );
+  });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({
   onSuccess,
   onError,
-  // showProgressBar = false,
-  showTermsCheckbox = true,
-  termsUrl = '/terms',
-  redirectAfterRegister,
   className,
 }) => {
   const { register: registerUser } = useNAuth();
@@ -84,29 +61,16 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         name: data.name,
         email: data.email,
         password: data.password,
-        birthDate: data.birthDate,
-        idDocument: data.idDocument,
-        phones: data.phone ? [{ phone: data.phone }] : [],
       };
 
       const user = await registerUser(registerData);
-      toast.success('Registration successful! Please log in.');
       
       if (onSuccess) {
         onSuccess(user);
       }
-      
-      if (redirectAfterRegister) {
-        window.location.href = redirectAfterRegister;
-      } else {
-        window.location.href = '/login';
-      }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Registration failed';
-      toast.error(message);
-      
       if (onError) {
-        onError(error instanceof Error ? error : new Error(message));
+        onError(error instanceof Error ? error : new Error('Registration failed'));
       }
     } finally {
       setIsLoading(false);
@@ -121,13 +85,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   };
 
   return (
-    <Card className={cn('w-full max-w-md', className)}>
-      <CardHeader>
-        <CardTitle>Create Account</CardTitle>
-        <CardDescription>Sign up to get started with NAuth</CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <CardContent className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className={cn('space-y-6', className)}>
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
             <Input
@@ -227,64 +185,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="birthDate">Birth Date</Label>
-              <Input
-                id="birthDate"
-                type="date"
-                {...register('birthDate')}
-                disabled={isLoading}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
-              <Input
-                id="phone"
-                placeholder="(11) 99999-9999"
-                {...register('phone')}
-                disabled={isLoading}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="idDocument">CPF/CNPJ (Optional)</Label>
-            <Input
-              id="idDocument"
-              placeholder="000.000.000-00"
-              {...register('idDocument')}
-              disabled={isLoading}
-            />
-            {errors.idDocument && (
-              <p className="text-sm text-destructive">{errors.idDocument.message}</p>
-            )}
-          </div>
-
-          {showTermsCheckbox && (
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="termsAccepted"
-                className="h-4 w-4 rounded border-gray-300"
-                {...register('termsAccepted')}
-                disabled={isLoading}
-              />
-              <Label htmlFor="termsAccepted" className="text-sm font-normal">
-                I accept the{' '}
-                <a href={termsUrl} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
-                  terms and conditions
-                </a>
-              </Label>
-            </div>
-          )}
-          {errors.termsAccepted && (
-            <p className="text-sm text-destructive">{errors.termsAccepted.message}</p>
-          )}
-        </CardContent>
-        
-        <CardFooter className="flex flex-col space-y-4">
           <Button
             type="submit"
             className="w-full"
@@ -299,15 +199,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
               'Create Account'
             )}
           </Button>
-          
-          <p className="text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <a href="/login" className="text-primary hover:underline">
-              Sign in
-            </a>
-          </p>
-        </CardFooter>
-      </form>
-    </Card>
+    </form>
   );
 };

@@ -3,12 +3,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
 import { useNAuth } from '../contexts/NAuthContext';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import type { ChangePasswordFormProps } from '../types';
 import { cn } from '../utils/cn';
 import { validatePasswordStrength } from '../utils/validators';
@@ -76,17 +74,12 @@ export const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({
         newPassword: data.newPassword,
       });
       
-      toast.success('Password changed successfully!');
-      
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to change password';
-      toast.error(message);
-      
       if (onError) {
-        onError(error instanceof Error ? error : new Error(message));
+        onError(error instanceof Error ? error : new Error('Failed to change password'));
       }
     } finally {
       setIsLoading(false);
@@ -101,17 +94,7 @@ export const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({
   };
 
   return (
-    <Card className={cn('w-full max-w-md', className)}>
-      <CardHeader>
-        <CardTitle>Change Password</CardTitle>
-        <CardDescription>
-          {userHasPassword
-            ? 'Enter your current password and choose a new one'
-            : 'Set up a password for your account'}
-        </CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <CardContent className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className={cn('space-y-6', className)}>
           {userHasPassword && (
             <div className="space-y-2">
               <Label htmlFor="oldPassword">Current Password</Label>
@@ -210,9 +193,7 @@ export const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({
               <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
             )}
           </div>
-        </CardContent>
-        
-        <CardFooter>
+
           <Button
             type="submit"
             className="w-full"
@@ -227,8 +208,6 @@ export const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({
               'Change Password'
             )}
           </Button>
-        </CardFooter>
-      </form>
-    </Card>
+    </form>
   );
 };

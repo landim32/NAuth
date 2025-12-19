@@ -1,6 +1,8 @@
 **/.classpath
 **/.dockerignore
 **/.env
+**/.env.*
+!**/.env.example
 **/.git
 **/.gitignore
 **/.project
@@ -52,3 +54,62 @@ DEPLOY.md
 !README.md
 .gitattributes
 .editorconfig
+
+# Database and sensitive files
+**/*.db
+**/*.sqlite
+**/*.mdf
+**/*.ldf
+**/secrets/
+**/*.secret
+**/*.private
+
+# Certificates (except explicitly needed ones)
+**/*.pfx
+!NAuth.API/emagine.pfx
+**/*.cer
+**/*.crt
+**/*.key
+**/*.pem
+
+# PowerShell and shell scripts
+**/*.ps1
+**/*.sh
+createContext.ps1
+
+# Development configuration files
+**/appsettings.Development.json
+**/appsettings.Local.json
+
+# Frontend build artifacts
+**/dist/
+**/build/
+**/*.local
+**/coverage/
+**/*.lcov
+
+# GitHub and CI/CD
+**/.github/
+**/.gitlab/
+**/.circleci/
+
+# SonarQube and code analysis
+**/.sonarqube/
+**/.scannerwork/
+
+# NPM and Yarn
+**/yarn-debug.log*
+**/yarn-error.log*
+**/lerna-debug.log*
+**/.pnpm-debug.log*
+
+# Test and coverage
+**/TestResults/
+**/test-results/
+**/coverage/
+**/*.coverage
+**/*.coveragexml
+
+# Backup files
+**/*.backup
+**/*.orig

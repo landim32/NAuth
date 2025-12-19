@@ -58,7 +58,7 @@ export class NAuthAPI {
         }
 
         // Add user agent
-        config.headers['User-Agent'] = navigator.userAgent;
+        //config.headers['User-Agent'] = navigator.userAgent;
 
         return config;
       },

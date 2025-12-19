@@ -2,7 +2,6 @@ import { useAuth } from 'nauth-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogOut, User, KeyRound, LayoutDashboard } from 'lucide-react';
 import { ROUTES } from '../lib/constants';
-import { ThemeToggle } from './ThemeToggle';
 
 export function UserMenu() {
   const { user, logout } = useAuth();
@@ -27,7 +26,7 @@ export function UserMenu() {
       </button>
 
       <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-        <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+        <div className="px-4 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700">
           <p className="text-sm font-semibold dark:text-white">{user.name}</p>
           <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
         </div>
@@ -54,13 +53,6 @@ export function UserMenu() {
             <KeyRound className="w-4 h-4" />
             Change Password
           </Link>
-        </div>
-
-        <div className="border-t border-gray-200 dark:border-gray-700 p-2">
-          <div className="flex items-center justify-between px-2 py-1">
-            <span className="text-sm dark:text-white">Theme</span>
-            <ThemeToggle />
-          </div>
         </div>
 
         <div className="border-t border-gray-200 dark:border-gray-700 p-2">

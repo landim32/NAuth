@@ -237,16 +237,6 @@ npm run build
 npm publish --access public
 ```
 
-## Changelog
-
-### [1.0.0] - 2024-12-18
-- Initial release
-- Complete authentication suite
-- Theme support
-- TypeScript support
-- Brazilian document validation
-- Comprehensive documentation
-
 ## License
 
 MIT © [Rodrigo Landim](https://github.com/landim32)

@@ -1,6 +1,6 @@
 {
   "name": "nauth-react",
-  "version": "0.0.2",
+  "version": "0.1.1",
   "description": "React authentication components for NAuth API integration",
   "author": "Rodrigo Landim",
   "license": "MIT",
@@ -43,12 +43,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/nauth/nauth-react"
+    "url": "https://github.com/landim32/NAuth/nauth-react"
   },
   "bugs": {
-    "url": "https://github.com/nauth/nauth-react/issues"
+    "url": "https://github.com/landim32/NAuth/nauth-react/issues"
   },
-  "homepage": "https://github.com/nauth/nauth-react#readme",
+  "homepage": "https://github.com/landim32/NAuth/nauth-react#readme",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -58,7 +58,8 @@
     "test:coverage": "vitest run --coverage",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "prepublishOnly": "npm run build",
+    "preversion": "npm run build",
+    "prepublishOnly": "npm version patch",
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
@@ -85,7 +86,6 @@
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",
     "react-hook-form": "^7.61.1",
-    "sonner": "^1.7.4",
     "tailwind-merge": "^2.6.0",
     "zod": "^3.25.76"
   },

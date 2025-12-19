@@ -22,7 +22,7 @@ export default {
         brand: {
           primary: '#7C3AED',
           secondary: '#DB2777',
-          accent: '#06B6D4',
+          accent: '#5cdef5ff',
         },
         primary: {
           DEFAULT: 'hsl(var(--primary))',

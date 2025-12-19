@@ -2,6 +2,7 @@ import { RegisterForm } from 'nauth-react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { useAuth } from 'nauth-react';
 import { ROUTES, EXTERNAL_LINKS } from '../lib/constants';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/Card';
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -25,33 +26,35 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center py-12">
+    <div className="min-h-[80vh] flex items-center justify-center">
       <div className="w-full max-w-md">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-200 dark:border-gray-700">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2 dark:text-white">Create Account</h1>
-            <p className="text-gray-600 dark:text-gray-400">
+        <Card className="p-8">
+          <CardHeader>
+            <CardTitle className="text-3xl font-bold mb-2 dark:text-white">Create Account</CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-400">
               Get started with your free account
-            </p>
-          </div>
+            </CardDescription>
+          </CardHeader>
 
-          <RegisterForm
-            onSuccess={handleSuccess}
-            showTermsCheckbox={true}
-            termsUrl={EXTERNAL_LINKS.TERMS}
-            className="space-y-4"
-          />
+          <CardContent>
+            <RegisterForm
+              onSuccess={handleSuccess}
+              showTermsCheckbox={true}
+              termsUrl={EXTERNAL_LINKS.TERMS}
+              className="space-y-4"
+            />
+          </CardContent>
 
-          <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+          <CardFooter className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400 justify-center">
             Already have an account?{' '}
             <Link
               to={ROUTES.LOGIN}
-              className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+              className="text-blue-600 dark:text-blue-400 hover:underline font-medium ml-1"
             >
               Sign in
             </Link>
-          </div>
-        </div>
+          </CardFooter>
+        </Card>
       </div>
     </div>
   );

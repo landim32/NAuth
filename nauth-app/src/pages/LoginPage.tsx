@@ -1,7 +1,9 @@
 import { LoginForm } from 'nauth-react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { useAuth } from 'nauth-react';
+import { toast } from 'sonner';
 import { ROUTES } from '../lib/constants';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/Card';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -21,44 +23,61 @@ export function LoginPage() {
   }
 
   const handleSuccess = () => {
+    toast.success('Login successful! Welcome back.');
+    
     // Check if there's a stored redirect destination
     const redirectTo = sessionStorage.getItem('redirectAfterLogin');
     if (redirectTo) {
       sessionStorage.removeItem('redirectAfterLogin');
-      navigate(redirectTo);
+      //navigate(redirectTo);
     } else {
-      navigate(ROUTES.DASHBOARD);
+      //navigate(ROUTES.DASHBOARD);
     }
+  };
+
+  const handleError = (error: Error) => {
+    toast.error(error.message || 'Login failed. Please try again.');
   };
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center">
       <div className="w-full max-w-md">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-200 dark:border-gray-700">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2 dark:text-white">Welcome Back</h1>
-            <p className="text-gray-600 dark:text-gray-400">
+        <Card className="p-8 bg-white dark:bg-gray-800">
+          <CardHeader className="mb-8">
+            <CardTitle>Welcome Back</CardTitle>
+            <CardDescription>
               Sign in to your account to continue
-            </p>
-          </div>
+            </CardDescription>
+          </CardHeader>
 
-          <LoginForm
-            onSuccess={handleSuccess}
-            showRememberMe={true}
-            showForgotPassword={true}
-            className="space-y-4"
-          />
+          <CardContent>
+            <LoginForm
+              onSuccess={handleSuccess}
+              onError={handleError}
+              showRememberMe={true}
+              className="space-y-4"
+            />
+          </CardContent>
 
-          <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-            Don't have an account?{' '}
+          <CardFooter className="flex-col space-y-3">
             <Link
-              to={ROUTES.REGISTER}
-              className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+              to={ROUTES.FORGOT_PASSWORD}
+              className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium"
             >
-              Sign up
+              Forgot your password?
             </Link>
-          </div>
-        </div>
+
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Don't have an account?{' '}
+              <Link
+                to={ROUTES.REGISTER}
+                className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+              >
+                Sign up
+              </Link>
+            </div>
+          </CardFooter>
+        </Card>
       </div>
     </div>
   );

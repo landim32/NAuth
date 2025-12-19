@@ -14,9 +14,6 @@ export { ChangePasswordForm } from './components/ChangePasswordForm';
 export { NAuthProvider, useNAuth } from './contexts/NAuthContext';
 export type { NAuthConfig, NAuthContextValue, NAuthProviderProps } from './contexts/NAuthContext';
 
-export { ThemeProvider, useTheme } from './contexts/ThemeContext';
-export type { ThemeProviderProps } from './contexts/ThemeContext';
-
 // Custom Hooks
 export { useAuth } from './hooks/useAuth';
 export { useUser } from './hooks/useUser';
@@ -30,26 +27,7 @@ export { NAuthAPI, createNAuthClient } from './services/nauth-api';
 export { Button } from './components/ui/button';
 export { Input } from './components/ui/input';
 export { Label } from './components/ui/label';
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './components/ui/card';
 export { Avatar, AvatarImage, AvatarFallback } from './components/ui/avatar';
-export {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuCheckboxItem,
-  DropdownMenuRadioItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuGroup,
-  DropdownMenuPortal,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuRadioGroup,
-} from './components/ui/dropdown-menu';
-export { Toaster } from './components/ui/toaster';
 
 // TypeScript Types
 export type {

@@ -3,12 +3,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Eye, EyeOff, Loader2, CheckCircle } from 'lucide-react';
-import { toast } from 'sonner';
 import { useNAuth } from '../contexts/NAuthContext';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import type { ResetPasswordFormProps } from '../types';
 import { cn } from '../utils/cn';
 import { validatePasswordStrength } from '../utils/validators';
@@ -57,7 +55,9 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
 
   const onSubmit = async (data: ResetPasswordFormData) => {
     if (!recoveryHash) {
-      toast.error('Invalid recovery link');
+      if (onError) {
+        onError(new Error('Invalid recovery link'));
+      }
       return;
     }
 
@@ -69,22 +69,13 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
       });
       
       setIsSuccess(true);
-      toast.success('Password reset successful!');
       
       if (onSuccess) {
         onSuccess();
       }
-
-      // Redirect to login after 2 seconds
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 2000);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to reset password';
-      toast.error(message);
-      
       if (onError) {
-        onError(error instanceof Error ? error : new Error(message));
+        onError(error instanceof Error ? error : new Error('Failed to reset password'));
       }
     } finally {
       setIsLoading(false);
@@ -100,52 +91,42 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
 
   if (isSuccess) {
     return (
-      <Card className={cn('w-full max-w-md', className)}>
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
-            <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
-          </div>
-          <CardTitle>Password Reset Complete</CardTitle>
-          <CardDescription>
+      <div className={cn('text-center space-y-4', className)}>
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
+          <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold mb-2">Password Reset Complete</h2>
+          <p className="text-muted-foreground">
             Your password has been successfully reset. Redirecting to login...
-          </CardDescription>
-        </CardHeader>
-      </Card>
+          </p>
+        </div>
+      </div>
     );
   }
 
   if (!recoveryHash) {
     return (
-      <Card className={cn('w-full max-w-md', className)}>
-        <CardHeader>
-          <CardTitle>Invalid Reset Link</CardTitle>
-          <CardDescription>
+      <div className={cn('space-y-6', className)}>
+        <div>
+          <h2 className="text-2xl font-bold mb-2">Invalid Reset Link</h2>
+          <p className="text-muted-foreground">
             This password reset link is invalid or has expired.
-          </CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => (window.location.href = '/forgot-password')}
-          >
-            Request New Link
-          </Button>
-        </CardFooter>
-      </Card>
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => (window.location.href = '/forgot-password')}
+        >
+          Request New Link
+        </Button>
+      </div>
     );
   }
 
   return (
-    <Card className={cn('w-full max-w-md', className)}>
-      <CardHeader>
-        <CardTitle>Reset Password</CardTitle>
-        <CardDescription>
-          Enter your new password below
-        </CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <CardContent className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className={cn('space-y-6', className)}>
           <div className="space-y-2">
             <Label htmlFor="newPassword">New Password</Label>
             <div className="relative">
@@ -217,9 +198,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
               <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
             )}
           </div>
-        </CardContent>
-        
-        <CardFooter>
+
           <Button
             type="submit"
             className="w-full"
@@ -234,8 +213,6 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
               'Reset Password'
             )}
           </Button>
-        </CardFooter>
-      </form>
-    </Card>
+    </form>
   );
 };

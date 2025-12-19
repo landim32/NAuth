@@ -133,10 +133,7 @@ export interface LoginFormProps {
   onSuccess?: (user: UserInfo) => void;
   onError?: (error: Error) => void;
   showRememberMe?: boolean;
-  showForgotPassword?: boolean;
-  showRegisterLink?: boolean;
   customSubmitText?: string;
-  redirectAfterLogin?: string;
   className?: string;
   styles?: {
     container?: string;
@@ -154,7 +151,6 @@ export interface RegisterFormProps {
   termsUrl?: string;
   validateOnChange?: boolean;
   validateOnBlur?: boolean;
-  redirectAfterRegister?: string;
   className?: string;
 }
 

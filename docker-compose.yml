@@ -43,8 +43,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      postgres-init:
-        condition: service_completed_successfully
     networks:
       - emagine-network
     healthcheck:

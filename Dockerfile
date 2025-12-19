@@ -19,7 +19,8 @@ COPY ["Lib/", "Lib/"]
 # Restore dependencies
 RUN dotnet restore "NAuth.API/NAuth.API.csproj"
 
-# Copy everything else and build
+# Copy source code (sensitive files are excluded via .dockerignore)
+# .dockerignore prevents .env files, secrets, and other sensitive data from being copied
 COPY . .
 WORKDIR "/src/NAuth.API"
 RUN dotnet build "NAuth.API.csproj" -c Release -o /app/build
@@ -58,11 +59,17 @@ RUN git clone https://github.com/mono/libgdiplus.git /tmp/libgdiplus && \
     cd / && \
     rm -rf /tmp/libgdiplus
 
+# Create non-root user early for better security
+RUN useradd -m -s /bin/bash appuser
+
 # Copy published app
 COPY --from=publish /app/publish .
 
-# Copy SSL certificate
+# Copy SSL certificate (only this specific certificate is needed)
 COPY ["NAuth.API/emagine.pfx", "./emagine.pfx"]
+
+# Set ownership to non-root user
+RUN chown -R appuser:appuser /app
 
 # Set environment variables
 ENV ASPNETCORE_ENVIRONMENT=Docker
@@ -72,12 +79,11 @@ ENV ASPNETCORE_URLS=http://+:80;https://+:443
 EXPOSE 80
 EXPOSE 443
 
-# Health check - usando a rota raiz que retorna o status da aplicação
+# Health check - using root route that returns application status
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:80/ || exit 1
 
 # Run as non-root user for security
-RUN useradd -m -s /bin/bash appuser && chown -R appuser:appuser /app
 USER appuser
 
 ENTRYPOINT ["dotnet", "NAuth.API.dll"]
