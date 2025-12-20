@@ -10,6 +10,7 @@ export const ROUTES = {
   DASHBOARD: '/dashboard',
   PROFILE: '/profile',
   CHANGE_PASSWORD: '/change-password',
+  SEARCH_USERS: '/search-users',
 } as const;
 
 export const EXTERNAL_LINKS = {

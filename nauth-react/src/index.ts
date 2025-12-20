@@ -9,6 +9,7 @@ export { RegisterForm } from './components/RegisterForm';
 export { ForgotPasswordForm } from './components/ForgotPasswordForm';
 export { ResetPasswordForm } from './components/ResetPasswordForm';
 export { ChangePasswordForm } from './components/ChangePasswordForm';
+export { SearchForm } from './components/SearchForm';
 
 // Context Providers & Hooks
 export { NAuthProvider, useNAuth } from './contexts/NAuthContext';
@@ -49,7 +50,12 @@ export type {
   ForgotPasswordFormProps,
   ResetPasswordFormProps,
   ChangePasswordFormProps,
+  SearchFormProps,
+  PagedResult,
+  UserSearchParams,
 } from './types';
+
+export { UserStatus } from './types';
 
 // Utility Functions
 export {

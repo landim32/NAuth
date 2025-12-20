@@ -1,6 +1,6 @@
 import { useAuth } from 'nauth-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, User, KeyRound, LayoutDashboard } from 'lucide-react';
+import { LogOut, User, KeyRound } from 'lucide-react';
 import { ROUTES } from '../lib/constants';
 
 export function UserMenu() {
@@ -32,13 +32,6 @@ export function UserMenu() {
         </div>
 
         <div className="py-2">
-          <Link
-            to={ROUTES.DASHBOARD}
-            className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white transition-colors"
-          >
-            <LayoutDashboard className="w-4 h-4" />
-            Dashboard
-          </Link>
           <Link
             to={ROUTES.PROFILE}
             className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white transition-colors"

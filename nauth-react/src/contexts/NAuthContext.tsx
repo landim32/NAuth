@@ -168,6 +168,13 @@ export const NAuthProvider: React.FC<NAuthProviderProps> = ({ config, children }
     return userData;
   }, [api, config]);
 
+  const searchUsers = useCallback(
+    async (params: { searchTerm: string; page: number; pageSize: number }) => {
+      return await api.searchUsers(params);
+    },
+    [api]
+  );
+
   const value: NAuthContextValue = {
     user,
     token,
@@ -183,6 +190,7 @@ export const NAuthProvider: React.FC<NAuthProviderProps> = ({ config, children }
     hasPassword,
     uploadImage,
     refreshUser,
+    searchUsers,
   };
 
   return <NAuthContext.Provider value={value}>{children}</NAuthContext.Provider>;

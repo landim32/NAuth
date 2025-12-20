@@ -1,8 +1,8 @@
-# @nauth/react-auth
+# nauth-react
 
 Modern React authentication component library for NAuth API integration. Built with TypeScript, Tailwind CSS, and designed as a distributable NPM package.
 
-[![npm version](https://badge.fury.io/js/%40nauth%2Freact-auth.svg)](https://www.npmjs.com/package/@nauth/react-auth)
+[![npm version](https://badge.fury.io/js/%40nauth%2Freact.svg)](https://www.npmjs.com/package/nauth-react)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Features
@@ -18,7 +18,7 @@ Modern React authentication component library for NAuth API integration. Built w
 ## Installation
 
 ```bash
-npm install @nauth/react-auth react-router-dom
+npm install nauth-react react-router-dom
 
 # If you don't have Tailwind CSS
 npm install -D tailwindcss postcss autoprefixer tailwindcss-animate
@@ -33,7 +33,7 @@ export default {
   darkMode: ['class'],
   content: [
     './src/**/*.{js,ts,jsx,tsx}',
-    './node_modules/@nauth/react-auth/dist/**/*.{js,ts,jsx,tsx}',
+    './node_modules/nauth-react/dist/**/*.{js,ts,jsx,tsx}',
   ],
   plugins: [require('tailwindcss-animate')],
 };
@@ -52,8 +52,8 @@ export default {
 
 ```tsx
 import { BrowserRouter } from 'react-router-dom';
-import { NAuthProvider, ThemeProvider } from '@nauth/react-auth';
-import '@nauth/react-auth/styles';
+import { NAuthProvider, ThemeProvider } from 'nauth-react';
+import 'nauth-react/styles';
 import './index.css';
 
 function App() {
@@ -82,7 +82,7 @@ VITE_API_URL=https://your-nauth-api.com
 ### 2. Use Components
 
 ```tsx
-import { LoginForm, RegisterForm, useAuth, useProtectedRoute } from '@nauth/react-auth';
+import { LoginForm, RegisterForm, useAuth, useProtectedRoute } from 'nauth-react';
 import { useNavigate } from 'react-router-dom';
 
 // Login Page
@@ -162,7 +162,7 @@ const { theme, setTheme } = useTheme();
 ## API Client
 
 ```tsx
-import { createNAuthClient } from '@nauth/react-auth';
+import { createNAuthClient } from 'nauth-react';
 
 const api = createNAuthClient({ apiUrl: 'https://your-api.com' });
 
@@ -193,7 +193,7 @@ import {
   validateEmail,
   formatPhone,
   validatePasswordStrength,
-} from '@nauth/react-auth';
+} from 'nauth-react';
 ```
 
 ## TypeScript
@@ -204,7 +204,7 @@ import type {
   LoginCredentials,
   NAuthConfig,
   Theme,
-} from '@nauth/react-auth';
+} from 'nauth-react';
 ```
 
 ## Project Structure
@@ -243,5 +243,5 @@ MIT © [Rodrigo Landim](https://github.com/landim32)
 
 ## Links
 
-- [GitHub](https://github.com/landim32/NAuth)
-- [NPM](https://www.npmjs.com/package/@nauth/react-auth)
+- [GitHub](https://github.com/landim32/NAuth/tree/main/nauth-react)
+- [NPM](https://www.npmjs.com/package/nauth-react)

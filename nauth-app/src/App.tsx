@@ -12,6 +12,7 @@ import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { ChangePasswordPage } from './pages/ChangePasswordPage';
+import SearchUsersPage from './pages/SearchUsersPage';
 import { ROUTES } from './lib/constants';
 
 function App() {
@@ -59,6 +60,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ChangePasswordPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.SEARCH_USERS}
+              element={
+                <ProtectedRoute>
+                  <SearchUsersPage />
                 </ProtectedRoute>
               }
             />

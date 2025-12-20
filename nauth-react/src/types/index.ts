@@ -1,4 +1,11 @@
 // User & Authentication Types
+export enum UserStatus {
+  Active = 1,
+  Inactive = 2,
+  Suspended = 3,
+  Blocked = 4,
+}
+
 export interface UserRole {
   roleId: number;
   slug: string;
@@ -30,6 +37,7 @@ export interface UserInfo {
   idDocument: string;
   pixKey?: string;
   password?: string | null;
+  status?: number;
   roles: UserRole[];
   phones: UserPhone[];
   addresses: UserAddress[];
@@ -67,6 +75,23 @@ export interface ChangePasswordData {
 export interface ResetPasswordData {
   recoveryHash: string;
   newPassword: string;
+}
+
+// Pagination Types
+export interface PagedResult<T> {
+  items: T[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
+
+export interface UserSearchParams {
+  searchTerm: string;
+  page: number;
+  pageSize: number;
 }
 
 // API Response Types
@@ -119,6 +144,7 @@ export interface NAuthContextValue {
   hasPassword: () => Promise<boolean>;
   uploadImage: (file: File) => Promise<string>;
   refreshUser: () => Promise<UserInfo>;
+  searchUsers: (params: UserSearchParams) => Promise<PagedResult<UserInfo>>;
 }
 
 export type Theme = 'dark' | 'light' | 'system';
@@ -184,6 +210,22 @@ export interface ChangePasswordFormProps {
   className?: string;
 }
 
+export interface SearchFormProps {
+  onSuccess?: (result: PagedResult<UserInfo>) => void;
+  onError?: (error: Error) => void;
+  onUserClick?: (user: UserInfo) => void;
+  initialPageSize?: number;
+  pageSizeOptions?: number[];
+  showUserAvatar?: boolean;
+  className?: string;
+  styles?: {
+    container?: string;
+    searchBar?: string;
+    table?: string;
+    pagination?: string;
+  };
+}
+
 export interface UserTableProps {
   users?: UserInfo[];
   pageSize?: number;
@@ -236,6 +278,7 @@ export const API_ENDPOINTS = {
   SEND_RECOVERY_EMAIL: '/User/sendRecoveryMail',
   RESET_PASSWORD: '/User/changePasswordUsingHash',
   LIST_USERS: '/User/list',
+  SEARCH_USERS: '/User/search',
   LIST_ROLES: '/Role/list',
   GET_ROLE_BY_ID: '/Role/getById',
   GET_ROLE_BY_SLUG: '/Role/getBySlug',

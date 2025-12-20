@@ -10,6 +10,8 @@ import type {
   UserRole,
   ApiError,
   NAuthConfig,
+  PagedResult,
+  UserSearchParams,
 } from '../types';
 import { API_ENDPOINTS } from '../types';
 
@@ -226,6 +228,14 @@ export class NAuthAPI {
   async listUsers(take: number = 50): Promise<UserInfo[]> {
     const response = await this.client.get<UserInfo[]>(
       `${API_ENDPOINTS.LIST_USERS}/${take}`
+    );
+    return response.data;
+  }
+
+  async searchUsers(params: UserSearchParams): Promise<PagedResult<UserInfo>> {
+    const response = await this.client.post<PagedResult<UserInfo>>(
+      API_ENDPOINTS.SEARCH_USERS,
+      params
     );
     return response.data;
   }
