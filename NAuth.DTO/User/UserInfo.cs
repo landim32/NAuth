@@ -28,6 +28,8 @@ namespace NAuth.DTO.User
         public string PixKey { get; set; }
         [JsonPropertyName("password")]
         public string Password { get; set; }
+        [JsonPropertyName("status")]
+        public int Status { get; set; }
         [JsonPropertyName("roles")]
         public IList<RoleInfo> Roles { get; set; }
         [JsonPropertyName("phones")]

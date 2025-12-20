@@ -5,6 +5,7 @@ using NAuth.Infra.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using BCrypt.Net;
+using NAuth.Domain.Enums;
 
 namespace NAuth.Domain.Models
 {
@@ -45,6 +46,7 @@ namespace NAuth.Domain.Models
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public string StripeId { get; set; }
+        public UserStatus Status { get; set; }
 
         public IUserModel GetById(long userId, IUserDomainFactory factory)
         {
@@ -74,9 +76,14 @@ namespace NAuth.Domain.Models
             return _repositoryUser.Update(this, factory);
         }
 
-        public IEnumerable<IUserModel> ListUsers(int take, IUserDomainFactory factory)
+        public IEnumerable<IUserModel> ListUsers(IUserDomainFactory factory)
         {
-            return _repositoryUser.ListUsers(take, factory);
+            return _repositoryUser.ListUsers(factory);
+        }
+
+        public IEnumerable<IUserModel> SearchUsers(string searchTerm, int page, int pageSize, out int totalCount, IUserDomainFactory factory)
+        {
+            return _repositoryUser.SearchUsers(searchTerm, page, pageSize, out totalCount, factory);
         }
 
         public IUserModel GetByEmail(string email, IUserDomainFactory factory)

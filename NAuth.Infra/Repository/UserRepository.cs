@@ -29,6 +29,7 @@ namespace NAuth.Infra.Repository
             md.Email = u.Email;
             md.IsAdmin = u.IsAdmin;
             md.StripeId = u.StripeId;
+            md.Status = (NAuth.Domain.Enums.UserStatus)u.Status;
             md.CreatedAt = u.CreatedAt;
             md.UpdatedAt = u.UpdatedAt;
             return md;
@@ -44,6 +45,7 @@ namespace NAuth.Infra.Repository
             row.Email = md.Email;
             row.IsAdmin = md.IsAdmin;
             row.StripeId = md.StripeId;
+            row.Status = (int)md.Status;
             row.CreatedAt = md.CreatedAt;
             row.UpdatedAt = md.UpdatedAt;
         }
@@ -79,9 +81,9 @@ namespace NAuth.Infra.Repository
             return model;
         }
 
-        public IEnumerable<IUserModel> ListUsers(int take, IUserDomainFactory factory)
+        public IEnumerable<IUserModel> ListUsers(IUserDomainFactory factory)
         {
-            var rows = _ccsContext.Users.OrderBy(x => x.Name).Take(take).ToList();
+            var rows = _ccsContext.Users.OrderBy(x => x.Name).ToList();
             return rows.Select(x => DbToModel(factory, x));
         }
 
@@ -173,6 +175,31 @@ namespace NAuth.Infra.Repository
         {
             var row = _ccsContext.Users.Find(userId);
             return row?.Password;
+        }
+
+        public IEnumerable<IUserModel> SearchUsers(string searchTerm, int page, int pageSize, out int totalCount, IUserDomainFactory factory)
+        {
+            var query = _ccsContext.Users.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var lowerSearchTerm = searchTerm.ToLower();
+                query = query.Where(x =>
+                    x.Name.ToLower().Contains(lowerSearchTerm) ||
+                    x.Email.ToLower().Contains(lowerSearchTerm) ||
+                    (x.IdDocument != null && x.IdDocument.Contains(searchTerm))
+                );
+            }
+
+            totalCount = query.Count();
+
+            var rows = query
+                .OrderBy(x => x.Name)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return rows.Select(x => DbToModel(factory, x));
         }
     }
 }

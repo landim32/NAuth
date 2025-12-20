@@ -53,10 +53,9 @@ namespace NAuth.Test.ACL
         #region ListAsync Tests
 
         [Fact]
-        public async Task ListAsync_WithValidTake_ShouldReturnRoles()
+        public async Task ListAsync_ShouldReturnRoles()
         {
             // Arrange
-            var take = 10;
             var roles = new List<RoleInfo>
             {
                 new RoleInfo { RoleId = 1, Slug = "admin", Name = "Administrator" },
@@ -75,14 +74,14 @@ namespace NAuth.Test.ACL
                     "SendAsync",
                     ItExpr.Is<HttpRequestMessage>(req =>
                         req.Method == HttpMethod.Get &&
-                        req.RequestUri.ToString().Contains($"/Role/list/{take}")),
+                        req.RequestUri.ToString().Contains("/Role/list")),
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(httpResponse);
 
             var roleClient = CreateRoleClient();
 
             // Act
-            var result = await roleClient.ListAsync(take);
+            var result = await roleClient.ListAsync();
 
             // Assert
             Assert.NotNull(result);
@@ -95,7 +94,6 @@ namespace NAuth.Test.ACL
         public async Task ListAsync_WithEmptyResult_ShouldReturnEmptyList()
         {
             // Arrange
-            var take = 10;
             var roles = new List<RoleInfo>();
 
             var jsonResponse = JsonConvert.SerializeObject(roles);
@@ -115,7 +113,7 @@ namespace NAuth.Test.ACL
             var roleClient = CreateRoleClient();
 
             // Act
-            var result = await roleClient.ListAsync(take);
+            var result = await roleClient.ListAsync();
 
             // Assert
             Assert.NotNull(result);
@@ -126,7 +124,6 @@ namespace NAuth.Test.ACL
         public async Task ListAsync_WhenApiReturnsError_ShouldThrowException()
         {
             // Arrange
-            var take = 10;
             var httpResponse = new HttpResponseMessage(HttpStatusCode.InternalServerError)
             {
                 Content = new StringContent("Internal Server Error")
@@ -143,7 +140,7 @@ namespace NAuth.Test.ACL
             var roleClient = CreateRoleClient();
 
             // Act & Assert
-            await Assert.ThrowsAsync<HttpRequestException>(() => roleClient.ListAsync(take));
+            await Assert.ThrowsAsync<HttpRequestException>(() => roleClient.ListAsync());
         }
 
         #endregion
@@ -313,7 +310,6 @@ namespace NAuth.Test.ACL
         public async Task ListAsync_ShouldLogUrlAndResult()
         {
             // Arrange
-            var take = 10;
             var roles = new List<RoleInfo>
             {
                 new RoleInfo { RoleId = 1, Slug = "admin", Name = "Administrator" }
@@ -336,7 +332,7 @@ namespace NAuth.Test.ACL
             var roleClient = CreateRoleClient();
 
             // Act
-            await roleClient.ListAsync(take);
+            await roleClient.ListAsync();
 
             // Assert
             _mockLogger.Verify(

@@ -4,7 +4,8 @@
     {
         TModel Insert(TModel model, TFactory factory);
         TModel Update(TModel model, TFactory factory);
-        IEnumerable<TModel> ListUsers(int take, TFactory factory);
+        IEnumerable<TModel> ListUsers(TFactory factory);
+        IEnumerable<TModel> SearchUsers(string searchTerm, int page, int pageSize, out int totalCount, TFactory factory);
         TModel GetById(long userId, TFactory factory);
         TModel GetByEmail(string email, TFactory factory);
         TModel GetBySlug(string slug, TFactory factory);

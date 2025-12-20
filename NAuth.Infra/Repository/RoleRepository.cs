@@ -65,9 +65,9 @@ namespace NAuth.Infra.Repository
             return model;
         }
 
-        public IEnumerable<IRoleModel> ListRoles(int take, IRoleDomainFactory factory)
+        public IEnumerable<IRoleModel> ListRoles(IRoleDomainFactory factory)
         {
-            var rows = _context.Roles.OrderBy(x => x.Name).Take(take).ToList();
+            var rows = _context.Roles.OrderBy(x => x.Name).ToList();
             return rows.Select(x => DbToModel(factory, x));
         }
 
@@ -78,6 +78,16 @@ namespace NAuth.Infra.Repository
             _context.Roles.Update(row);
             _context.SaveChanges();
             return model;
+        }
+
+        public void Delete(long roleId)
+        {
+            var role = _context.Roles.Find(roleId);
+            if (role != null)
+            {
+                _context.Roles.Remove(role);
+                _context.SaveChanges();
+            }
         }
     }
 }

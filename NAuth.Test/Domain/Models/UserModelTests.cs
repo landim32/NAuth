@@ -300,10 +300,9 @@ namespace NAuth.Test.Domain.Models
         #region ListUsers Tests
 
         [Fact]
-        public void ListUsers_WithTake_ShouldReturnUsers()
+        public void ListUsers_ShouldReturnUsers()
         {
             // Arrange
-            var take = 10;
             var mockUsers = new List<IUserModel>
             {
                 Mock.Of<IUserModel>(),
@@ -311,16 +310,16 @@ namespace NAuth.Test.Domain.Models
                 Mock.Of<IUserModel>()
             };
             _mockUserRepository
-                .Setup(r => r.ListUsers(take, _mockUserFactory.Object))
+                .Setup(r => r.ListUsers(_mockUserFactory.Object))
                 .Returns(mockUsers);
 
             // Act
-            var result = _userModel.ListUsers(take, _mockUserFactory.Object);
+            var result = _userModel.ListUsers(_mockUserFactory.Object);
 
             // Assert
             Assert.NotNull(result);
             Assert.Equal(3, result.Count());
-            _mockUserRepository.Verify(r => r.ListUsers(take, _mockUserFactory.Object), Times.Once);
+            _mockUserRepository.Verify(r => r.ListUsers(_mockUserFactory.Object), Times.Once);
         }
 
         #endregion

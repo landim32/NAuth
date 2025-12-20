@@ -25,10 +25,10 @@ namespace NAuth.ACL
             _logger = logger;
         }
 
-        public async Task<IList<RoleInfo>> ListAsync(int take)
+        public async Task<IList<RoleInfo>> ListAsync()
         {
-            var url = $"{_nauthSetting.Value.ApiUrl}/Role/list/{take}";
-            _logger.LogInformation("ListAsync - Accessing URL: {Url}, Take={Take}", url, take);
+            var url = $"{_nauthSetting.Value.ApiUrl}/Role/list";
+            _logger.LogInformation("ListAsync - Accessing URL: {Url}", url);
 
             var response = await _httpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();

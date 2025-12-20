@@ -65,8 +65,8 @@ namespace NAuth.API.Controllers
             }
         }
 
-        [HttpGet("getMe")]
         [Authorize]
+        [HttpGet("getMe")]
         public async Task<ActionResult<UserInfo>> GetMe()
         {
             try
@@ -95,6 +95,7 @@ namespace NAuth.API.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("getById/{userId}")]
         public async Task<ActionResult<UserInfo>> GetById(long userId)
         {
@@ -118,6 +119,7 @@ namespace NAuth.API.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("getByEmail/{email}")]
         public async Task<ActionResult<UserInfo>> GetByEmail(string email)
         {
@@ -371,15 +373,23 @@ namespace NAuth.API.Controllers
             }
         }
 
-        [HttpGet("list/{take}")]
-        public async Task<ActionResult<System.Collections.Generic.List<UserInfo>>> list(int take)
+        [Authorize]
+        [HttpGet("list")]
+        public async Task<ActionResult<System.Collections.Generic.List<UserInfo>>> list()
         {
             try
             {
-                var userModels = _userService.ListUsers(take);
+                var userSession = _userService.GetUserInSession(HttpContext);
+                if (userSession == null || !userSession.IsAdmin)
+                {
+                    _logger.LogError(NotAuthorizedMessage);
+                    return Unauthorized(NotAuthorizedMessage);
+                }
+
+                var userModels = _userService.ListUsers();
                 var userInfos = await Task.WhenAll(userModels.Select(x => _userService.GetUserInfoFromModel(x)));
 
-                _logger.LogInformation("list(take: {@take}) successfully", take);
+                _logger.LogInformation("list() successfully");
 
                 return Ok(userInfos.ToList());
             }
@@ -390,5 +400,40 @@ namespace NAuth.API.Controllers
             }
         }
 
+        [Authorize]
+        [HttpPost("search")]
+        public ActionResult<PagedResult<UserInfo>> Search([FromBody] UserSearchParam param)
+        {
+            try
+            {
+                var userSession = _userService.GetUserInSession(HttpContext);
+                if (userSession == null || !userSession.IsAdmin)
+                {
+                    _logger.LogError(NotAuthorizedMessage);
+                    return Unauthorized(NotAuthorizedMessage);
+                }
+
+                var result = _userService.SearchUsers(
+                    param.SearchTerm,
+                    param.Page,
+                    param.PageSize
+                );
+
+                _logger.LogInformation(
+                    "search(searchTerm: {SearchTerm}, page: {Page}, pageSize: {PageSize}) = {TotalCount} users found",
+                    param.SearchTerm,
+                    param.Page,
+                    param.PageSize,
+                    result.TotalCount
+                );
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ExceptionOccurredMessage, ex.Message);
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }

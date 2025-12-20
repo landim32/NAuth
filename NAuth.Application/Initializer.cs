@@ -81,6 +81,7 @@ namespace NAuth.Application
 
             #region Service
             injectDependency(typeof(IUserService), typeof(UserService), services, scoped);
+            injectDependency(typeof(IRoleService), typeof(RoleService), services, scoped);
             #endregion
 
 

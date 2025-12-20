@@ -13,7 +13,8 @@ namespace NAuth.Domain.Models.Models
         IRoleModel Update(IRoleDomainFactory factory);
         IRoleModel GetById(long roleId, IRoleDomainFactory factory);
         IRoleModel GetBySlug(string slug, IRoleDomainFactory factory);
-        IEnumerable<IRoleModel> ListRoles(int take, IRoleDomainFactory factory);
+        IEnumerable<IRoleModel> ListRoles(IRoleDomainFactory factory);
         bool ExistSlug(long roleId, string slug);
+        void Delete(long roleId);
     }
 }

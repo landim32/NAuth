@@ -252,10 +252,9 @@ namespace NAuth.Test.Domain.Models
         #region ListRoles Tests
 
         [Fact]
-        public void ListRoles_WithTake_ShouldReturnRoles()
+        public void ListRoles_ShouldReturnRoles()
         {
             // Arrange
-            var take = 10;
             var mockRoles = new List<IRoleModel>
             {
                 Mock.Of<IRoleModel>(),
@@ -263,72 +262,34 @@ namespace NAuth.Test.Domain.Models
                 Mock.Of<IRoleModel>()
             };
             _mockRepository
-                .Setup(r => r.ListRoles(take, _mockFactory.Object))
+                .Setup(r => r.ListRoles(_mockFactory.Object))
                 .Returns(mockRoles);
 
             // Act
-            var result = _roleModel.ListRoles(take, _mockFactory.Object);
+            var result = _roleModel.ListRoles(_mockFactory.Object);
 
             // Assert
             Assert.NotNull(result);
             Assert.Equal(3, result.Count());
-            _mockRepository.Verify(r => r.ListRoles(take, _mockFactory.Object), Times.Once);
-        }
-
-        [Fact]
-        public void ListRoles_WithZeroTake_ShouldCallRepository()
-        {
-            // Arrange
-            var take = 0;
-            var mockRoles = new List<IRoleModel>();
-            _mockRepository
-                .Setup(r => r.ListRoles(take, _mockFactory.Object))
-                .Returns(mockRoles);
-
-            // Act
-            var result = _roleModel.ListRoles(take, _mockFactory.Object);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Empty(result);
-            _mockRepository.Verify(r => r.ListRoles(take, _mockFactory.Object), Times.Once);
-        }
-
-        [Fact]
-        public void ListRoles_WithNegativeTake_ShouldCallRepository()
-        {
-            // Arrange
-            var take = -1;
-            var mockRoles = new List<IRoleModel>();
-            _mockRepository
-                .Setup(r => r.ListRoles(take, _mockFactory.Object))
-                .Returns(mockRoles);
-
-            // Act
-            var result = _roleModel.ListRoles(take, _mockFactory.Object);
-
-            // Assert
-            Assert.NotNull(result);
-            _mockRepository.Verify(r => r.ListRoles(take, _mockFactory.Object), Times.Once);
+            _mockRepository.Verify(r => r.ListRoles(_mockFactory.Object), Times.Once);
         }
 
         [Fact]
         public void ListRoles_WhenEmpty_ShouldReturnEmptyList()
         {
             // Arrange
-            var take = 10;
             var mockRoles = new List<IRoleModel>();
             _mockRepository
-                .Setup(r => r.ListRoles(take, _mockFactory.Object))
+                .Setup(r => r.ListRoles(_mockFactory.Object))
                 .Returns(mockRoles);
 
             // Act
-            var result = _roleModel.ListRoles(take, _mockFactory.Object);
+            var result = _roleModel.ListRoles(_mockFactory.Object);
 
             // Assert
             Assert.NotNull(result);
             Assert.Empty(result);
-            _mockRepository.Verify(r => r.ListRoles(take, _mockFactory.Object), Times.Once);
+            _mockRepository.Verify(r => r.ListRoles(_mockFactory.Object), Times.Once);
         }
 
         #endregion

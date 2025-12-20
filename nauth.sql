@@ -42,7 +42,8 @@ CREATE TABLE IF NOT EXISTS users (
     birth_date timestamp without time zone,
     pix_key character varying(180),
     stripe_id character varying(120),
-    image character varying(150)
+    image character varying(150),
+    status integer DEFAULT 1 NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS roles (

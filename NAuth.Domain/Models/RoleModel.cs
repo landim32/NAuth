@@ -41,14 +41,19 @@ namespace NAuth.Domain.Models
             return _repositoryRole.Insert(this, factory);
         }
 
-        public IEnumerable<IRoleModel> ListRoles(int take, IRoleDomainFactory factory)
+        public IEnumerable<IRoleModel> ListRoles(IRoleDomainFactory factory)
         {
-            return _repositoryRole.ListRoles(take, factory);
+            return _repositoryRole.ListRoles(factory);
         }
 
         public IRoleModel Update(IRoleDomainFactory factory)
         {
             return _repositoryRole.Update(this, factory);
+        }
+
+        public void Delete(long roleId)
+        {
+            _repositoryRole.Delete(roleId);
         }
     }
 }

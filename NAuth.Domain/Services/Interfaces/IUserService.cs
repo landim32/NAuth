@@ -24,6 +24,7 @@ namespace NAuth.Domain.Services.Interfaces
         IUserModel GetByStripeId(string stripeId);
         UserInfo GetUserInSession(HttpContext httpContext);
         Task<UserInfo> GetUserInfoFromModel(IUserModel md);
-        IList<IUserModel> ListUsers(int take);
+        IList<IUserModel> ListUsers();
+        PagedResult<UserInfo> SearchUsers(string searchTerm, int page, int pageSize);
     }
 }

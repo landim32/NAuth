@@ -35,6 +35,8 @@ public partial class User
 
     public string Image { get; set; }
 
+    public int Status { get; set; }
+
     public virtual ICollection<UserAddress> UserAddresses { get; set; } = new List<UserAddress>();
 
     public virtual ICollection<UserDocument> UserDocuments { get; set; } = new List<UserDocument>();

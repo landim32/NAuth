@@ -627,20 +627,19 @@ namespace NAuth.Test.Domain.Services
         public void ListUsers_ShouldReturnListOfUsers()
         {
             // Arrange
-            var take = 10;
             var userList = new List<IUserModel> { _mockUserModel.Object };
             
             _mockUserFactory.Setup(f => f.BuildUserModel()).Returns(_mockUserModel.Object);
-            _mockUserModel.Setup(m => m.ListUsers(take, _mockUserFactory.Object))
+            _mockUserModel.Setup(m => m.ListUsers(_mockUserFactory.Object))
                 .Returns(userList);
 
             // Act
-            var result = _userService.ListUsers(take);
+            var result = _userService.ListUsers();
 
             // Assert
             Assert.NotNull(result);
             Assert.Single(result);
-            _mockUserModel.Verify(m => m.ListUsers(take, _mockUserFactory.Object), Times.Once);
+            _mockUserModel.Verify(m => m.ListUsers(_mockUserFactory.Object), Times.Once);
         }
 
         #endregion

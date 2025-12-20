@@ -363,7 +363,7 @@ namespace NAuth.Test.Infra.Repository
             _context.SaveChanges();
 
             // Act
-            var result = _repository.ListRoles(10, _mockFactory.Object);
+            var result = _repository.ListRoles(_mockFactory.Object);
 
             // Assert
             var roleList = result.ToList();
@@ -372,47 +372,10 @@ namespace NAuth.Test.Infra.Repository
         }
 
         [Fact]
-        public void ListRoles_ShouldRespectTakeParameter()
-        {
-            // Arrange
-            var roles = new[]
-            {
-                new Role { Slug = "admin", Name = "Administrator" },
-                new Role { Slug = "user", Name = "User" },
-                new Role { Slug = "moderator", Name = "Moderator" },
-                new Role { Slug = "guest", Name = "Guest" },
-                new Role { Slug = "editor", Name = "Editor" }
-            };
-            _context.Roles.AddRange(roles);
-            _context.SaveChanges();
-
-            // Act
-            var result = _repository.ListRoles(3, _mockFactory.Object);
-
-            // Assert
-            Assert.Equal(3, result.Count());
-        }
-
-        [Fact]
         public void ListRoles_WithEmptyDatabase_ShouldReturnEmpty()
         {
             // Act
-            var result = _repository.ListRoles(10, _mockFactory.Object);
-
-            // Assert
-            Assert.Empty(result);
-        }
-
-        [Fact]
-        public void ListRoles_WithTakeZero_ShouldReturnEmpty()
-        {
-            // Arrange
-            var role = new Role { Slug = "admin", Name = "Administrator" };
-            _context.Roles.Add(role);
-            _context.SaveChanges();
-
-            // Act
-            var result = _repository.ListRoles(0, _mockFactory.Object);
+            var result = _repository.ListRoles(_mockFactory.Object);
 
             // Assert
             Assert.Empty(result);
@@ -502,7 +465,7 @@ namespace NAuth.Test.Infra.Repository
             Assert.True(exists);
 
             // List
-            var roles = _repository.ListRoles(10, _mockFactory.Object);
+            var roles = _repository.ListRoles(_mockFactory.Object);
             Assert.Single(roles);
 
             // Get by slug

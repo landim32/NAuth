@@ -1,4 +1,5 @@
-﻿using NAuth.Domain.Factory.Interfaces;
+﻿using NAuth.Domain.Enums;
+using NAuth.Domain.Factory.Interfaces;
 using System;
 using System.Collections.Generic;
 
@@ -19,6 +20,7 @@ namespace NAuth.Domain.Models.Models
         DateTime UpdatedAt { get; set; }
         bool IsAdmin { get; set; }
         string StripeId { get; set; }
+        UserStatus Status { get; set; }
 
         IUserModel Insert(IUserDomainFactory factory);
         IUserModel Update(IUserDomainFactory factory);
@@ -27,10 +29,12 @@ namespace NAuth.Domain.Models.Models
         IUserModel GetById(long userId, IUserDomainFactory factory);
         IUserModel GetByStripeId(string stripeId, IUserDomainFactory factory);
         IUserModel GetByRecoveryHash(string recoveryHash, IUserDomainFactory factory);
-        IEnumerable<IUserModel> ListUsers(int take, IUserDomainFactory factory);
+        IEnumerable<IUserModel> ListUsers(IUserDomainFactory factory);
+        IEnumerable<IUserModel> SearchUsers(string searchTerm, int page, int pageSize, out int totalCount, IUserDomainFactory factory);
         IUserModel LoginWithEmail(string email, string password, IUserDomainFactory factory);
         bool HasPassword(long userId, IUserDomainFactory factory);
         void ChangePassword(long userId, string password, IUserDomainFactory factory);
+        void ChangePasswordUsingHash(string recoveryHash, string password, IUserDomainFactory factory);
         string GenerateRecoveryHash(long userId, IUserDomainFactory factory);
         bool ExistSlug(long userId, string slug);
         IEnumerable<IRoleModel> ListRoles(long userId, IRoleDomainFactory roleFactory);

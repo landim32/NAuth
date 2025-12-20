@@ -4,7 +4,7 @@ namespace NAuth.ACL.Interfaces
 {
     public interface IRoleClient
     {
-        Task<IList<RoleInfo>> ListAsync(int take);
+        Task<IList<RoleInfo>> ListAsync();
         Task<RoleInfo?> GetByIdAsync(long roleId);
         Task<RoleInfo?> GetBySlugAsync(string slug);
     }

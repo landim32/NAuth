@@ -780,7 +780,7 @@ namespace NAuth.Test.Infra.Repository
             _context.SaveChanges();
 
             // Act
-            var result = _repository.ListUsers(10, _mockFactory.Object);
+            var result = _repository.ListUsers(_mockFactory.Object);
 
             // Assert
             var users = result.ToList();
@@ -789,7 +789,7 @@ namespace NAuth.Test.Infra.Repository
         }
 
         [Fact]
-        public void ListUsers_ShouldRespectTakeParameter()
+        public void ListUsers_ShouldReturnAllUsers()
         {
             // Arrange
             var users = new[]
@@ -804,17 +804,17 @@ namespace NAuth.Test.Infra.Repository
             _context.SaveChanges();
 
             // Act
-            var result = _repository.ListUsers(3, _mockFactory.Object);
+            var result = _repository.ListUsers(_mockFactory.Object);
 
             // Assert
-            Assert.Equal(3, result.Count());
+            Assert.Equal(5, result.Count());
         }
 
         [Fact]
         public void ListUsers_WithEmptyDatabase_ShouldReturnEmpty()
         {
             // Act
-            var result = _repository.ListUsers(10, _mockFactory.Object);
+            var result = _repository.ListUsers(_mockFactory.Object);
 
             // Assert
             Assert.Empty(result);

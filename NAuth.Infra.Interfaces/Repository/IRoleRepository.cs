@@ -8,7 +8,8 @@ namespace NAuth.Infra.Interfaces.Repository
         TModel Update(TModel model, TFactory factory);
         TModel GetById(long roleId, TFactory factory);
         TModel GetBySlug(string slug, TFactory factory);
-        IEnumerable<TModel> ListRoles(int take, TFactory factory);
+        IEnumerable<TModel> ListRoles(TFactory factory);
         bool ExistSlug(long roleId, string slug);
+        void Delete(long roleId);
     }
 }

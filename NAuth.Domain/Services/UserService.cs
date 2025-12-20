@@ -457,6 +457,7 @@ namespace NAuth.Domain.Services
                     model.BirthDate = user.BirthDate;
                     model.IdDocument = user.IdDocument;
                     model.PixKey = user.PixKey;
+                    model.Status = (NAuth.Domain.Enums.UserStatus)user.Status;
                     model.CreatedAt = DateTime.Now;
                     model.UpdatedAt = DateTime.Now;
                     model.Hash = GetUniqueToken();
@@ -554,6 +555,7 @@ namespace NAuth.Domain.Services
                     model.BirthDate = user.BirthDate;
                     model.IdDocument = user.IdDocument;
                     model.PixKey = user.PixKey;
+                    model.Status = (NAuth.Domain.Enums.UserStatus)user.Status;
                     model.UpdatedAt = DateTime.Now;
                     model.Slug = await GenerateSlug(model);
 
@@ -665,6 +667,7 @@ namespace NAuth.Domain.Services
                 IdDocument = md.IdDocument,
                 PixKey = md.PixKey,
                 BirthDate = md.BirthDate,
+                Status = (int)md.Status,
                 CreatedAt = md.CreatedAt,
                 UpdatedAt = md.UpdatedAt,
                 IsAdmin = md.IsAdmin,
@@ -746,9 +749,24 @@ namespace NAuth.Domain.Services
             return _factories.UserFactory.BuildUserModel().GetBySlug(slug, _factories.UserFactory);
         }
 
-        public IList<IUserModel> ListUsers(int take)
+        public IList<IUserModel> ListUsers()
         {
-            return _factories.UserFactory.BuildUserModel().ListUsers(take, _factories.UserFactory).ToList();
+            return _factories.UserFactory.BuildUserModel().ListUsers(_factories.UserFactory).ToList();
+        }
+
+        public PagedResult<UserInfo> SearchUsers(string searchTerm, int page, int pageSize)
+        {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
+            if (pageSize > 100) pageSize = 100;
+
+            int totalCount;
+            var userModels = _factories.UserFactory.BuildUserModel()
+                .SearchUsers(searchTerm, page, pageSize, out totalCount, _factories.UserFactory);
+
+            var userInfoList = userModels.Select(x => GetUserInfoFromModel(x).Result).ToList();
+
+            return new PagedResult<UserInfo>(userInfoList, page, pageSize, totalCount);
         }
     }
 }
