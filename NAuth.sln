@@ -40,7 +40,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "5 - Extra", "5 - Extra", "{
 		prompt-package.txt = prompt-package.txt
 		README.md = README.md
 		update-ntools.ps1 = update-ntools.ps1
-		user-search-implementation-prompt.txt = user-search-implementation-prompt.txt
+		user-search-prompt.txt = user-search-prompt.txt
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NAuth.Infra.Interfaces", "NAuth.Infra.Interfaces\NAuth.Infra.Interfaces.csproj", "{2E1E6915-FBE3-4940-B275-C31B70BAD446}"

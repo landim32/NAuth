@@ -11,6 +11,7 @@ export const ROUTES = {
   PROFILE: '/profile',
   CHANGE_PASSWORD: '/change-password',
   SEARCH_USERS: '/search-users',
+  ROLES: '/roles',
 } as const;
 
 export const EXTERNAL_LINKS = {

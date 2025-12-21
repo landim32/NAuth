@@ -175,6 +175,38 @@ export const NAuthProvider: React.FC<NAuthProviderProps> = ({ config, children }
     [api]
   );
 
+  const fetchRoles = useCallback(async () => {
+    return await api.fetchRoles();
+  }, [api]);
+
+  const getRoleById = useCallback(
+    async (roleId: number) => {
+      return await api.getRoleById(roleId);
+    },
+    [api]
+  );
+
+  const createRole = useCallback(
+    async (data: { roleId: number; name: string; slug: string }) => {
+      return await api.createRole(data);
+    },
+    [api]
+  );
+
+  const updateRole = useCallback(
+    async (data: { roleId: number; name: string; slug: string }) => {
+      return await api.updateRole(data);
+    },
+    [api]
+  );
+
+  const deleteRole = useCallback(
+    async (roleId: number) => {
+      return await api.deleteRole(roleId);
+    },
+    [api]
+  );
+
   const value: NAuthContextValue = {
     user,
     token,
@@ -191,6 +223,11 @@ export const NAuthProvider: React.FC<NAuthProviderProps> = ({ config, children }
     uploadImage,
     refreshUser,
     searchUsers,
+    fetchRoles,
+    getRoleById,
+    createRole,
+    updateRole,
+    deleteRole,
   };
 
   return <NAuthContext.Provider value={value}>{children}</NAuthContext.Provider>;

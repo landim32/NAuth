@@ -1,10 +1,8 @@
-import React from 'react';
 import { SearchForm } from 'nauth-react';
 import type { PagedResult, UserInfo } from 'nauth-react';
-import { useNavigate } from 'react-router-dom';
 
 export default function SearchUsersPage() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const handleSuccess = (result: PagedResult<UserInfo>) => {
     console.log('Search successful:', result);
@@ -21,7 +19,7 @@ export default function SearchUsersPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
           Search Users

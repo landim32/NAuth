@@ -12,6 +12,14 @@ export interface UserRole {
   name: string;
 }
 
+export type RoleInfo = UserRole;
+
+export interface RoleFormData {
+  roleId: number;
+  name: string;
+  slug: string;
+}
+
 export interface UserPhone {
   phone: string;
 }
@@ -145,6 +153,11 @@ export interface NAuthContextValue {
   uploadImage: (file: File) => Promise<string>;
   refreshUser: () => Promise<UserInfo>;
   searchUsers: (params: UserSearchParams) => Promise<PagedResult<UserInfo>>;
+  fetchRoles: () => Promise<RoleInfo[]>;
+  getRoleById: (roleId: number) => Promise<RoleInfo>;
+  createRole: (data: RoleFormData) => Promise<RoleInfo>;
+  updateRole: (data: RoleFormData) => Promise<RoleInfo>;
+  deleteRole: (roleId: number) => Promise<string>;
 }
 
 export type Theme = 'dark' | 'light' | 'system';
@@ -263,6 +276,32 @@ export interface RoleManagerProps {
   className?: string;
 }
 
+export interface RoleListProps {
+  onRoleClick?: (role: RoleInfo) => void;
+  onEdit?: (role: RoleInfo) => void;
+  onDelete?: (role: RoleInfo) => void;
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
+  showCreateButton?: boolean;
+  initialPageSize?: number;
+  pageSizeOptions?: number[];
+  className?: string;
+  styles?: {
+    container?: string;
+    searchBar?: string;
+    table?: string;
+    pagination?: string;
+  };
+}
+
+export interface RoleFormProps {
+  roleId?: number;
+  onSuccess?: (role: RoleInfo) => void;
+  onError?: (error: Error) => void;
+  onCancel?: () => void;
+  className?: string;
+}
+
 // Constants
 export const API_ENDPOINTS = {
   LOGIN: '/User/loginWithEmail',
@@ -282,6 +321,9 @@ export const API_ENDPOINTS = {
   LIST_ROLES: '/Role/list',
   GET_ROLE_BY_ID: '/Role/getById',
   GET_ROLE_BY_SLUG: '/Role/getBySlug',
+  INSERT_ROLE: '/Role/insert',
+  UPDATE_ROLE: '/Role/update',
+  DELETE_ROLE: '/Role/delete',
 } as const;
 
 export const VERSION = '1.0.0';

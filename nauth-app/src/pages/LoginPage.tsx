@@ -29,9 +29,9 @@ export function LoginPage() {
     const redirectTo = sessionStorage.getItem('redirectAfterLogin');
     if (redirectTo) {
       sessionStorage.removeItem('redirectAfterLogin');
-      //navigate(redirectTo);
+      navigate(redirectTo);
     } else {
-      //navigate(ROUTES.DASHBOARD);
+      navigate(ROUTES.DASHBOARD);
     }
   };
 

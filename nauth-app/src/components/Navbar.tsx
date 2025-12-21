@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from 'nauth-react';
 import { APP_NAME, ROUTES } from '../lib/constants';
 import { UserMenu } from './UserMenu';
-import { Shield, Search, LayoutDashboard } from 'lucide-react';
+import { Shield, Search, LayoutDashboard, ShieldCheck } from 'lucide-react';
 
 export function Navbar() {
   const { isAuthenticated } = useAuth();
@@ -34,6 +34,13 @@ export function Navbar() {
                 >
                   <Search className="w-4 h-4" />
                   Search
+                </Link>
+                <Link
+                  to={ROUTES.ROLES}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  Roles
                 </Link>
               </>
             )}

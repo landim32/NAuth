@@ -13,6 +13,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { ChangePasswordPage } from './pages/ChangePasswordPage';
 import SearchUsersPage from './pages/SearchUsersPage';
+import RolesPage from './pages/RolesPage';
 import { ROUTES } from './lib/constants';
 
 function App() {
@@ -68,6 +69,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <SearchUsersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.ROLES}
+              element={
+                <ProtectedRoute>
+                  <RolesPage />
                 </ProtectedRoute>
               }
             />

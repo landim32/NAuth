@@ -8,6 +8,8 @@ import type {
   ChangePasswordData,
   ResetPasswordData,
   UserRole,
+  RoleInfo,
+  RoleFormData,
   ApiError,
   NAuthConfig,
   PagedResult,
@@ -249,6 +251,14 @@ export class NAuthAPI {
     return response.data;
   }
 
+  async fetchRoles(): Promise<RoleInfo[]> {
+    const response = await this.client.get<RoleInfo[]>(
+      API_ENDPOINTS.LIST_ROLES
+    );
+    console.log('Fetched roles:', response.data);
+    return response.data;
+  }
+
   async getRoleById(roleId: number): Promise<UserRole> {
     const response = await this.client.get<UserRole>(
       `${API_ENDPOINTS.GET_ROLE_BY_ID}/${roleId}`
@@ -260,6 +270,42 @@ export class NAuthAPI {
     const response = await this.client.get<UserRole>(
       `${API_ENDPOINTS.GET_ROLE_BY_SLUG}/${slug}`
     );
+    return response.data;
+  }
+
+  async createRole(data: RoleFormData): Promise<RoleInfo> {
+    const payload = {
+      roleId: 0,
+      name: data.name,
+      slug: data.slug || '',
+    };
+
+    const response = await this.client.post<RoleInfo>(
+      API_ENDPOINTS.INSERT_ROLE,
+      payload
+    );
+    return response.data;
+  }
+
+  async updateRole(data: RoleFormData): Promise<RoleInfo> {
+    const payload = {
+      roleId: data.roleId,
+      name: data.name,
+      slug: data.slug || '',
+    };
+
+    const response = await this.client.post<RoleInfo>(
+      API_ENDPOINTS.UPDATE_ROLE,
+      payload
+    );
+    return response.data;
+  }
+
+  async deleteRole(roleId: number): Promise<string> {
+    const response = await this.client.delete<string>(
+      `${API_ENDPOINTS.DELETE_ROLE}/${roleId}`
+    );
+    console.log('Deleted role:', response.data);
     return response.data;
   }
 

@@ -11,6 +11,10 @@ export { ResetPasswordForm } from './components/ResetPasswordForm';
 export { ChangePasswordForm } from './components/ChangePasswordForm';
 export { SearchForm } from './components/SearchForm';
 
+// Role Management Components
+export { RoleList } from './components/RoleList';
+export { RoleForm } from './components/RoleForm';
+
 // Context Providers & Hooks
 export { NAuthProvider, useNAuth } from './contexts/NAuthContext';
 export type { NAuthConfig, NAuthContextValue, NAuthProviderProps } from './contexts/NAuthContext';
@@ -37,6 +41,8 @@ export type {
   UserAddress,
   UserPhone,
   UserRole,
+  RoleInfo,
+  RoleFormData,
   LoginCredentials,
   RegisterData,
   ChangePasswordData,
@@ -51,6 +57,8 @@ export type {
   ResetPasswordFormProps,
   ChangePasswordFormProps,
   SearchFormProps,
+  RoleListProps,
+  RoleFormProps,
   PagedResult,
   UserSearchParams,
 } from './types';
