@@ -15,6 +15,9 @@ export { SearchForm } from './components/SearchForm';
 export { RoleList } from './components/RoleList';
 export { RoleForm } from './components/RoleForm';
 
+// User Management Components
+export { UserEditForm } from './components/UserEditForm';
+
 // Context Providers & Hooks
 export { NAuthProvider, useNAuth } from './contexts/NAuthContext';
 export type { NAuthConfig, NAuthContextValue, NAuthProviderProps } from './contexts/NAuthContext';
@@ -59,6 +62,7 @@ export type {
   SearchFormProps,
   RoleListProps,
   RoleFormProps,
+  UserEditFormProps,
   PagedResult,
   UserSearchParams,
 } from './types';

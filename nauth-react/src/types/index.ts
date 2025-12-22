@@ -146,6 +146,8 @@ export interface NAuthContextValue {
   logout: () => void;
   register: (data: RegisterData) => Promise<UserInfo>;
   updateUser: (data: Partial<UserInfo>) => Promise<UserInfo>;
+  createUser: (data: Partial<UserInfo>) => Promise<UserInfo>;
+  getUserById: (userId: number) => Promise<UserInfo>;
   changePassword: (data: ChangePasswordData) => Promise<void>;
   resetPassword: (data: ResetPasswordData) => Promise<void>;
   sendRecoveryEmail: (email: string) => Promise<void>;
@@ -297,6 +299,14 @@ export interface RoleListProps {
 export interface RoleFormProps {
   roleId?: number;
   onSuccess?: (role: RoleInfo) => void;
+  onError?: (error: Error) => void;
+  onCancel?: () => void;
+  className?: string;
+}
+
+export interface UserEditFormProps {
+  userId?: number;
+  onSuccess?: (user: UserInfo) => void;
   onError?: (error: Error) => void;
   onCancel?: () => void;
   className?: string;

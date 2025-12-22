@@ -1,0 +1,669 @@
+{
+	"info": {
+		"_postman_id": "795383bc-ca77-4f52-9b0d-3052d425234b",
+		"name": "NAuth",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1862130"
+	},
+	"item": [
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "LoginWithEmail",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Device-Fingerprint",
+								"value": "123456",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"rodrigo@emagine.com.br\",\r\n  \"password\": \"pikpro6\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/User/loginWithEmail",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"User",
+								"loginWithEmail"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetMe",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/User/getMe",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"User",
+								"getMe"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "HasPassword",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "tokendoamor",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/User/hasPassword",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"User",
+								"hasPassword"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetByToken",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "tokendoroot",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"rodrigo@emagine.com.br\",\r\n  \"password\": \"pikpro6\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/User/getByToken/247KbvXcebysVHl4AndmpS",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"User",
+								"getByToken",
+								"247KbvXcebysVHl4AndmpS"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetById",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/User/getById/1",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"User",
+								"getById",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetByEmail",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "tokendoroot",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/User/getByEmail/rodrigo@emagine.com.br",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"User",
+								"getByEmail",
+								"rodrigo@emagine.com.br"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/User/list",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"User",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"searchTerm\": \"Rod\",\r\n  \"page\": 1,\r\n  \"pageSize\": 10\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/User/search",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"User",
+								"search"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetBySlug",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "tokendoroot",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/User/getBySlug/rodrigo-landim",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"User",
+								"getBySlug",
+								"rodrigo-landim"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Insert",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Rodrigo Landim\",\r\n  \"email\": \"rodrigo.landim@emagine.com.br\",\r\n  \"isAdmin\": true,\r\n  \"birthDate\": \"2025-08-26\",\r\n  \"idDocument\": \"89639766100\",\r\n  \"password\": \"123\",\r\n  \"roles\": [\r\n    {\r\n        \"roleId\": 1,\r\n        \"slug\": \"administrator\",\r\n        \"name\": \"Administrator\"\r\n    }\r\n  ],\r\n  \"phones\": [\r\n    {\r\n      \"phone\": \"61998752588\"\r\n    }\r\n  ],\r\n  \"addresses\": [\r\n    {\r\n      \"zipCode\": \"73252900\",\r\n      \"address\": \"Condomínio RK\",\r\n      \"complement\": \"Conj Centauros Qd N\",\r\n      \"neighborhood\": \"Sobradinho\",\r\n      \"city\": \"Brasília\",\r\n      \"state\": \"DF\"\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/User/insert",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"User",
+								"insert"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"userId\": 3,\r\n  \"name\": \"Rodrigo Landim 2\",\r\n  \"email\": \"rodrigo.landim@emagine.com.br\",\r\n  \"isAdmin\": false,\r\n  \"birthDate\": \"2025-08-26\",\r\n  \"idDocument\": \"1911663/SSP-DF\",\r\n  \"password\": \"123\",\r\n  \"roles\": [\r\n    {\r\n        \"roleId\": 1,\r\n        \"slug\": \"administrator\",\r\n        \"name\": \"Administrator\"\r\n    },\r\n    {\r\n        \"roleId\": 3,\r\n        \"slug\": \"teste\",\r\n        \"name\": \"teste\"\r\n    }\r\n  ],\r\n  \"phones\": [\r\n    {\r\n      \"phone\": \"61998752588\"\r\n    }\r\n  ],\r\n  \"addresses\": [\r\n    {\r\n      \"zipCode\": \"73252900\",\r\n      \"address\": \"Condomínio RK\",\r\n      \"complement\": \"Conj Centauros Qd N\",\r\n      \"neighborhood\": \"Sobradinho\",\r\n      \"city\": \"Brasília\",\r\n      \"state\": \"DF\"\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/User/update",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"User",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ChangePassword",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "tokendoamor",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"oldPassword\": \"pikpro6\",\r\n  \"newPassword\": \"123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/User/changePassword",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"User",
+								"changePassword"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "changePasswordUsingHash",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "tokendoamor",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"recoveryHash\": \"first-access\",\r\n  \"newPassword\": \"pikpro6\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/User/changePasswordUsingHash",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"User",
+								"changePasswordUsingHash"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Role",
+			"item": [
+				{
+					"name": "List",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/Role/list",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"Role",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "InsertRole",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"slug\": \"Vendendor\",\r\n  \"name\": \"Vendendor\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/Role/insert",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"Role",
+								"insert"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateRole",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"roleId\": 2,\r\n    \"slug\": \"Associado\",\r\n    \"name\": \"Associado\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/Role/update",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"Role",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetById",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/Role/getById/1",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"Role",
+								"getById",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteRole",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/Role/delete/5",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"Role",
+								"delete",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetBySlug",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "tokendoamor",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/Role/getBySlug/administrator",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"Role",
+								"getBySlug",
+								"administrator"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "https://emagine.com.br/auth-api"
+		},
+		{
+			"key": "bearerToken",
+			"value": ""
+		}
+	]
+}

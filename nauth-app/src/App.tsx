@@ -14,6 +14,7 @@ import { ProfilePage } from './pages/ProfilePage';
 import { ChangePasswordPage } from './pages/ChangePasswordPage';
 import SearchUsersPage from './pages/SearchUsersPage';
 import RolesPage from './pages/RolesPage';
+import UserEditPage from './pages/UserEditPage';
 import { ROUTES } from './lib/constants';
 
 function App() {
@@ -77,6 +78,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <RolesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.USER_EDIT}
+              element={
+                <ProtectedRoute>
+                  <UserEditPage />
                 </ProtectedRoute>
               }
             />

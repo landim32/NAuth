@@ -61,7 +61,15 @@ namespace NAuth.Infra.Repository
         public IUserModel Update(IUserModel model, IUserDomainFactory factory)
         {
             var row = _ccsContext.Users.Where(x => x.UserId == model.UserId).FirstOrDefault();
+            if (row == null)
+            {
+                return null;
+            }
+            var oldHash = row.Hash;
+            var oldPassword = row.Password;
             ModelToDb(model, row);
+            row.Hash = oldHash;
+            row.Password = oldPassword;
             row.UpdatedAt = DateTime.Now;
             _ccsContext.Users.Update(row);
             _ccsContext.SaveChanges();

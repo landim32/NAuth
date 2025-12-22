@@ -192,6 +192,7 @@ docker-compose logs -f postgres
 
 After deployment, the services will be available at:
 
+- **Frontend App**: http://localhost:5006
 - **API HTTP**: http://localhost:5004
 - **API HTTPS**: https://localhost:5005
 - **Swagger UI**: http://localhost:5004/swagger

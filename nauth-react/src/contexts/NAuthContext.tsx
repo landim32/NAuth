@@ -114,6 +114,26 @@ export const NAuthProvider: React.FC<NAuthProviderProps> = ({ config, children }
     [api, config]
   );
 
+  const createUser = useCallback(
+    async (data: Partial<UserInfo>): Promise<UserInfo> => {
+      setIsLoading(true);
+      try {
+        const newUser = await api.createUser(data);
+        return newUser;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [api]
+  );
+
+  const getUserById = useCallback(
+    async (userId: number): Promise<UserInfo> => {
+      return await api.getUserById(userId);
+    },
+    [api]
+  );
+
   const changePassword = useCallback(
     async (data: ChangePasswordData): Promise<void> => {
       await api.changePassword(data);
@@ -216,6 +236,8 @@ export const NAuthProvider: React.FC<NAuthProviderProps> = ({ config, children }
     logout,
     register,
     updateUser,
+    createUser,
+    getUserById,
     changePassword,
     resetPassword,
     sendRecoveryEmail,

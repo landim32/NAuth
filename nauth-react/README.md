@@ -2,7 +2,7 @@
 
 Modern React authentication component library for NAuth API integration. Built with TypeScript, Tailwind CSS, and designed as a distributable NPM package.
 
-[![npm version](https://badge.fury.io/js/%40nauth%2Freact.svg)](https://www.npmjs.com/package/nauth-react)
+[![npm version](https://img.shields.io/npm/v/nauth-react.svg)](https://www.npmjs.com/package/nauth-react)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Features
@@ -82,7 +82,15 @@ VITE_API_URL=https://your-nauth-api.com
 ### 2. Use Components
 
 ```tsx
-import { LoginForm, RegisterForm, useAuth, useProtectedRoute } from 'nauth-react';
+import {
+  LoginForm,
+  RegisterForm,
+  UserEditForm,
+  RoleList,
+  SearchForm,
+  useAuth,
+  useProtectedRoute,
+} from 'nauth-react';
 import { useNavigate } from 'react-router-dom';
 
 // Login Page
@@ -111,6 +119,57 @@ function Dashboard() {
     </div>
   );
 }
+
+// User Management
+function CreateUserPage() {
+  const navigate = useNavigate();
+  return (
+    <UserEditForm
+      onSuccess={(user) => {
+        console.log('User created:', user);
+        navigate('/users');
+      }}
+      onCancel={() => navigate('/users')}
+    />
+  );
+}
+
+// Edit User
+function EditUserPage({ userId }: { userId: number }) {
+  const navigate = useNavigate();
+  return (
+    <UserEditForm
+      userId={userId}
+      onSuccess={(user) => {
+        console.log('User updated:', user);
+        navigate('/users');
+      }}
+      onCancel={() => navigate('/users')}
+    />
+  );
+}
+
+// Search Users
+function UsersPage() {
+  return (
+    <SearchForm
+      onUserClick={(user) => console.log('Clicked:', user)}
+      showUserAvatar
+      initialPageSize={25}
+    />
+  );
+}
+
+// Role Management
+function RolesPage() {
+  return (
+    <RoleList
+      onEdit={(role) => console.log('Edit:', role)}
+      onDelete={(role) => console.log('Delete:', role)}
+      showCreateButton
+    />
+  );
+}
 ```
 
 ## Components
@@ -122,6 +181,14 @@ function Dashboard() {
 - `ResetPasswordForm` - Password reset with token
 - `ChangePasswordForm` - Change password for authenticated users
 
+**User Management:**
+- `UserEditForm` - Create and edit users with full profile management (dual mode)
+- `SearchForm` - Search and browse users with pagination
+
+**Role Management:**
+- `RoleList` - List and manage roles with CRUD operations
+- `RoleForm` - Create and edit roles
+
 **UI Components:** `Button`, `Input`, `Label`, `Card`, `Avatar`, `DropdownMenu`, `Toaster`
 
 ## Hooks
@@ -131,7 +198,18 @@ function Dashboard() {
 const { user, isAuthenticated, login, logout, isLoading } = useAuth();
 
 // User management
-const { user, updateUser, changePassword, uploadImage } = useUser();
+const {
+  user,
+  updateUser,
+  createUser,
+  getUserById,
+  changePassword,
+  uploadImage,
+  searchUsers,
+} = useUser();
+
+// Role management
+const { fetchRoles, getRoleById, createRole, updateRole, deleteRole } = useNAuth();
 
 // Route protection
 useProtectedRoute({ redirectTo: '/login', requireAdmin: false });

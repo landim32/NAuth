@@ -1,5 +1,7 @@
-﻿using System;
+﻿using NAuth.DTO.Converters;
+using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace NAuth.DTO.User
@@ -21,6 +23,7 @@ namespace NAuth.DTO.User
         [JsonPropertyName("isAdmin")]
         public bool IsAdmin { get; set; }
         [JsonPropertyName("birthDate")]
+        [JsonConverter(typeof(NullableDateTimeConverter))]
         public DateTime? BirthDate { get; set; }
         [JsonPropertyName("idDocument")]
         public string IdDocument { get; set; }

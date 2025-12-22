@@ -21,8 +21,15 @@ export class NAuthAPI {
   private client: AxiosInstance;
   private config: NAuthConfig;
   private fingerprint: string | null = null;
+  private isDevelopment: boolean;
 
   constructor(config: NAuthConfig) {
+    /*
+    this.isDevelopment = typeof import.meta !== 'undefined' && 
+                         import.meta.env && 
+                         (import.meta.env.DEV === true || import.meta.env.MODE === 'development');
+    */
+   this.isDevelopment = true;
     this.config = {
       timeout: 30000,
       storageKey: 'nauth_token',
@@ -124,9 +131,16 @@ export class NAuthAPI {
     this.getStorage().removeItem(this.config.storageKey || 'nauth_token');
   }
 
+  private log(method: string, ...args: any[]): void {
+    if (this.isDevelopment) {
+      console.log(`[NAuthAPI.${method}]`, ...args);
+    }
+  }
+
   // Authentication Methods
 
   async login(credentials: LoginCredentials): Promise<AuthSession> {
+    this.log('login', { email: credentials.email });
     const response = await this.client.post<AuthSession>(
       API_ENDPOINTS.LOGIN,
       credentials
@@ -143,6 +157,7 @@ export class NAuthAPI {
   }
 
   async register(data: RegisterData): Promise<UserInfo> {
+    this.log('register', { email: data.email, name: data.name });
     const response = await this.client.post<UserInfo>(
       API_ENDPOINTS.REGISTER,
       data
@@ -151,6 +166,7 @@ export class NAuthAPI {
   }
 
   logout(): void {
+    this.log('logout');
     this.clearToken();
     
     if (this.config.onLogout) {
@@ -161,11 +177,13 @@ export class NAuthAPI {
   // User Methods
 
   async getMe(): Promise<UserInfo> {
+    this.log('getMe');
     const response = await this.client.get<UserInfo>(API_ENDPOINTS.GET_ME);
     return response.data;
   }
 
   async getUserById(userId: number): Promise<UserInfo> {
+    this.log('getUserById', { userId });
     const response = await this.client.get<UserInfo>(
       `${API_ENDPOINTS.GET_BY_ID}/${userId}`
     );
@@ -173,6 +191,7 @@ export class NAuthAPI {
   }
 
   async getUserByEmail(email: string): Promise<UserInfo> {
+    this.log('getUserByEmail', { email });
     const response = await this.client.get<UserInfo>(
       `${API_ENDPOINTS.GET_BY_EMAIL}/${email}`
     );
@@ -180,6 +199,7 @@ export class NAuthAPI {
   }
 
   async getUserBySlug(slug: string): Promise<UserInfo> {
+    this.log('getUserBySlug', { slug });
     const response = await this.client.get<UserInfo>(
       `${API_ENDPOINTS.GET_BY_SLUG}/${slug}`
     );
@@ -187,6 +207,7 @@ export class NAuthAPI {
   }
 
   async updateUser(data: Partial<UserInfo>): Promise<UserInfo> {
+    this.log('updateUser', data);
     const response = await this.client.post<UserInfo>(
       API_ENDPOINTS.UPDATE_USER,
       data
@@ -194,7 +215,17 @@ export class NAuthAPI {
     return response.data;
   }
 
+  async createUser(data: Partial<UserInfo>): Promise<UserInfo> {
+    this.log('createUser', { email: data.email, name: data.name });
+    const response = await this.client.post<UserInfo>(
+      API_ENDPOINTS.REGISTER,
+      data
+    );
+    return response.data;
+  }
+
   async uploadImage(file: File): Promise<string> {
+    this.log('uploadImage', { fileName: file.name, fileSize: file.size });
     const formData = new FormData();
     formData.append('file', file);
 
@@ -211,23 +242,28 @@ export class NAuthAPI {
   }
 
   async hasPassword(): Promise<boolean> {
+    this.log('hasPassword');
     const response = await this.client.get<boolean>(API_ENDPOINTS.HAS_PASSWORD);
     return response.data;
   }
 
   async changePassword(data: ChangePasswordData): Promise<void> {
+    this.log('changePassword');
     await this.client.post(API_ENDPOINTS.CHANGE_PASSWORD, data);
   }
 
   async sendRecoveryEmail(email: string): Promise<void> {
+    this.log('sendRecoveryEmail', { email });
     await this.client.get(`${API_ENDPOINTS.SEND_RECOVERY_EMAIL}/${email}`);
   }
 
   async resetPassword(data: ResetPasswordData): Promise<void> {
+    this.log('resetPassword');
     await this.client.post(API_ENDPOINTS.RESET_PASSWORD, data);
   }
 
   async listUsers(take: number = 50): Promise<UserInfo[]> {
+    this.log('listUsers', { take });
     const response = await this.client.get<UserInfo[]>(
       `${API_ENDPOINTS.LIST_USERS}/${take}`
     );
@@ -235,6 +271,7 @@ export class NAuthAPI {
   }
 
   async searchUsers(params: UserSearchParams): Promise<PagedResult<UserInfo>> {
+    this.log('searchUsers', { params });
     const response = await this.client.post<PagedResult<UserInfo>>(
       API_ENDPOINTS.SEARCH_USERS,
       params
@@ -245,6 +282,7 @@ export class NAuthAPI {
   // Role Methods
 
   async listRoles(take: number = 50): Promise<UserRole[]> {
+    this.log('listRoles', { take });
     const response = await this.client.get<UserRole[]>(
       `${API_ENDPOINTS.LIST_ROLES}/${take}`
     );
@@ -252,14 +290,16 @@ export class NAuthAPI {
   }
 
   async fetchRoles(): Promise<RoleInfo[]> {
+    this.log('fetchRoles');
     const response = await this.client.get<RoleInfo[]>(
       API_ENDPOINTS.LIST_ROLES
     );
-    console.log('Fetched roles:', response.data);
+    this.log('fetchRoles - response', response.data);
     return response.data;
   }
 
   async getRoleById(roleId: number): Promise<UserRole> {
+    this.log('getRoleById', { roleId });
     const response = await this.client.get<UserRole>(
       `${API_ENDPOINTS.GET_ROLE_BY_ID}/${roleId}`
     );
@@ -267,6 +307,7 @@ export class NAuthAPI {
   }
 
   async getRoleBySlug(slug: string): Promise<UserRole> {
+    this.log('getRoleBySlug', { slug });
     const response = await this.client.get<UserRole>(
       `${API_ENDPOINTS.GET_ROLE_BY_SLUG}/${slug}`
     );
@@ -274,6 +315,7 @@ export class NAuthAPI {
   }
 
   async createRole(data: RoleFormData): Promise<RoleInfo> {
+    this.log('createRole', { name: data.name, slug: data.slug });
     const payload = {
       roleId: 0,
       name: data.name,
@@ -288,6 +330,7 @@ export class NAuthAPI {
   }
 
   async updateRole(data: RoleFormData): Promise<RoleInfo> {
+    this.log('updateRole', { roleId: data.roleId, name: data.name });
     const payload = {
       roleId: data.roleId,
       name: data.name,
@@ -302,10 +345,11 @@ export class NAuthAPI {
   }
 
   async deleteRole(roleId: number): Promise<string> {
+    this.log('deleteRole', { roleId });
     const response = await this.client.delete<string>(
       `${API_ENDPOINTS.DELETE_ROLE}/${roleId}`
     );
-    console.log('Deleted role:', response.data);
+    this.log('deleteRole - response', response.data);
     return response.data;
   }
 

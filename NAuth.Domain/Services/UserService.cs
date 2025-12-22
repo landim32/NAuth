@@ -482,7 +482,8 @@ namespace NAuth.Domain.Services
                 {
                     _logger.LogError(ex, "Error inserting user with email {Email}", user.Email);
                     transaction.Rollback();
-                    throw new InvalidOperationException($"Error inserting user with email {user.Email}", ex);
+                    //throw new InvalidOperationException($"Error inserting user with email {user.Email}", ex);
+                    throw new InvalidOperationException(ex.Message, ex);
                 }
             }
         }
@@ -582,7 +583,8 @@ namespace NAuth.Domain.Services
                 {
                     _logger.LogError(ex, "Error updating user {UserId}", user.UserId);
                     transaction.Rollback();
-                    throw new InvalidOperationException($"Error updating user {user.UserId}", ex);
+                    //throw new InvalidOperationException($"Error updating user {user.UserId}", ex);
+                    throw new InvalidOperationException(ex.Message, ex);
                 }
             }
         }

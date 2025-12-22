@@ -206,10 +206,10 @@ namespace NAuth.API.Controllers
                     _logger.LogError(NotAuthorizedMessage);
                     return Unauthorized(NotAuthorizedMessage);
                 }
-                if (userSession.UserId != user.UserId)
+                if (userSession.UserId != user.UserId && !userSession.IsAdmin)
                 {
                     _logger.LogError("Only can update your user ({UserSession} != {UserId})", userSession.UserId, user.UserId);
-                    return Forbid("Only can update your user");
+                    return StatusCode(403, "Only can update your user");
                 }
 
                 var updatedUser = await _userService.Update(user);
