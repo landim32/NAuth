@@ -39,7 +39,7 @@ namespace NAuth.Test.ACL
 
             _mockNAuthSettings.Setup(x => x.Value).Returns(_nauthSetting);
             _mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(_mockLogger.Object);
-            
+
             _scheme = new AuthenticationScheme("TestScheme", "TestScheme", typeof(NAuthHandler));
             _mockOptions.Setup(x => x.Get(It.IsAny<string>())).Returns(new AuthenticationSchemeOptions());
 
@@ -85,7 +85,7 @@ namespace NAuth.Test.ACL
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature
+                    SecurityAlgorithms.HmacSha256
                 ),
                 Issuer = "NAuth",
                 Audience = "NAuth.API"
@@ -248,7 +248,7 @@ namespace NAuth.Test.ACL
                 IssuedAt = now.AddHours(-2),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature
+                    SecurityAlgorithms.HmacSha256
                 ),
                 Issuer = "NAuth",
                 Audience = "NAuth.API"
@@ -286,7 +286,7 @@ namespace NAuth.Test.ACL
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(wrongKey),
-                    SecurityAlgorithms.HmacSha256Signature
+                    SecurityAlgorithms.HmacSha256
                 ),
                 Issuer = "NAuth",
                 Audience = "NAuth.API"
@@ -328,7 +328,7 @@ namespace NAuth.Test.ACL
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature
+                    SecurityAlgorithms.HmacSha256
                 ),
                 Issuer = "NAuth",
                 Audience = "NAuth.API"
@@ -366,7 +366,7 @@ namespace NAuth.Test.ACL
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature
+                    SecurityAlgorithms.HmacSha256
                 ),
                 Issuer = "NAuth",
                 Audience = "NAuth.API"
@@ -480,7 +480,7 @@ namespace NAuth.Test.ACL
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature
+                    SecurityAlgorithms.HmacSha256
                 ),
                 Issuer = "WrongIssuer",
                 Audience = "NAuth.API"
@@ -518,7 +518,7 @@ namespace NAuth.Test.ACL
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature
+                    SecurityAlgorithms.HmacSha256
                 ),
                 Issuer = "NAuth",
                 Audience = "WrongAudience"
@@ -563,7 +563,7 @@ namespace NAuth.Test.ACL
                 IssuedAt = now.AddMinutes(-10),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature
+                    SecurityAlgorithms.HmacSha256
                 ),
                 Issuer = "NAuth",
                 Audience = "NAuth.API"

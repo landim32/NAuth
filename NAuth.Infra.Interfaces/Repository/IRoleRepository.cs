@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace NAuth.Infra.Interfaces.Repository
 {
     public interface IRoleRepository<TModel, TFactory>

@@ -126,7 +126,7 @@ namespace NAuth.Test.Domain.Models
             _addressModel.Neighborhood = "Center";
             _addressModel.City = "Test City";
             _addressModel.State = "TS";
-            
+
             var mockReturnModel = new Mock<IUserAddressModel>();
             _mockRepository
                 .Setup(r => r.Insert(_addressModel, _mockFactory.Object))
@@ -138,7 +138,7 @@ namespace NAuth.Test.Domain.Models
             // Assert
             Assert.NotNull(result);
             _mockRepository.Verify(r => r.Insert(
-                It.Is<IUserAddressModel>(m => 
+                It.Is<IUserAddressModel>(m =>
                     m.UserId == 1L &&
                     m.ZipCode == "12345678" &&
                     m.Address == "Test Street" &&
@@ -157,7 +157,7 @@ namespace NAuth.Test.Domain.Models
             _addressModel.UserId = 1L;
             _addressModel.ZipCode = "12345";
             _addressModel.Address = "Street";
-            
+
             var mockReturnModel = new Mock<IUserAddressModel>();
             _mockRepository
                 .Setup(r => r.Insert(_addressModel, _mockFactory.Object))
@@ -337,15 +337,15 @@ namespace NAuth.Test.Domain.Models
             _addressModel.Neighborhood = "Center";
             _addressModel.City = "Test City";
             _addressModel.State = "TS";
-            
+
             var insertedModel = new Mock<IUserAddressModel>();
             insertedModel.SetupGet(m => m.AddressId).Returns(1L);
             insertedModel.SetupGet(m => m.UserId).Returns(userId);
-            
+
             _mockRepository
                 .Setup(r => r.Insert(_addressModel, _mockFactory.Object))
                 .Returns(insertedModel.Object);
-            
+
             var mockAddresses = new List<IUserAddressModel> { insertedModel.Object };
             _mockRepository
                 .Setup(r => r.ListByUser(userId, _mockFactory.Object))
@@ -353,7 +353,7 @@ namespace NAuth.Test.Domain.Models
 
             // Act - Insert
             var insertResult = _addressModel.Insert(_mockFactory.Object);
-            
+
             // Act - List
             var listResult = _addressModel.ListByUser(userId, _mockFactory.Object);
 
@@ -373,25 +373,25 @@ namespace NAuth.Test.Domain.Models
             _addressModel.UserId = userId;
             _addressModel.ZipCode = "12345678";
             _addressModel.Address = "Test Street";
-            
+
             var insertedModel = new Mock<IUserAddressModel>();
             _mockRepository
                 .Setup(r => r.Insert(_addressModel, _mockFactory.Object))
                 .Returns(insertedModel.Object);
-            
+
             var mockAddresses = new List<IUserAddressModel> { insertedModel.Object };
             _mockRepository
                 .Setup(r => r.ListByUser(userId, _mockFactory.Object))
                 .Returns(mockAddresses);
-            
+
             _mockRepository.Setup(r => r.DeleteAllByUser(userId));
 
             // Act - Insert
             var insertResult = _addressModel.Insert(_mockFactory.Object);
-            
+
             // Act - List
             var listResult = _addressModel.ListByUser(userId, _mockFactory.Object);
-            
+
             // Act - Delete
             _addressModel.DeleteAllByUser(userId);
 
@@ -409,22 +409,22 @@ namespace NAuth.Test.Domain.Models
         {
             // Arrange
             var userId = 1L;
-            
+
             var address1 = new UserAddressModel(_mockUnitOfWork.Object, _mockRepository.Object);
             address1.UserId = userId;
             address1.Address = "Address 1";
-            
+
             var address2 = new UserAddressModel(_mockUnitOfWork.Object, _mockRepository.Object);
             address2.UserId = userId;
             address2.Address = "Address 2";
-            
+
             var mockReturn1 = Mock.Of<IUserAddressModel>();
             var mockReturn2 = Mock.Of<IUserAddressModel>();
-            
+
             _mockRepository
                 .Setup(r => r.Insert(address1, _mockFactory.Object))
                 .Returns(mockReturn1);
-            
+
             _mockRepository
                 .Setup(r => r.Insert(address2, _mockFactory.Object))
                 .Returns(mockReturn2);
@@ -449,7 +449,7 @@ namespace NAuth.Test.Domain.Models
             _addressModel.ZipCode = "12345678";
             _addressModel.Address = "Test Street";
             _addressModel.City = "Test City";
-            
+
             var mockReturnModel = new Mock<IUserAddressModel>();
             _mockRepository
                 .Setup(r => r.Insert(_addressModel, _mockFactory.Object))
@@ -499,7 +499,7 @@ namespace NAuth.Test.Domain.Models
             _addressModel.Neighborhood = null;
             _addressModel.City = null;
             _addressModel.State = null;
-            
+
             var mockReturnModel = new Mock<IUserAddressModel>();
             _mockRepository
                 .Setup(r => r.Insert(_addressModel, _mockFactory.Object))

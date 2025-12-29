@@ -140,7 +140,7 @@ namespace NAuth.Test.Domain.Models
             // Assert
             Assert.NotNull(result);
             _mockRepository.Verify(r => r.Insert(
-                It.Is<IUserDocumentModel>(m => 
+                It.Is<IUserDocumentModel>(m =>
                     m.UserId == 1L &&
                     m.DocumentType == DocumentTypeEnum.IdentificationDocument &&
                     m.Base64 == "test-base64"),
@@ -222,7 +222,7 @@ namespace NAuth.Test.Domain.Models
             // Assert
             Assert.NotNull(result);
             _mockRepository.Verify(r => r.Update(
-                It.Is<IUserDocumentModel>(m => 
+                It.Is<IUserDocumentModel>(m =>
                     m.DocumentId == 1L &&
                     m.UserId == 100L &&
                     m.DocumentType == DocumentTypeEnum.DriveLicence &&

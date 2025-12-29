@@ -333,14 +333,14 @@ namespace NAuth.Test.Domain.Models
             var email = "test@test.com";
             var password = "password123";
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password, 12);
-            
+
             var mockUser = new Mock<IUserModel>();
             mockUser.SetupGet(u => u.UserId).Returns(1L);
-            
+
             _mockUserRepository
                 .Setup(r => r.GetByEmail(email, _mockUserFactory.Object))
                 .Returns(mockUser.Object);
-            
+
             _mockUserRepository
                 .Setup(r => r.GetHashedPassword(1L))
                 .Returns(hashedPassword);
@@ -362,14 +362,14 @@ namespace NAuth.Test.Domain.Models
             var email = "test@test.com";
             var password = "wrongpassword";
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword("correctpassword", 12);
-            
+
             var mockUser = new Mock<IUserModel>();
             mockUser.SetupGet(u => u.UserId).Returns(1L);
-            
+
             _mockUserRepository
                 .Setup(r => r.GetByEmail(email, _mockUserFactory.Object))
                 .Returns(mockUser.Object);
-            
+
             _mockUserRepository
                 .Setup(r => r.GetHashedPassword(1L))
                 .Returns(hashedPassword);
@@ -387,13 +387,13 @@ namespace NAuth.Test.Domain.Models
             // Arrange
             var email = "nonexistent@test.com";
             var password = "password123";
-            
+
             _mockUserRepository
                 .Setup(r => r.GetByEmail(email, _mockUserFactory.Object))
                 .Returns((IUserModel)null!);
 
             // Act & Assert
-            Assert.Throws<UserNotFoundException>(() => 
+            Assert.Throws<UserNotFoundException>(() =>
                 _userModel.LoginWithEmail(email, password, _mockUserFactory.Object));
         }
 
@@ -403,14 +403,14 @@ namespace NAuth.Test.Domain.Models
             // Arrange
             var email = "test@test.com";
             var password = "password123";
-            
+
             var mockUser = new Mock<IUserModel>();
             mockUser.SetupGet(u => u.UserId).Returns(1L);
-            
+
             _mockUserRepository
                 .Setup(r => r.GetByEmail(email, _mockUserFactory.Object))
                 .Returns(mockUser.Object);
-            
+
             _mockUserRepository
                 .Setup(r => r.GetHashedPassword(1L))
                 .Returns(string.Empty);
@@ -471,11 +471,11 @@ namespace NAuth.Test.Domain.Models
             var userId = 1L;
             var newPassword = "newpassword123";
             var mockUser = new Mock<IUserModel>();
-            
+
             _mockUserRepository
                 .Setup(r => r.GetById(userId, _mockUserFactory.Object))
                 .Returns(mockUser.Object);
-            
+
             _mockUserRepository
                 .Setup(r => r.ChangePassword(userId, It.IsAny<string>()));
 
@@ -493,13 +493,13 @@ namespace NAuth.Test.Domain.Models
             // Arrange
             var userId = 999L;
             var newPassword = "newpassword123";
-            
+
             _mockUserRepository
                 .Setup(r => r.GetById(userId, _mockUserFactory.Object))
                 .Returns((IUserModel)null!);
 
             // Act & Assert
-            Assert.Throws<UserNotFoundException>(() => 
+            Assert.Throws<UserNotFoundException>(() =>
                 _userModel.ChangePassword(userId, newPassword, _mockUserFactory.Object));
         }
 
@@ -515,11 +515,11 @@ namespace NAuth.Test.Domain.Models
             var newPassword = "newpassword123";
             var mockUser = new Mock<IUserModel>();
             mockUser.SetupGet(u => u.UserId).Returns(1L);
-            
+
             _mockUserRepository
                 .Setup(r => r.GetUserByRecoveryHash(recoveryHash, _mockUserFactory.Object))
                 .Returns(mockUser.Object);
-            
+
             _mockUserRepository
                 .Setup(r => r.ChangePassword(1L, It.IsAny<string>()));
 
@@ -537,13 +537,13 @@ namespace NAuth.Test.Domain.Models
             // Arrange
             var recoveryHash = "invalid_hash";
             var newPassword = "newpassword123";
-            
+
             _mockUserRepository
                 .Setup(r => r.GetUserByRecoveryHash(recoveryHash, _mockUserFactory.Object))
                 .Returns((IUserModel)null!);
 
             // Act & Assert
-            Assert.Throws<UserNotFoundException>(() => 
+            Assert.Throws<UserNotFoundException>(() =>
                 _userModel.ChangePasswordUsingHash(recoveryHash, newPassword, _mockUserFactory.Object));
         }
 
@@ -557,11 +557,11 @@ namespace NAuth.Test.Domain.Models
             // Arrange
             var userId = 1L;
             var mockUser = new Mock<IUserModel>();
-            
+
             _mockUserRepository
                 .Setup(r => r.GetById(userId, _mockUserFactory.Object))
                 .Returns(mockUser.Object);
-            
+
             _mockUserRepository
                 .Setup(r => r.UpdateRecoveryHash(userId, It.IsAny<string>()));
 
@@ -580,13 +580,13 @@ namespace NAuth.Test.Domain.Models
         {
             // Arrange
             var userId = 999L;
-            
+
             _mockUserRepository
                 .Setup(r => r.GetById(userId, _mockUserFactory.Object))
                 .Returns((IUserModel)null!);
 
             // Act & Assert
-            Assert.Throws<UserNotFoundException>(() => 
+            Assert.Throws<UserNotFoundException>(() =>
                 _userModel.GenerateRecoveryHash(userId, _mockUserFactory.Object));
         }
 

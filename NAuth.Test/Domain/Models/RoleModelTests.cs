@@ -142,9 +142,9 @@ namespace NAuth.Test.Domain.Models
             // Assert
             Assert.NotNull(result);
             _mockRepository.Verify(r => r.Update(
-                It.Is<IRoleModel>(m => 
-                    m.RoleId == 1L && 
-                    m.Slug == "updated-slug" && 
+                It.Is<IRoleModel>(m =>
+                    m.RoleId == 1L &&
+                    m.Slug == "updated-slug" &&
                     m.Name == "Updated Role"),
                 _mockFactory.Object),
                 Times.Once);
@@ -396,23 +396,23 @@ namespace NAuth.Test.Domain.Models
             // Arrange
             _roleModel.Slug = "test-role";
             _roleModel.Name = "Test Role";
-            
+
             var insertedModel = new Mock<IRoleModel>();
             insertedModel.SetupGet(m => m.RoleId).Returns(1L);
             insertedModel.SetupGet(m => m.Slug).Returns("test-role");
             insertedModel.SetupGet(m => m.Name).Returns("Test Role");
-            
+
             _mockRepository
                 .Setup(r => r.Insert(_roleModel, _mockFactory.Object))
                 .Returns(insertedModel.Object);
-            
+
             _mockRepository
                 .Setup(r => r.GetById(1L, _mockFactory.Object))
                 .Returns(insertedModel.Object);
 
             // Act - Insert
             var insertResult = _roleModel.Insert(_mockFactory.Object);
-            
+
             // Act - Retrieve
             var getResult = _roleModel.GetById(1L, _mockFactory.Object);
 
@@ -431,38 +431,38 @@ namespace NAuth.Test.Domain.Models
             // Arrange
             _roleModel.Slug = "original-slug";
             _roleModel.Name = "Original Name";
-            
+
             var insertedModel = new Mock<IRoleModel>();
             insertedModel.SetupGet(m => m.RoleId).Returns(1L);
             insertedModel.SetupGet(m => m.Slug).Returns("original-slug");
             insertedModel.SetupGet(m => m.Name).Returns("Original Name");
-            
+
             var updatedModel = new Mock<IRoleModel>();
             updatedModel.SetupGet(m => m.RoleId).Returns(1L);
             updatedModel.SetupGet(m => m.Slug).Returns("updated-slug");
             updatedModel.SetupGet(m => m.Name).Returns("Updated Name");
-            
+
             _mockRepository
                 .Setup(r => r.Insert(_roleModel, _mockFactory.Object))
                 .Returns(insertedModel.Object);
-            
+
             _mockRepository
                 .Setup(r => r.Update(It.IsAny<IRoleModel>(), _mockFactory.Object))
                 .Returns(updatedModel.Object);
-            
+
             _mockRepository
                 .Setup(r => r.GetById(1L, _mockFactory.Object))
                 .Returns(updatedModel.Object);
 
             // Act - Insert
             var insertResult = _roleModel.Insert(_mockFactory.Object);
-            
+
             // Act - Update
             _roleModel.RoleId = 1L;
             _roleModel.Slug = "updated-slug";
             _roleModel.Name = "Updated Name";
             var updateResult = _roleModel.Update(_mockFactory.Object);
-            
+
             // Act - Retrieve
             var getResult = _roleModel.GetById(1L, _mockFactory.Object);
 
@@ -484,11 +484,11 @@ namespace NAuth.Test.Domain.Models
             var slug = "new-role";
             _roleModel.Slug = slug;
             _roleModel.Name = "New Role";
-            
+
             _mockRepository
                 .Setup(r => r.ExistSlug(0L, slug))
                 .Returns(false);
-            
+
             var insertedModel = new Mock<IRoleModel>();
             insertedModel.SetupGet(m => m.RoleId).Returns(1L);
             _mockRepository
@@ -497,7 +497,7 @@ namespace NAuth.Test.Domain.Models
 
             // Act - Check slug existence
             var slugExists = _roleModel.ExistSlug(0L, slug);
-            
+
             // Act - Insert if slug doesn't exist
             IRoleModel result = null!;
             if (!slugExists)

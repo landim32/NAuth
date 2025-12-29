@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NAuth.Domain.Exceptions;
-using NAuth.Domain.Services;
 using NAuth.Domain.Services.Interfaces;
 using NAuth.DTO.User;
 using System;
@@ -94,7 +93,7 @@ namespace NAuth.API.Controllers
                     Name = role.Name
                 };
 
-                _logger.LogInformation("GetById(roleId: {RoleId}) = Role(RoleId: {ID}, Slug: {Slug}, Name: {Name})", 
+                _logger.LogInformation("GetById(roleId: {RoleId}) = Role(RoleId: {ID}, Slug: {Slug}, Name: {Name})",
                     roleId, role.RoleId, role.Slug, role.Name);
 
                 return Ok(roleInfo);
@@ -171,7 +170,7 @@ namespace NAuth.API.Controllers
                     Name = newRole.Name
                 };
 
-                _logger.LogInformation("Role successfully inserted (RoleId: {RoleId}, Slug: {Slug}, Name: {Name})", 
+                _logger.LogInformation("Role successfully inserted (RoleId: {RoleId}, Slug: {Slug}, Name: {Name})",
                     newRole.RoleId, newRole.Slug, newRole.Name);
 
                 return Ok(result);
@@ -210,7 +209,7 @@ namespace NAuth.API.Controllers
                     Name = updatedRole.Name
                 };
 
-                _logger.LogInformation("Role successfully updated (RoleId: {RoleId}, Slug: {Slug}, Name: {Name})", 
+                _logger.LogInformation("Role successfully updated (RoleId: {RoleId}, Slug: {Slug}, Name: {Name})",
                     updatedRole.RoleId, updatedRole.Slug, updatedRole.Name);
 
                 return Ok(result);

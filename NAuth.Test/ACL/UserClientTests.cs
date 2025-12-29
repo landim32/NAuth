@@ -43,8 +43,8 @@ namespace NAuth.Test.ACL
             };
 
             var userClient = new UserClient(_mockOptions.Object, _mockLogger.Object, httpClient);
-            
-            var httpClientField = typeof(UserClient).GetField("_httpClient", 
+
+            var httpClientField = typeof(UserClient).GetField("_httpClient",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             httpClientField?.SetValue(userClient, httpClient);
 

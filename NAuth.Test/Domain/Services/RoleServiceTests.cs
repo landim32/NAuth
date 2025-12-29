@@ -26,17 +26,17 @@ namespace NAuth.Test.Domain.Services
             _mockRoleFactory = new Mock<IRoleDomainFactory>();
             _mockRoleModel = new Mock<IRoleModel>();
             _mockStringClient = new Mock<IStringClient>();
-            
+
             _mockFactory = new Mock<DomainFactory>(
                 Mock.Of<IUserDomainFactory>(),
                 Mock.Of<IUserPhoneDomainFactory>(),
                 Mock.Of<IUserAddressDomainFactory>(),
                 _mockRoleFactory.Object
             );
-            
+
             _mockFactory.SetupGet(f => f.RoleFactory).Returns(_mockRoleFactory.Object);
             _mockRoleFactory.Setup(f => f.BuildRoleModel()).Returns(_mockRoleModel.Object);
-            
+
             _roleService = new RoleService(_mockLogger.Object, _mockFactory.Object, _mockStringClient.Object);
         }
 

@@ -1,11 +1,10 @@
-﻿using NAuth.Domain.Factory.Interfaces;
+﻿using NAuth.Domain.Enums;
+using NAuth.Domain.Factory.Interfaces;
 using NAuth.Domain.Models.Models;
 using NAuth.Infra.Interfaces;
 using NAuth.Infra.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
-using BCrypt.Net;
-using NAuth.Domain.Enums;
 
 namespace NAuth.Domain.Models
 {
@@ -23,7 +22,7 @@ namespace NAuth.Domain.Models
         public const string UserNotFoundMessage = "User not found";
 
         public UserModel(
-            IUnitOfWork unitOfWork, 
+            IUnitOfWork unitOfWork,
             IUserRepository<IUserModel, IUserDomainFactory> repositoryUser,
             IUserRoleRepository<IRoleModel, IRoleDomainFactory> repositoryUserRole
         )
@@ -134,7 +133,7 @@ namespace NAuth.Domain.Models
             {
                 throw new UserNotFoundException();
             }
-            
+
             // Usa BCrypt para criar o hash da nova senha
             string hashedPassword = HashPassword(password);
             _repositoryUser.ChangePassword(userId, hashedPassword);
@@ -147,7 +146,7 @@ namespace NAuth.Domain.Models
             {
                 throw new UserNotFoundException();
             }
-            
+
             // Usa BCrypt para criar o hash da nova senha
             string hashedPassword = HashPassword(password);
             _repositoryUser.ChangePassword(user.UserId, hashedPassword);
@@ -160,7 +159,7 @@ namespace NAuth.Domain.Models
             {
                 throw new UserNotFoundException();
             }
-            
+
             // Gera um token seguro para recuperação de senha usando BCrypt
             string recoveryToken = Guid.NewGuid().ToString() + user.UserId + DateTime.UtcNow.Ticks;
             string recoveryHash = HashPassword(recoveryToken);

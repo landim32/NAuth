@@ -1,8 +1,8 @@
+using Microsoft.EntityFrameworkCore;
 using NAuth.Domain.Factory.Interfaces;
 using NAuth.Domain.Models.Models;
 using NAuth.Infra.Context;
 using NAuth.Infra.Interfaces.Repository;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -34,7 +34,7 @@ namespace NAuth.Infra.Repository
                 .SelectMany(u => u.Roles)
                 .OrderBy(r => r.Name)
                 .ToList();
-            
+
             return rows.Select(x => DbToModel(factory, x));
         }
 
@@ -43,7 +43,7 @@ namespace NAuth.Infra.Repository
             var user = _context.Users
                 .Include(u => u.Roles)
                 .FirstOrDefault(u => u.UserId == userId);
-            
+
             if (user == null)
                 return;
 
@@ -63,7 +63,7 @@ namespace NAuth.Infra.Repository
             var user = _context.Users
                 .Include(u => u.Roles)
                 .FirstOrDefault(u => u.UserId == userId);
-            
+
             if (user == null)
                 return;
 
@@ -80,7 +80,7 @@ namespace NAuth.Infra.Repository
             var user = _context.Users
                 .Include(u => u.Roles)
                 .FirstOrDefault(u => u.UserId == userId);
-            
+
             if (user == null)
                 return;
 

@@ -13,7 +13,7 @@ namespace NAuth.Domain.Factory
         protected readonly IUserRoleRepository<IRoleModel, IRoleDomainFactory> _repositoryUserRole;
 
         public UserDomainFactory(
-            IUnitOfWork unitOfWork, 
+            IUnitOfWork unitOfWork,
             IUserRepository<IUserModel, IUserDomainFactory> repositoryUser,
             IUserRoleRepository<IRoleModel, IRoleDomainFactory> repositoryUserRole
         )

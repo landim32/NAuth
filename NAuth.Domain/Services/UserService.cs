@@ -4,20 +4,17 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NAuth.Domain.Exceptions;
 using NAuth.Domain.Factory;
-using NAuth.Domain.Factory.Interfaces;
 using NAuth.Domain.Models.Models;
 using NAuth.Domain.Services.Interfaces;
 using NAuth.DTO.Settings;
 using NAuth.DTO.User;
 using NAuth.Infra.Interfaces;
-using Newtonsoft.Json;
 using NTools.ACL.Interfaces;
 using NTools.DTO.MailerSend;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -95,7 +92,7 @@ namespace NAuth.Domain.Services
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_nauthSetting.JwtSecret);
-            
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
@@ -122,7 +119,7 @@ namespace NAuth.Domain.Services
                 Expires = DateTime.UtcNow.AddMonths(2),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature
+                    SecurityAlgorithms.HmacSha256
                 ),
                 Issuer = "NAuth",
                 Audience = "NAuth.API"
@@ -131,7 +128,7 @@ namespace NAuth.Domain.Services
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
 
-            _logger.LogInformation("JWT token created successfully for user {UserId}, expires at {ExpiresAt}", 
+            _logger.LogInformation("JWT token created successfully for user {UserId}, expires at {ExpiresAt}",
                 userId, tokenDescriptor.Expires);
 
             return await Task.FromResult(tokenString);
@@ -473,9 +470,9 @@ namespace NAuth.Domain.Services
                     md.ChangePassword(user.UserId, user.Password, _factories.UserFactory);
 
                     transaction.Commit();
-                    
+
                     _logger.LogInformation("User {UserId} inserted successfully with email {Email}", md.UserId, md.Email);
-                    
+
                     return md;
                 }
                 catch (Exception ex)
@@ -547,7 +544,7 @@ namespace NAuth.Domain.Services
                     {
                         throw new UserValidationException("User not exists");
                     }
-                    
+
                     await ValidateUserForUpdate(user, model);
 
                     model.Slug = user.Slug;
@@ -574,9 +571,9 @@ namespace NAuth.Domain.Services
                     InsertRoles(user);
 
                     transaction.Commit();
-                    
+
                     _logger.LogInformation("User {UserId} updated successfully with email {Email}", model.UserId, model.Email);
-                    
+
                     return model;
                 }
                 catch (Exception ex)
@@ -638,7 +635,7 @@ namespace NAuth.Domain.Services
             }
 
             var claims = httpContext.User.Claims.ToList();
-            
+
             var userInfo = new UserInfo
             {
                 UserId = long.TryParse(claims.FirstOrDefault(c => c.Type == "userId")?.Value, out var userId) ? userId : 0,

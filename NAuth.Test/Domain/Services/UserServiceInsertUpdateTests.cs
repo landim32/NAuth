@@ -138,7 +138,7 @@ namespace NAuth.Test.Domain.Services
             _mockUserFactory.Setup(f => f.BuildUserModel()).Returns(_mockUserModel.Object);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => 
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _userService.Insert(user));
             Assert.Contains("Error inserting user", exception.Message);
             _mockTransaction.Verify(t => t.Rollback(), Times.Once);
@@ -158,7 +158,7 @@ namespace NAuth.Test.Domain.Services
             _mockUserFactory.Setup(f => f.BuildUserModel()).Returns(_mockUserModel.Object);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => 
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _userService.Insert(user));
             Assert.Contains("Error inserting user", exception.Message);
             _mockTransaction.Verify(t => t.Rollback(), Times.Once);
@@ -180,7 +180,7 @@ namespace NAuth.Test.Domain.Services
                 .ReturnsAsync(false);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => 
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _userService.Insert(user));
             Assert.Contains("Error inserting user", exception.Message);
             _mockTransaction.Verify(t => t.Rollback(), Times.Once);
@@ -204,7 +204,7 @@ namespace NAuth.Test.Domain.Services
                 .ReturnsAsync(true);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => 
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _userService.Insert(user));
             Assert.Contains("Error inserting user", exception.Message);
             _mockTransaction.Verify(t => t.Rollback(), Times.Once);
@@ -228,7 +228,7 @@ namespace NAuth.Test.Domain.Services
                 .ReturnsAsync(true);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => 
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _userService.Insert(user));
             Assert.Contains("Error inserting user", exception.Message);
             _mockTransaction.Verify(t => t.Rollback(), Times.Once);
@@ -257,7 +257,7 @@ namespace NAuth.Test.Domain.Services
                 .ReturnsAsync(false);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => 
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _userService.Insert(user));
             Assert.Contains("Error inserting user", exception.Message);
             _mockTransaction.Verify(t => t.Rollback(), Times.Once);
@@ -437,7 +437,7 @@ namespace NAuth.Test.Domain.Services
             _mockUserFactory.Setup(f => f.BuildUserModel()).Returns(_mockUserModel.Object);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => 
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _userService.Update(user));
             Assert.Contains("Error updating user", exception.Message);
             _mockTransaction.Verify(t => t.Rollback(), Times.Once);
@@ -459,7 +459,7 @@ namespace NAuth.Test.Domain.Services
                 .Returns((IUserModel)null!);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => 
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _userService.Update(user));
             Assert.Contains("Error updating user", exception.Message);
             _mockTransaction.Verify(t => t.Rollback(), Times.Once);
@@ -489,7 +489,7 @@ namespace NAuth.Test.Domain.Services
                 .ReturnsAsync(true);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => 
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _userService.Update(user));
             Assert.Contains("Error updating user", exception.Message);
             _mockTransaction.Verify(t => t.Rollback(), Times.Once);

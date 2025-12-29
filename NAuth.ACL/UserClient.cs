@@ -5,7 +5,6 @@ using NAuth.ACL.Interfaces;
 using NAuth.DTO.Settings;
 using NAuth.DTO.User;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -38,7 +37,7 @@ namespace NAuth.ACL
             }
 
             var claims = httpContext.User.Claims.ToList();
-            
+
             var userInfo = new UserInfo
             {
                 UserId = long.TryParse(claims.FirstOrDefault(c => c.Type == "userId")?.Value, out var userId) ? userId : 0,

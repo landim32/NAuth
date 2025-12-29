@@ -42,8 +42,8 @@ namespace NAuth.Test.ACL
 
             // Usar reflexão para injetar o HttpClient customizado
             var roleClient = new RoleClient(_mockOptions.Object, _mockLogger.Object, httpClient);
-            
-            var httpClientField = typeof(RoleClient).GetField("_httpClient", 
+
+            var httpClientField = typeof(RoleClient).GetField("_httpClient",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             httpClientField?.SetValue(roleClient, httpClient);
 

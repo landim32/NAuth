@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace NAuth.Infra.Context;
+﻿namespace NAuth.Infra.Context;
 
 public partial class UserAddress
 {

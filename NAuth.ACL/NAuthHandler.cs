@@ -3,16 +3,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NAuth.DTO.Settings;
-using NAuth.DTO.User;
-using Newtonsoft.Json;
-using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 
 namespace NAuth.ACL
 {
@@ -31,31 +26,39 @@ namespace NAuth.ACL
             _nauthSetting = nauthSetting.Value;
         }
 
-        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
+        protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
+            Logger.LogInformation("Starting authentication process for request path: {Path}", Request.Path);
+
             if (!Request.Headers.ContainsKey("Authorization"))
             {
-                return AuthenticateResult.Fail("Missing Authorization Header");
+                Logger.LogWarning("Authentication failed: Missing Authorization Header for path {Path}", Request.Path);
+                return Task.FromResult(AuthenticateResult.Fail("Missing Authorization Header"));
+            }
+
+            string jwtSecret = _nauthSetting.JwtSecret; 
+            if (string.IsNullOrEmpty(jwtSecret))
+            {
+                Logger.LogError("Authentication failed: JWT Secret is not configured");
+                return Task.FromResult(AuthenticateResult.Fail("Missing JWT Secret"));
             }
 
             try
             {
-                var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+                var authHeaderValue = Request.Headers["Authorization"].ToString();
+                if (string.IsNullOrWhiteSpace(authHeaderValue))
+                {
+                    Logger.LogWarning("Authentication failed: Authorization header is empty for path {Path}", Request.Path);
+                    return Task.FromResult(AuthenticateResult.Fail("Missing Authorization Token"));
+                }
+
+                var authHeader = AuthenticationHeaderValue.Parse(authHeaderValue);
                 var token = authHeader.Parameter;
 
-                if (string.IsNullOrEmpty(token))
-                {
-                    return AuthenticateResult.Fail("Missing Authorization Token");
-                }
-
-                if (string.IsNullOrEmpty(_nauthSetting.JwtSecret))
-                {
-                    return AuthenticateResult.Fail("Missing JWT Secret");
-                }
-
-                // Valida o JWT token
+                Logger.LogTrace("Autentication Token={Token}, JWT Secret={JwtSecret}", token, jwtSecret);
+                Logger.LogDebug("Starting JWT token validation");
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_nauthSetting.JwtSecret);
+                var key = Encoding.ASCII.GetBytes(jwtSecret);
 
                 var validationParameters = new TokenValidationParameters
                 {
@@ -66,58 +69,49 @@ namespace NAuth.ACL
                     ValidateAudience = true,
                     ValidAudience = "NAuth.API",
                     ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero // Remove o delay padrão de 5 minutos
+                    ClockSkew = TimeSpan.Zero
                 };
 
-                // Valida e extrai as claims do token
                 var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
+                Logger.LogDebug("Token validation completed successfully");
 
-                // Verifica se é um JWT válido
                 if (validatedToken is not JwtSecurityToken jwtToken ||
                     !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    return AuthenticateResult.Fail("Invalid token format");
+                    Logger.LogWarning("Authentication failed: Invalid token format or algorithm");
+                    return Task.FromResult(AuthenticateResult.Fail("Invalid token format"));
                 }
 
-                // Extrai o userId do token
                 var userIdClaim = principal.FindFirst("userId") ?? principal.FindFirst(ClaimTypes.NameIdentifier);
                 if (userIdClaim == null || !long.TryParse(userIdClaim.Value, out long userId))
                 {
-                    return AuthenticateResult.Fail("Invalid user ID in token");
+                    Logger.LogWarning("Authentication failed: Invalid or missing user ID in token claims");
+                    return Task.FromResult(AuthenticateResult.Fail("Invalid user ID in token"));
                 }
 
-                // Busca o usuário para garantir que ainda existe e está válido
-                /*
-                var user = _userService.GetUserByID(userId);
-                if (user == null)
-                {
-                    return AuthenticateResult.Fail("User not found or inactive");
-                }
-                */
-
-                // Cria uma nova identidade com as claims do token
+                Logger.LogDebug("Creating authentication ticket for user {UserId}", userId);
                 var identity = new ClaimsIdentity(principal.Claims, Scheme.Name);
                 var claimsPrincipal = new ClaimsPrincipal(identity);
                 var ticket = new AuthenticationTicket(claimsPrincipal, Scheme.Name);
 
                 Logger.LogInformation("JWT token validated successfully for user {UserId}", userId);
 
-                return AuthenticateResult.Success(ticket);
+                return Task.FromResult(AuthenticateResult.Success(ticket));
             }
             catch (SecurityTokenExpiredException ex)
             {
                 Logger.LogWarning(ex, "Token has expired");
-                return AuthenticateResult.Fail("Token has expired");
+                return Task.FromResult(AuthenticateResult.Fail("Token has expired"));
             }
             catch (SecurityTokenException ex)
             {
                 Logger.LogWarning(ex, "Invalid token");
-                return AuthenticateResult.Fail($"Invalid token: {ex.Message}");
+                return Task.FromResult(AuthenticateResult.Fail($"Invalid token: {ex.Message}"));
             }
             catch (Exception ex)
             {
                 Logger.LogError(ex, "Error validating token");
-                return AuthenticateResult.Fail($"Error validating token: {ex.Message}");
+                return Task.FromResult(AuthenticateResult.Fail($"Error validating token: {ex.Message}"));
             }
         }
     }

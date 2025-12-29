@@ -126,7 +126,7 @@ namespace NAuth.Test.Domain.Models
             // Arrange
             _phoneModel.UserId = 1L;
             _phoneModel.Phone = "11999887766";
-            
+
             var mockReturnModel = new Mock<IUserPhoneModel>();
             _mockRepository
                 .Setup(r => r.Insert(_phoneModel, _mockFactory.Object))
@@ -138,7 +138,7 @@ namespace NAuth.Test.Domain.Models
             // Assert
             Assert.NotNull(result);
             _mockRepository.Verify(r => r.Insert(
-                It.Is<IUserPhoneModel>(m => 
+                It.Is<IUserPhoneModel>(m =>
                     m.UserId == 1L &&
                     m.Phone == "11999887766"),
                 _mockFactory.Object),
@@ -151,7 +151,7 @@ namespace NAuth.Test.Domain.Models
             // Arrange
             _phoneModel.UserId = 1L;
             _phoneModel.Phone = "11999";
-            
+
             var mockReturnModel = new Mock<IUserPhoneModel>();
             _mockRepository
                 .Setup(r => r.Insert(_phoneModel, _mockFactory.Object))
@@ -171,7 +171,7 @@ namespace NAuth.Test.Domain.Models
             // Arrange
             _phoneModel.UserId = 1L;
             _phoneModel.Phone = "";
-            
+
             var mockReturnModel = new Mock<IUserPhoneModel>();
             _mockRepository
                 .Setup(r => r.Insert(_phoneModel, _mockFactory.Object))
@@ -346,15 +346,15 @@ namespace NAuth.Test.Domain.Models
             var userId = 1L;
             _phoneModel.UserId = userId;
             _phoneModel.Phone = "11999887766";
-            
+
             var insertedModel = new Mock<IUserPhoneModel>();
             insertedModel.SetupGet(m => m.PhoneId).Returns(1L);
             insertedModel.SetupGet(m => m.UserId).Returns(userId);
-            
+
             _mockRepository
                 .Setup(r => r.Insert(_phoneModel, _mockFactory.Object))
                 .Returns(insertedModel.Object);
-            
+
             var mockPhones = new List<IUserPhoneModel> { insertedModel.Object };
             _mockRepository
                 .Setup(r => r.ListByUser(userId, _mockFactory.Object))
@@ -362,7 +362,7 @@ namespace NAuth.Test.Domain.Models
 
             // Act - Insert
             var insertResult = _phoneModel.Insert(_mockFactory.Object);
-            
+
             // Act - List
             var listResult = _phoneModel.ListByUser(userId, _mockFactory.Object);
 
@@ -381,25 +381,25 @@ namespace NAuth.Test.Domain.Models
             var userId = 1L;
             _phoneModel.UserId = userId;
             _phoneModel.Phone = "11999887766";
-            
+
             var insertedModel = new Mock<IUserPhoneModel>();
             _mockRepository
                 .Setup(r => r.Insert(_phoneModel, _mockFactory.Object))
                 .Returns(insertedModel.Object);
-            
+
             var mockPhones = new List<IUserPhoneModel> { insertedModel.Object };
             _mockRepository
                 .Setup(r => r.ListByUser(userId, _mockFactory.Object))
                 .Returns(mockPhones);
-            
+
             _mockRepository.Setup(r => r.DeleteAllByUser(userId));
 
             // Act - Insert
             var insertResult = _phoneModel.Insert(_mockFactory.Object);
-            
+
             // Act - List
             var listResult = _phoneModel.ListByUser(userId, _mockFactory.Object);
-            
+
             // Act - Delete
             _phoneModel.DeleteAllByUser(userId);
 
@@ -417,22 +417,22 @@ namespace NAuth.Test.Domain.Models
         {
             // Arrange
             var userId = 1L;
-            
+
             var phone1 = new UserPhoneModel(_mockUnitOfWork.Object, _mockRepository.Object);
             phone1.UserId = userId;
             phone1.Phone = "11999887766";
-            
+
             var phone2 = new UserPhoneModel(_mockUnitOfWork.Object, _mockRepository.Object);
             phone2.UserId = userId;
             phone2.Phone = "11988776655";
-            
+
             var mockReturn1 = Mock.Of<IUserPhoneModel>();
             var mockReturn2 = Mock.Of<IUserPhoneModel>();
-            
+
             _mockRepository
                 .Setup(r => r.Insert(phone1, _mockFactory.Object))
                 .Returns(mockReturn1);
-            
+
             _mockRepository
                 .Setup(r => r.Insert(phone2, _mockFactory.Object))
                 .Returns(mockReturn2);
@@ -455,7 +455,7 @@ namespace NAuth.Test.Domain.Models
             var userId = 1L;
             _phoneModel.UserId = userId;
             _phoneModel.Phone = "11999887766";
-            
+
             var mockReturnModel = new Mock<IUserPhoneModel>();
             _mockRepository
                 .Setup(r => r.Insert(_phoneModel, _mockFactory.Object))
@@ -498,7 +498,7 @@ namespace NAuth.Test.Domain.Models
             // Arrange
             _phoneModel.UserId = 1L;
             _phoneModel.Phone = null;
-            
+
             var mockReturnModel = new Mock<IUserPhoneModel>();
             _mockRepository
                 .Setup(r => r.Insert(_phoneModel, _mockFactory.Object))

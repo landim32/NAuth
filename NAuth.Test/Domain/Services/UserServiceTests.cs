@@ -8,7 +8,6 @@ using NAuth.Domain.Factory.Interfaces;
 using NAuth.Domain.Models.Models;
 using NAuth.Domain.Services;
 using NAuth.DTO.Settings;
-using NAuth.DTO.User;
 using NAuth.Infra.Interfaces;
 using NTools.ACL.Interfaces;
 using NTools.DTO.MailerSend;
@@ -102,7 +101,7 @@ namespace NAuth.Test.Domain.Services
             // Arrange
             var email = "test@example.com";
             var password = "password123";
-            
+
             _mockUserFactory.Setup(f => f.BuildUserModel()).Returns(_mockUserModel.Object);
             _mockUserModel.Setup(m => m.LoginWithEmail(email, password, _mockUserFactory.Object))
                 .Returns(_mockUserModel.Object);
@@ -158,7 +157,7 @@ namespace NAuth.Test.Domain.Services
             var fingerprint = "test-fingerprint";
 
             // Act & Assert
-            await Assert.ThrowsAsync<UserValidationException>(() => 
+            await Assert.ThrowsAsync<UserValidationException>(() =>
                 _userService.CreateToken(userId, ipAddress, userAgent, fingerprint));
         }
 
@@ -172,7 +171,7 @@ namespace NAuth.Test.Domain.Services
             var fingerprint = "test-fingerprint";
 
             // Act & Assert
-            await Assert.ThrowsAsync<UserValidationException>(() => 
+            await Assert.ThrowsAsync<UserValidationException>(() =>
                 _userService.CreateToken(userId, ipAddress, userAgent, fingerprint));
         }
 
@@ -190,7 +189,7 @@ namespace NAuth.Test.Domain.Services
                 .Returns((IUserModel)null!);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<UserValidationException>(() => 
+            var exception = await Assert.ThrowsAsync<UserValidationException>(() =>
                 _userService.CreateToken(userId, ipAddress, userAgent, fingerprint));
             Assert.Equal("User not found", exception.Message);
         }
@@ -260,7 +259,7 @@ namespace NAuth.Test.Domain.Services
             var newPassword = "newPassword123";
 
             // Act & Assert
-            var exception = Assert.Throws<UserValidationException>(() => 
+            var exception = Assert.Throws<UserValidationException>(() =>
                 _userService.ChangePasswordUsingHash(recoveryHash, newPassword));
             Assert.Equal("Recovery hash cant be empty", exception.Message);
         }
@@ -273,7 +272,7 @@ namespace NAuth.Test.Domain.Services
             var newPassword = "";
 
             // Act & Assert
-            var exception = Assert.Throws<UserValidationException>(() => 
+            var exception = Assert.Throws<UserValidationException>(() =>
                 _userService.ChangePasswordUsingHash(recoveryHash, newPassword));
             Assert.Equal("Password cant be empty", exception.Message);
         }
@@ -290,7 +289,7 @@ namespace NAuth.Test.Domain.Services
                 .Returns((IUserModel)null!);
 
             // Act & Assert
-            var exception = Assert.Throws<UserValidationException>(() => 
+            var exception = Assert.Throws<UserValidationException>(() =>
                 _userService.ChangePasswordUsingHash(recoveryHash, newPassword));
             Assert.Equal("User not found", exception.Message);
         }
@@ -337,7 +336,7 @@ namespace NAuth.Test.Domain.Services
             _mockUserModel.Setup(m => m.HasPassword(userId, _mockUserFactory.Object)).Returns(true);
 
             // Act & Assert
-            var exception = Assert.Throws<UserValidationException>(() => 
+            var exception = Assert.Throws<UserValidationException>(() =>
                 _userService.ChangePassword(userId, oldPassword, newPassword));
             Assert.Equal("Old password cant be empty", exception.Message);
         }
@@ -354,7 +353,7 @@ namespace NAuth.Test.Domain.Services
             _mockUserModel.Setup(m => m.HasPassword(userId, _mockUserFactory.Object)).Returns(true);
 
             // Act & Assert
-            var exception = Assert.Throws<UserValidationException>(() => 
+            var exception = Assert.Throws<UserValidationException>(() =>
                 _userService.ChangePassword(userId, oldPassword, newPassword));
             Assert.Equal("New password cant be empty", exception.Message);
         }
@@ -388,7 +387,7 @@ namespace NAuth.Test.Domain.Services
             // Assert
             Assert.True(result);
             _mockMailClient.Verify(m => m.SendmailAsync(It.Is<MailerInfo>(
-                mail => mail.To.Any(t => t.Email == email) && 
+                mail => mail.To.Any(t => t.Email == email) &&
                         mail.Subject.Contains("Password Recovery"))), Times.Once);
         }
 
@@ -399,7 +398,7 @@ namespace NAuth.Test.Domain.Services
             var email = "";
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<UserValidationException>(() => 
+            var exception = await Assert.ThrowsAsync<UserValidationException>(() =>
                 _userService.SendRecoveryEmail(email));
             Assert.Equal("Email cant be empty", exception.Message);
         }
@@ -415,7 +414,7 @@ namespace NAuth.Test.Domain.Services
                 .Returns((IUserModel)null!);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<UserValidationException>(() => 
+            var exception = await Assert.ThrowsAsync<UserValidationException>(() =>
                 _userService.SendRecoveryEmail(email));
             Assert.Equal("User not found", exception.Message);
         }
@@ -429,7 +428,7 @@ namespace NAuth.Test.Domain.Services
         {
             // Arrange
             var email = "test@example.com";
-            
+
             _mockUserFactory.Setup(f => f.BuildUserModel()).Returns(_mockUserModel.Object);
             _mockUserModel.Setup(m => m.GetByEmail(email, _mockUserFactory.Object))
                 .Returns(_mockUserModel.Object);
@@ -451,7 +450,7 @@ namespace NAuth.Test.Domain.Services
         {
             // Arrange
             var userId = 1L;
-            
+
             _mockUserFactory.Setup(f => f.BuildUserModel()).Returns(_mockUserModel.Object);
             _mockUserModel.Setup(m => m.GetById(userId, _mockUserFactory.Object))
                 .Returns(_mockUserModel.Object);
@@ -532,7 +531,7 @@ namespace NAuth.Test.Domain.Services
             // Arrange
             var mockPhoneModel = new Mock<IUserPhoneModel>();
             var mockAddressModel = new Mock<IUserAddressModel>();
-            
+
             _mockUserModel.SetupGet(m => m.UserId).Returns(1L);
             _mockUserModel.SetupGet(m => m.Hash).Returns("test-hash");
             _mockUserModel.SetupGet(m => m.Slug).Returns("test-slug");
@@ -584,7 +583,7 @@ namespace NAuth.Test.Domain.Services
         {
             // Arrange
             var stripeId = "stripe_123";
-            
+
             _mockUserFactory.Setup(f => f.BuildUserModel()).Returns(_mockUserModel.Object);
             _mockUserModel.Setup(m => m.GetByStripeId(stripeId, _mockUserFactory.Object))
                 .Returns(_mockUserModel.Object);
@@ -606,7 +605,7 @@ namespace NAuth.Test.Domain.Services
         {
             // Arrange
             var slug = "test-slug";
-            
+
             _mockUserFactory.Setup(f => f.BuildUserModel()).Returns(_mockUserModel.Object);
             _mockUserModel.Setup(m => m.GetBySlug(slug, _mockUserFactory.Object))
                 .Returns(_mockUserModel.Object);
@@ -628,7 +627,7 @@ namespace NAuth.Test.Domain.Services
         {
             // Arrange
             var userList = new List<IUserModel> { _mockUserModel.Object };
-            
+
             _mockUserFactory.Setup(f => f.BuildUserModel()).Returns(_mockUserModel.Object);
             _mockUserModel.Setup(m => m.ListUsers(_mockUserFactory.Object))
                 .Returns(userList);

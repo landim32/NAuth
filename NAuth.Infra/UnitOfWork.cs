@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using NAuth.Infra.Context;
 using NAuth.Infra.Interfaces;
-using System;
 
 namespace NAuth.Infra
 {
