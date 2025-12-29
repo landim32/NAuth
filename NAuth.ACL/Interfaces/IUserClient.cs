@@ -7,7 +7,7 @@ namespace NAuth.ACL.Interfaces
     {
         UserInfo? GetUserInSession(HttpContext httpContext);
         Task<UserInfo?> GetMeAsync(string token);
-        Task<UserInfo?> GetByIdAsync(long userId);
+        Task<UserInfo?> GetByIdAsync(long userId, string token);
         Task<UserInfo?> GetByTokenAsync(string token);
         Task<UserInfo?> GetByEmailAsync(string email);
         Task<UserInfo?> GetBySlugAsync(string slug);

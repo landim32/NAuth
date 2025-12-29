@@ -166,6 +166,7 @@ namespace NAuth.Test.ACL
         {
             // Arrange
             var userId = 1L;
+            var token = "valid-token";
             var user = new UserInfo
             {
                 UserId = userId,
@@ -192,7 +193,7 @@ namespace NAuth.Test.ACL
             var userClient = CreateUserClient();
 
             // Act
-            var result = await userClient.GetByIdAsync(userId);
+            var result = await userClient.GetByIdAsync(userId, token);
 
             // Assert
             Assert.NotNull(result);
@@ -204,6 +205,7 @@ namespace NAuth.Test.ACL
         {
             // Arrange
             var userId = 999L;
+            var token = "valid-token";
             var httpResponse = new HttpResponseMessage(HttpStatusCode.NotFound)
             {
                 Content = new StringContent("User not found")
@@ -220,7 +222,7 @@ namespace NAuth.Test.ACL
             var userClient = CreateUserClient();
 
             // Act & Assert
-            await Assert.ThrowsAsync<HttpRequestException>(() => userClient.GetByIdAsync(userId));
+            await Assert.ThrowsAsync<HttpRequestException>(() => userClient.GetByIdAsync(userId, token));
         }
 
         #endregion
@@ -712,6 +714,7 @@ namespace NAuth.Test.ACL
         {
             // Arrange
             var userId = 1L;
+            var token = "valid-token";
             var user = new UserInfo { UserId = userId, Name = "Test" };
 
             var jsonResponse = JsonConvert.SerializeObject(user);
@@ -731,7 +734,7 @@ namespace NAuth.Test.ACL
             var userClient = CreateUserClient();
 
             // Act
-            await userClient.GetByIdAsync(userId);
+            await userClient.GetByIdAsync(userId, token);
 
             // Assert
             _mockLogger.Verify(

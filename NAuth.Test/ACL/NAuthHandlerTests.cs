@@ -5,9 +5,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Moq;
 using NAuth.ACL;
-using NAuth.ACL.Interfaces;
 using NAuth.DTO.Settings;
-using NAuth.DTO.User;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -16,24 +14,22 @@ using Xunit;
 
 namespace NAuth.Test.ACL
 {
-    public class RemoteAuthHandlerTests
+    public class NAuthHandlerTests
     {
         private readonly Mock<IOptionsMonitor<AuthenticationSchemeOptions>> _mockOptions;
         private readonly Mock<ILoggerFactory> _mockLoggerFactory;
-        private readonly Mock<ILogger<RemoteAuthHandler>> _mockLogger;
+        private readonly Mock<ILogger<NAuthHandler>> _mockLogger;
         private readonly Mock<ISystemClock> _mockClock;
-        private readonly Mock<IUserClient> _mockUserClient;
         private readonly Mock<IOptions<NAuthSetting>> _mockNAuthSettings;
         private readonly NAuthSetting _nauthSetting;
         private readonly AuthenticationScheme _scheme;
 
-        public RemoteAuthHandlerTests()
+        public NAuthHandlerTests()
         {
             _mockOptions = new Mock<IOptionsMonitor<AuthenticationSchemeOptions>>();
             _mockLoggerFactory = new Mock<ILoggerFactory>();
-            _mockLogger = new Mock<ILogger<RemoteAuthHandler>>();
+            _mockLogger = new Mock<ILogger<NAuthHandler>>();
             _mockClock = new Mock<ISystemClock>();
-            _mockUserClient = new Mock<IUserClient>();
             _mockNAuthSettings = new Mock<IOptions<NAuthSetting>>();
 
             _nauthSetting = new NAuthSetting
@@ -44,25 +40,24 @@ namespace NAuth.Test.ACL
             _mockNAuthSettings.Setup(x => x.Value).Returns(_nauthSetting);
             _mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(_mockLogger.Object);
             
-            _scheme = new AuthenticationScheme("TestScheme", "TestScheme", typeof(RemoteAuthHandler));
+            _scheme = new AuthenticationScheme("TestScheme", "TestScheme", typeof(NAuthHandler));
             _mockOptions.Setup(x => x.Get(It.IsAny<string>())).Returns(new AuthenticationSchemeOptions());
 
             _mockClock.Setup(x => x.UtcNow).Returns(DateTimeOffset.UtcNow);
         }
 
-        private RemoteAuthHandler CreateHandler()
+        private NAuthHandler CreateHandler()
         {
-            return new RemoteAuthHandler(
+            return new NAuthHandler(
                 _mockOptions.Object,
                 _mockLoggerFactory.Object,
                 UrlEncoder.Default,
                 _mockClock.Object,
-                _mockUserClient.Object,
                 _mockNAuthSettings.Object
             );
         }
 
-        private async Task<RemoteAuthHandler> InitializeHandlerAsync(HttpContext context)
+        private async Task<NAuthHandler> InitializeHandlerAsync(HttpContext context)
         {
             var handler = CreateHandler();
             await handler.InitializeAsync(_scheme, context);
@@ -134,7 +129,6 @@ namespace NAuth.Test.ACL
 
             // Assert
             Assert.False(result.Succeeded);
-            // Com header vazio, o Parse falha e retorna "Missing Authorization Header"
             Assert.Equal("Missing Authorization Header", result.Failure?.Message);
         }
 
@@ -151,7 +145,7 @@ namespace NAuth.Test.ACL
 
             // Assert
             Assert.False(result.Succeeded);
-            Assert.Equal("Missing Authorization Token", result.Failure?.Message);
+            Assert.Contains("Error validating token", result.Failure?.Message);
         }
 
         [Fact]
@@ -172,87 +166,14 @@ namespace NAuth.Test.ACL
 
         #endregion
 
-        #region Default Development Token Tests
-
-        [Fact]
-        public async Task HandleAuthenticateAsync_WithDefaultToken_AndUserExists_ShouldSucceed()
-        {
-            // Arrange
-            var defaultUser = new UserInfo
-            {
-                UserId = 1L,
-                Name = "Rodrigo",
-                Email = "rodrigo@emagine.com.br",
-                Hash = "test-hash",
-                IsAdmin = true
-            };
-
-            _mockUserClient
-                .Setup(x => x.GetByEmailAsync("rodrigo@emagine.com.br"))
-                .ReturnsAsync(defaultUser);
-
-            var context = new DefaultHttpContext();
-            context.Request.Headers["Authorization"] = "Bearer tokendoamor";
-            var handler = await InitializeHandlerAsync(context);
-
-            // Act
-            var result = await handler.AuthenticateAsync();
-
-            // Assert
-            Assert.True(result.Succeeded);
-            Assert.NotNull(result.Ticket);
-            Assert.NotNull(result.Principal);
-            
-            var userIdClaim = result.Principal.FindFirst("userId");
-            Assert.NotNull(userIdClaim);
-            Assert.Equal("1", userIdClaim.Value);
-
-            _mockUserClient.Verify(x => x.GetByEmailAsync("rodrigo@emagine.com.br"), Times.Once);
-        }
-
-        [Fact]
-        public async Task HandleAuthenticateAsync_WithDefaultToken_AndUserNotFound_ShouldFail()
-        {
-            // Arrange
-            _mockUserClient
-                .Setup(x => x.GetByEmailAsync("rodrigo@emagine.com.br"))
-                .ReturnsAsync((UserInfo?)null);
-
-            var context = new DefaultHttpContext();
-            context.Request.Headers["Authorization"] = "Bearer tokendoamor";
-            var handler = await InitializeHandlerAsync(context);
-
-            // Act
-            var result = await handler.AuthenticateAsync();
-
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Default user not found", result.Failure?.Message);
-        }
-
-        #endregion
-
         #region Valid JWT Token Tests
 
         [Fact]
-        public async Task HandleAuthenticateAsync_WithValidJwtToken_AndUserExists_ShouldSucceed()
+        public async Task HandleAuthenticateAsync_WithValidJwtToken_ShouldSucceed()
         {
             // Arrange
             var userId = 1L;
             var token = GenerateValidJwtToken(userId, "Test User", "test@test.com");
-
-            var user = new UserInfo
-            {
-                UserId = userId,
-                Name = "Test User",
-                Email = "test@test.com",
-                Hash = "test-hash",
-                IsAdmin = false
-            };
-
-            _mockUserClient
-                .Setup(x => x.GetByIdAsync(userId))
-                .ReturnsAsync(user);
 
             var context = new DefaultHttpContext();
             context.Request.Headers["Authorization"] = $"Bearer {token}";
@@ -269,31 +190,6 @@ namespace NAuth.Test.ACL
             var userIdClaim = result.Principal.FindFirst("userId");
             Assert.NotNull(userIdClaim);
             Assert.Equal(userId.ToString(), userIdClaim.Value);
-
-            _mockUserClient.Verify(x => x.GetByIdAsync(userId), Times.Once);
-        }
-
-        [Fact]
-        public async Task HandleAuthenticateAsync_WithValidJwtToken_AndUserNotFound_ShouldFail()
-        {
-            // Arrange
-            var userId = 999L;
-            var token = GenerateValidJwtToken(userId, "Test User", "test@test.com");
-
-            _mockUserClient
-                .Setup(x => x.GetByIdAsync(userId))
-                .ReturnsAsync((UserInfo?)null);
-
-            var context = new DefaultHttpContext();
-            context.Request.Headers["Authorization"] = $"Bearer {token}";
-            var handler = await InitializeHandlerAsync(context);
-
-            // Act
-            var result = await handler.AuthenticateAsync();
-
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("User not found or inactive", result.Failure?.Message);
         }
 
         #endregion
@@ -347,8 +243,8 @@ namespace NAuth.Test.ACL
                     new Claim("userId", "1"),
                     new Claim(ClaimTypes.NameIdentifier, "1")
                 }),
-                NotBefore = now.AddHours(-2), // Começa 2 horas atrás
-                Expires = now.AddHours(-1), // Expirou há 1 hora
+                NotBefore = now.AddHours(-2),
+                Expires = now.AddHours(-1),
                 IssuedAt = now.AddHours(-2),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
@@ -408,7 +304,6 @@ namespace NAuth.Test.ACL
 
             // Assert
             Assert.False(result.Succeeded);
-            // A validação de assinatura errada retorna "Invalid token" com detalhes
             Assert.StartsWith("Invalid token", result.Failure?.Message);
         }
 
@@ -429,7 +324,6 @@ namespace NAuth.Test.ACL
                 {
                     new Claim(ClaimTypes.Name, "Test User"),
                     new Claim(ClaimTypes.Email, "test@test.com")
-                    // Sem userId
                 }),
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(
@@ -495,6 +389,48 @@ namespace NAuth.Test.ACL
 
         #endregion
 
+        #region Token Format Validation Tests
+
+        [Fact]
+        public async Task HandleAuthenticateAsync_WithNonHmacSha256Token_ShouldFail()
+        {
+            // Arrange
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes("different-secret-key-min-64-chars-for-hs512-algorithm-test-12345678901234567890");
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim("userId", "1"),
+                    new Claim(ClaimTypes.NameIdentifier, "1")
+                }),
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha512
+                ),
+                Issuer = "NAuth",
+                Audience = "NAuth.API"
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+
+            var context = new DefaultHttpContext();
+            context.Request.Headers["Authorization"] = $"Bearer {tokenString}";
+            var handler = await InitializeHandlerAsync(context);
+
+            // Act
+            var result = await handler.AuthenticateAsync();
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.StartsWith("Invalid token", result.Failure?.Message);
+        }
+
+        #endregion
+
         #region Claims Validation Tests
 
         [Fact]
@@ -503,19 +439,6 @@ namespace NAuth.Test.ACL
             // Arrange
             var userId = 1L;
             var token = GenerateValidJwtToken(userId, "Test User", "test@test.com");
-
-            var user = new UserInfo
-            {
-                UserId = userId,
-                Name = "Test User",
-                Email = "test@test.com",
-                Hash = "test-hash",
-                IsAdmin = false
-            };
-
-            _mockUserClient
-                .Setup(x => x.GetByIdAsync(userId))
-                .ReturnsAsync(user);
 
             var context = new DefaultHttpContext();
             context.Request.Headers["Authorization"] = $"Bearer {token}";
@@ -538,21 +461,36 @@ namespace NAuth.Test.ACL
 
         #endregion
 
-        #region Exception Handling Tests
+        #region Issuer and Audience Validation Tests
 
         [Fact]
-        public async Task HandleAuthenticateAsync_WhenUserClientThrows_ShouldFail()
+        public async Task HandleAuthenticateAsync_WithWrongIssuer_ShouldFail()
         {
             // Arrange
-            var userId = 1L;
-            var token = GenerateValidJwtToken(userId, "Test User", "test@test.com");
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_nauthSetting.JwtSecret);
 
-            _mockUserClient
-                .Setup(x => x.GetByIdAsync(userId))
-                .ThrowsAsync(new Exception("API Error"));
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim("userId", "1"),
+                    new Claim(ClaimTypes.NameIdentifier, "1")
+                }),
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature
+                ),
+                Issuer = "WrongIssuer",
+                Audience = "NAuth.API"
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
 
             var context = new DefaultHttpContext();
-            context.Request.Headers["Authorization"] = $"Bearer {token}";
+            context.Request.Headers["Authorization"] = $"Bearer {tokenString}";
             var handler = await InitializeHandlerAsync(context);
 
             // Act
@@ -560,7 +498,90 @@ namespace NAuth.Test.ACL
 
             // Assert
             Assert.False(result.Succeeded);
-            Assert.Contains("Error validating token", result.Failure?.Message);
+            Assert.Contains("Invalid token", result.Failure?.Message);
+        }
+
+        [Fact]
+        public async Task HandleAuthenticateAsync_WithWrongAudience_ShouldFail()
+        {
+            // Arrange
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_nauthSetting.JwtSecret);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim("userId", "1"),
+                    new Claim(ClaimTypes.NameIdentifier, "1")
+                }),
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature
+                ),
+                Issuer = "NAuth",
+                Audience = "WrongAudience"
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+
+            var context = new DefaultHttpContext();
+            context.Request.Headers["Authorization"] = $"Bearer {tokenString}";
+            var handler = await InitializeHandlerAsync(context);
+
+            // Act
+            var result = await handler.AuthenticateAsync();
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Contains("Invalid token", result.Failure?.Message);
+        }
+
+        #endregion
+
+        #region ClockSkew Tests
+
+        [Fact]
+        public async Task HandleAuthenticateAsync_WithJustExpiredToken_ShouldFailImmediately()
+        {
+            // Arrange
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_nauthSetting.JwtSecret);
+
+            var now = DateTime.UtcNow;
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim("userId", "1"),
+                    new Claim(ClaimTypes.NameIdentifier, "1")
+                }),
+                NotBefore = now.AddMinutes(-10),
+                Expires = now.AddSeconds(-1),
+                IssuedAt = now.AddMinutes(-10),
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature
+                ),
+                Issuer = "NAuth",
+                Audience = "NAuth.API"
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var expiredToken = tokenHandler.WriteToken(token);
+
+            var context = new DefaultHttpContext();
+            context.Request.Headers["Authorization"] = $"Bearer {expiredToken}";
+            var handler = await InitializeHandlerAsync(context);
+
+            // Act
+            var result = await handler.AuthenticateAsync();
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal("Token has expired", result.Failure?.Message);
         }
 
         #endregion

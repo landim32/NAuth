@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using NAuth.ACL.Interfaces;
 using NAuth.DTO.Settings;
 using NAuth.DTO.User;
 using Newtonsoft.Json;
@@ -17,25 +16,18 @@ using System.Threading.Tasks;
 
 namespace NAuth.ACL
 {
-    public class RemoteAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+    public class NAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
-        private const string TOKEN_DEFAULT = "tokendoamor";
-        private const string EMAIL_DEFAULT = "rodrigo@emagine.com.br";
-
-        private readonly IUserClient _userClient;
         private readonly NAuthSetting _nauthSetting;
 
-        public RemoteAuthHandler(
+        public NAuthHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
             ISystemClock clock,
-            IUserClient userClient,
-            IOptions<NAuthSetting> nauthSetting
-        )
+            IOptions<NAuthSetting> nauthSetting)
             : base(options, logger, encoder, clock)
         {
-            _userClient = userClient;
             _nauthSetting = nauthSetting.Value;
         }
 
@@ -48,13 +40,7 @@ namespace NAuth.ACL
 
             try
             {
-                var authHeaderValue = Request.Headers["Authorization"].ToString();
-                if (string.IsNullOrWhiteSpace(authHeaderValue))
-                {
-                    return AuthenticateResult.Fail("Missing Authorization Token");
-                }
-
-                var authHeader = AuthenticationHeaderValue.Parse(authHeaderValue);
+                var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
                 var token = authHeader.Parameter;
 
                 if (string.IsNullOrEmpty(token))
@@ -62,37 +48,14 @@ namespace NAuth.ACL
                     return AuthenticateResult.Fail("Missing Authorization Token");
                 }
 
-                UserInfo? user = null;
-
-                // Verifica se é o token padrão de desenvolvimento
-                if (token == TOKEN_DEFAULT)
+                if (string.IsNullOrEmpty(_nauthSetting.JwtSecret))
                 {
-                    Logger.LogWarning("Using default development token");
-                    user = await _userClient.GetByEmailAsync(EMAIL_DEFAULT);
-                    
-                    if (user == null)
-                    {
-                        return AuthenticateResult.Fail("Default user not found");
-                    }
-
-                    var devClaims = new[] {
-                        new Claim("userId", user.UserId.ToString()),
-                        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                        new Claim(ClaimTypes.Name, user.Name ?? string.Empty),
-                        new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-                        new Claim("hash", user.Hash ?? string.Empty),
-                        new Claim("isAdmin", user.IsAdmin.ToString())
-                    };
-                    var devIdentity = new ClaimsIdentity(devClaims, Scheme.Name);
-                    var devPrincipal = new ClaimsPrincipal(devIdentity);
-                    var devTicket = new AuthenticationTicket(devPrincipal, Scheme.Name);
-
-                    return AuthenticateResult.Success(devTicket);
+                    return AuthenticateResult.Fail("Missing JWT Secret");
                 }
 
-                // Valida JWT token (mesmo padrão do LocalAuthHandler)
+                // Valida o JWT token
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_nauthSetting.JwtSecret ?? "your-super-secret-key-min-32-chars-long-12345678");
+                var key = Encoding.ASCII.GetBytes(_nauthSetting.JwtSecret);
 
                 var validationParameters = new TokenValidationParameters
                 {
@@ -103,7 +66,7 @@ namespace NAuth.ACL
                     ValidateAudience = true,
                     ValidAudience = "NAuth.API",
                     ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
+                    ClockSkew = TimeSpan.Zero // Remove o delay padrão de 5 minutos
                 };
 
                 // Valida e extrai as claims do token
@@ -123,19 +86,21 @@ namespace NAuth.ACL
                     return AuthenticateResult.Fail("Invalid user ID in token");
                 }
 
-                // Busca o usuário via API remota
-                user = await _userClient.GetByIdAsync(userId);
+                // Busca o usuário para garantir que ainda existe e está válido
+                /*
+                var user = _userService.GetUserByID(userId);
                 if (user == null)
                 {
                     return AuthenticateResult.Fail("User not found or inactive");
                 }
+                */
 
                 // Cria uma nova identidade com as claims do token
                 var identity = new ClaimsIdentity(principal.Claims, Scheme.Name);
                 var claimsPrincipal = new ClaimsPrincipal(identity);
                 var ticket = new AuthenticationTicket(claimsPrincipal, Scheme.Name);
 
-                Logger.LogInformation("JWT token validated successfully for remote user {UserId}", userId);
+                Logger.LogInformation("JWT token validated successfully for user {UserId}", userId);
 
                 return AuthenticateResult.Success(ticket);
             }

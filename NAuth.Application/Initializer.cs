@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using NAuth.ACL;
 using NAuth.Domain.Factory;
 using NAuth.Domain.Factory.Interfaces;
 using NAuth.Domain.Models.Models;
@@ -14,7 +15,6 @@ using NAuth.Infra.Repository;
 using NTools.ACL;
 using NTools.ACL.Interfaces;
 using System;
-using LocalAuthHandler = NAuth.Domain.LocalAuthHandler;
 
 namespace NAuth.Application
 {
@@ -86,7 +86,7 @@ namespace NAuth.Application
 
 
             services.AddAuthentication("BasicAuthentication")
-                .AddScheme<AuthenticationSchemeOptions, LocalAuthHandler>("BasicAuthentication", null);
+                .AddScheme<AuthenticationSchemeOptions, NAuthHandler>("BasicAuthentication", null);
 
         }
     }

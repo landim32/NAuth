@@ -5,6 +5,7 @@ using NAuth.ACL.Interfaces;
 using NAuth.DTO.Settings;
 using NAuth.DTO.User;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -70,10 +71,12 @@ namespace NAuth.ACL
             return result;
         }
 
-        public async Task<UserInfo?> GetByIdAsync(long userId)
+        public async Task<UserInfo?> GetByIdAsync(long userId, string token)
         {
             var url = $"{_nauthSetting.Value.ApiUrl}/User/getById/{userId}";
             _logger.LogInformation("GetByIdAsync - Accessing URL: {Url}", url);
+
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(BearerAuthenticationScheme, token);
 
             var response = await _httpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
