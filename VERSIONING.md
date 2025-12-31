@@ -12,50 +12,80 @@ This project uses [GitVersion](https://gitversion.net/) for automatic semantic v
 
 ## Controlling Version Increments
 
-You can control version increments using special markers in your commit messages:
+You can control version increments using conventional commit message prefixes:
 
 ### Major Version Bump (Breaking Changes)
-```
-+semver: major
-+semver: breaking
+Use `major:` or `breaking:` prefix:
+
+```bash
+git commit -m "major: Redesign API interface"
+git commit -m "breaking: Remove deprecated methods"
 ```
 
-Example:
-```bash
-git commit -m "Refactor API interface +semver: breaking"
-```
+**Result**: `1.0.0` ? `2.0.0`
 
 ### Minor Version Bump (New Features)
-```
-+semver: minor
-+semver: feature
+Use `feature:` or `minor:` prefix:
+
+```bash
+git commit -m "feature: Add new authentication method"
+git commit -m "minor: Add user search functionality"
 ```
 
-Example:
-```bash
-git commit -m "Add new authentication method +semver: feature"
-```
+**Result**: `1.0.0` ? `1.1.0`
 
 ### Patch Version Bump (Bug Fixes)
-```
-+semver: patch
-+semver: fix
+Use `fix:` or `patch:` prefix, or any other commit message:
+
+```bash
+git commit -m "fix: Fix user validation bug"
+git commit -m "patch: Correct email validation"
+git commit -m "Update dependencies"
 ```
 
-Example:
-```bash
-git commit -m "Fix user validation bug +semver: patch"
-```
+**Result**: `1.0.0` ? `1.0.1`
 
 ### Skip Version Increment
-```
-+semver: none
-+semver: skip
-```
+Use `+semver: none` or `+semver: skip`:
 
-Example:
 ```bash
 git commit -m "Update documentation +semver: none"
+git commit -m "Refactor code style +semver: skip"
+```
+
+**Result**: No version change
+
+## Commit Message Format
+
+### Recommended Format
+
+```
+<type>: <short description>
+
+[optional body]
+
+[optional footer]
+```
+
+### Examples
+
+#### Major Changes (Breaking)
+```bash
+git commit -m "major: Redesign authentication API"
+git commit -m "breaking: Remove support for .NET 6"
+```
+
+#### Minor Changes (Features)
+```bash
+git commit -m "feature: Add role-based access control"
+git commit -m "minor: Add password strength validation"
+```
+
+#### Patch Changes (Fixes)
+```bash
+git commit -m "fix: Resolve null reference in user service"
+git commit -m "patch: Correct JWT token expiration"
+git commit -m "Improve error handling"
 ```
 
 ## How It Works
@@ -63,7 +93,7 @@ git commit -m "Update documentation +semver: none"
 1. **GitVersion analyzes** your Git history and branch structure
 2. **Calculates the next version** based on:
    - Current branch
-   - Commit messages with semver markers
+   - Commit messages with type prefixes
    - Previous tags
 3. **Updates project files** with the calculated version
 4. **Creates a Git tag** after successful NuGet publication
@@ -78,6 +108,9 @@ dotnet tool install --global GitVersion.Tool
 
 # Calculate version
 dotnet-gitversion
+
+# Show detailed information
+dotnet-gitversion /showvariable FullSemVer
 ```
 
 ## CI/CD Integration
@@ -94,29 +127,62 @@ The GitHub Actions workflow automatically:
 - **NuGet packages**: Uses `NuGetVersionV2` format (e.g., `1.2.3`, `1.2.3-alpha.1`)
 - **Git tags**: Uses `v{Major}.{Minor}.{Patch}` format (e.g., `v1.2.3`)
 
-## Examples
+## Complete Examples
 
 ### Starting with version 0.1.1 on main branch:
 
 ```bash
 # Regular commit (patch increment)
-git commit -m "Fix authentication bug"
+git commit -m "Update user validation logic"
 # Result: 0.1.2
 
+# Bug fix (patch increment)
+git commit -m "fix: Fix authentication bug"
+# Result: 0.1.3
+
 # Feature commit (minor increment)
-git commit -m "Add role management +semver: feature"
+git commit -m "feature: Add role management"
 # Result: 0.2.0
 
-# Breaking change commit (major increment)
-git commit -m "Redesign API interface +semver: breaking"
+# Another feature (minor increment)
+git commit -m "minor: Add user search"
+# Result: 0.3.0
+
+# Breaking change (major increment)
+git commit -m "major: Redesign API interface"
 # Result: 1.0.0
+
+# Another breaking change (major increment)
+git commit -m "breaking: Remove legacy authentication"
+# Result: 2.0.0
 
 # Documentation update (no increment)
 git commit -m "Update README +semver: none"
-# Result: 1.0.0 (no change)
+# Result: 2.0.0 (no change)
 ```
+
+## Conventional Commits Compatibility
+
+This configuration is compatible with [Conventional Commits](https://www.conventionalcommits.org/) specification:
+
+- `major:` ? Breaking change
+- `breaking:` ? Breaking change
+- `feature:` ? New feature
+- `minor:` ? New feature
+- `fix:` ? Bug fix
+- `patch:` ? Bug fix
+- Other types (`docs:`, `chore:`, `refactor:`, etc.) ? Patch increment
+
+## Best Practices
+
+1. **Be descriptive**: Write clear commit messages
+2. **Use prefixes**: Always use appropriate type prefixes
+3. **One purpose**: One commit should have one purpose
+4. **Test locally**: Use `dotnet-gitversion` to verify version calculation
+5. **Review history**: Check Git history before pushing
 
 ## References
 
 - [GitVersion Documentation](https://gitversion.net/docs/)
 - [Semantic Versioning](https://semver.org/)
+- [Conventional Commits](https://www.conventionalcommits.org/)
