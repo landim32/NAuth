@@ -1,4 +1,4 @@
-# NAuth.DTO
+﻿# NAuth.DTO
 
 [![NuGet](https://img.shields.io/nuget/v/NAuth.DTO.svg)](https://www.nuget.org/packages/NAuth.DTO/)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/NAuth.DTO.svg)](https://www.nuget.org/packages/NAuth.DTO/)
@@ -6,7 +6,7 @@
 
 Data Transfer Objects (DTOs) library for NAuth authentication and authorization system. Contains all data models, settings, and converters used across NAuth components for user management, roles, and authentication.
 
-## ?? Installation
+## 📦 Installation
 
 Install via NuGet Package Manager:
 
@@ -20,17 +20,17 @@ Or via Package Manager Console:
 Install-Package NAuth.DTO
 ```
 
-## ?? Features
+## ✨ Features
 
-- ? **User DTOs**: Complete user data models for authentication and management
-- ? **Role DTOs**: Role and permission data structures
-- ? **Authentication Models**: Login parameters, token results, and password management
-- ? **Settings**: Configuration objects for NAuth services
-- ? **Converters**: Custom JSON converters for proper serialization
-- ? **Validation**: Built-in validation attributes and structures
-- ? **.NET 8 Compatible**: Built for modern .NET applications
+- **User DTOs**: Complete user data models for authentication and management
+- **Role DTOs**: Role and permission data structures
+- **Authentication Models**: Login parameters, token results, and password management
+- **Settings**: Configuration objects for NAuth services
+- **Converters**: Custom JSON converters for proper serialization
+- **Validation**: Built-in validation attributes and structures
+- **.NET 8 Compatible**: Built for modern .NET applications
 
-## ?? Core Components
+## 📚 Core Components
 
 ### User Models
 
@@ -191,7 +191,7 @@ public class NAuthSetting
 }
 ```
 
-## ?? Usage Examples
+## 💻 Usage Examples
 
 ### Basic User Model Usage
 
@@ -222,7 +222,7 @@ var newUser = new UserInsertedInfo
             Address = "123 Main St",
             Complement = "Apt 101",
             Neighborhood = "Downtown",
-            City = "S�o Paulo",
+            City = "São Paulo",
             State = "SP"
         }
     }
@@ -295,7 +295,7 @@ Console.WriteLine($"Showing page {results.Page} of {results.TotalPages}");
 Console.WriteLine($"Has next page: {results.HasNextPage}");
 ```
 
-## ?? JSON Serialization
+## 🔐 JSON Serialization
 
 All DTOs are properly decorated with JSON attributes for seamless serialization with both `Newtonsoft.Json` and `System.Text.Json`:
 
@@ -319,7 +319,7 @@ Handles nullable DateTime serialization properly.
 public DateTime? BirthDate { get; set; }
 ```
 
-## ?? User Status Enum
+## 📊 User Status Enum
 
 User status values for account state management:
 
@@ -333,30 +333,30 @@ public enum UserStatus
 }
 ```
 
-## ?? Related Packages
+## 🔗 Related Packages
 
 - **NAuth.ACL**: Access Control Layer client library for consuming NAuth services
 - **NAuth.API**: REST API implementation for authentication services
 - **NAuth.Domain**: Business logic and domain models
 
-## ?? Contributing
+## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## ?? License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](https://opensource.org/licenses/MIT) file for details.
 
-## ?? Links
+## 🔗 Links
 
 - [NuGet Package](https://www.nuget.org/packages/NAuth.DTO/)
-- [GitHub Repository](https://github.com/landim32/NAuth)
+- [GitHub Repository](https://github.com/landim32/NAuth/tree/main/NAuth.DTO)
 - [Documentation](https://github.com/landim32/NAuth/wiki)
 
-## ?? Support
+## 💬 Support
 
 For issues, questions, or contributions, please visit the [GitHub repository](https://github.com/landim32/NAuth).
 
 ---
 
-Made with ?? by [Rodrigo Landim](https://github.com/landim32) at Emagine
+Made with ❤️ by [Rodrigo Landim](https://github.com/landim32) at Emagine

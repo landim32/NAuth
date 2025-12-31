@@ -1,4 +1,4 @@
-# NAuth.ACL
+﻿# NAuth.ACL
 
 [![NuGet](https://img.shields.io/nuget/v/NAuth.ACL.svg)](https://www.nuget.org/packages/NAuth.ACL/)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/NAuth.ACL.svg)](https://www.nuget.org/packages/NAuth.ACL/)
@@ -6,7 +6,7 @@
 
 Access Control Layer (ACL) client library for NAuth authentication system. Provides HTTP client interfaces and implementations for user and role management, authentication handlers, and JWT token processing for consuming NAuth API services.
 
-## ?? Installation
+## 📦 Installation
 
 Install via NuGet Package Manager:
 
@@ -20,19 +20,19 @@ Or via Package Manager Console:
 Install-Package NAuth.ACL
 ```
 
-## ?? Features
+## ✨ Features
 
-- ? **HTTP Client**: Ready-to-use HTTP clients for NAuth API
-- ? **User Management**: Complete user CRUD operations
-- ? **Role Management**: Role and permission handling
-- ? **Authentication**: Login, logout, and token management
-- ? **Password Management**: Change and reset password operations
-- ? **File Upload**: Image upload for user profiles
-- ? **JWT Handling**: Built-in JWT token processing
-- ? **ASP.NET Core Integration**: Authentication handler for middleware
-- ? **.NET 8 Compatible**: Built for modern .NET applications
+- **HTTP Client**: Ready-to-use HTTP clients for NAuth API
+- **User Management**: Complete user CRUD operations
+- **Role Management**: Role and permission handling
+- **Authentication**: Login, logout, and token management
+- **Password Management**: Change and reset password operations
+- **File Upload**: Image upload for user profiles
+- **JWT Handling**: Built-in JWT token processing
+- **ASP.NET Core Integration**: Authentication handler for middleware
+- **.NET 8 Compatible**: Built for modern .NET applications
 
-## ?? Quick Start
+## 🚀 Quick Start
 
 ### 1. Configure Services
 
@@ -81,7 +81,7 @@ public class Startup
 }
 ```
 
-## ?? User Client
+## 👤 User Client
 
 ### IUserClient Interface
 
@@ -297,7 +297,7 @@ public class ProfileController : ControllerBase
 }
 ```
 
-## ?? Role Client
+## 👥 Role Client
 
 ### IRoleClient Interface
 
@@ -369,7 +369,7 @@ public class RoleService
 }
 ```
 
-## ?? Authentication Handler
+## 🔐 Authentication Handler
 
 ### NAuthHandler
 
@@ -416,7 +416,7 @@ public class SecureController : ControllerBase
 }
 ```
 
-## ??? Advanced Configuration
+## ⚙️ Advanced Configuration
 
 ### Custom HTTP Client Configuration
 
@@ -447,7 +447,7 @@ static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
 }
 ```
 
-## ?? Error Handling
+## ⚠️ Error Handling
 
 All client methods may throw exceptions. Implement proper error handling:
 
@@ -468,19 +468,19 @@ catch (Exception ex)
 }
 ```
 
-## ?? Dependencies
+## 📦 Dependencies
 
 - **Microsoft.AspNetCore.Authentication** (2.3.0)
 - **System.IdentityModel.Tokens.Jwt** (8.15.0)
 - **NAuth.DTO** (latest)
 
-## ?? Related Packages
+## 🔗 Related Packages
 
 - **NAuth.DTO**: Data Transfer Objects library
 - **NAuth.API**: REST API implementation
 - **NAuth.Domain**: Business logic layer
 
-## ?? Best Practices
+## 💡 Best Practices
 
 1. **Token Storage**: Store JWT tokens securely (HttpOnly cookies or secure storage)
 2. **Token Refresh**: Implement token refresh before expiration
@@ -489,25 +489,25 @@ catch (Exception ex)
 5. **Dependency Injection**: Always use DI for client instances
 6. **Configuration**: Use strongly-typed configuration with `IOptions<NAuthSetting>`
 
-## ?? Contributing
+## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## ?? License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](https://opensource.org/licenses/MIT) file for details.
 
-## ?? Links
+## 🔗 Links
 
 - [NuGet Package](https://www.nuget.org/packages/NAuth.ACL/)
-- [GitHub Repository](https://github.com/landim32/NAuth)
+- [GitHub Repository](https://github.com/landim32/NAuth/tree/main/NAuth.ACL)
 - [Documentation](https://github.com/landim32/NAuth/wiki)
 - [API Documentation](https://github.com/landim32/NAuth/wiki/API)
 
-## ?? Support
+## 💬 Support
 
 For issues, questions, or contributions, please visit the [GitHub repository](https://github.com/landim32/NAuth).
 
 ---
 
-Made with ?? by [Rodrigo Landim](https://github.com/landim32) at Emagine
+Made with ❤️ by [Rodrigo Landim](https://github.com/landim32) at Emagine
