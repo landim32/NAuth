@@ -13,7 +13,7 @@ namespace NAuth.ACL.Interfaces
         Task<UserInfo?> GetBySlugAsync(string slug);
         Task<UserInfo?> InsertAsync(UserInfo user);
         Task<UserInfo?> UpdateAsync(UserInfo user, string token);
-        Task<UserInfo?> LoginWithEmailAsync(LoginParam param);
+        Task<UserTokenResult?> LoginWithEmailAsync(LoginParam param);
         Task<bool> HasPasswordAsync(string token);
         Task<bool> ChangePasswordAsync(ChangePasswordParam param, string token);
         Task<bool> SendRecoveryMailAsync(string email);

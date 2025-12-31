@@ -163,7 +163,7 @@ namespace NAuth.ACL
             return result;
         }
 
-        public async Task<UserInfo?> LoginWithEmailAsync(LoginParam param)
+        public async Task<UserTokenResult?> LoginWithEmailAsync(LoginParam param)
         {
             var url = $"{_nauthSetting.Value.ApiUrl}/User/loginWithEmail";
             _logger.LogInformation("LoginWithEmailAsync - Accessing URL: {Url}, Email={Email}", url, param?.Email);
@@ -173,8 +173,8 @@ namespace NAuth.ACL
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
 
-            var result = JsonConvert.DeserializeObject<UserInfo>(json);
-            _logger.LogInformation("LoginWithEmailAsync - Login successful: UserId={UserId}, Email={Email}", result?.UserId, result?.Email);
+            var result = JsonConvert.DeserializeObject<UserTokenResult>(json);
+            _logger.LogInformation("LoginWithEmailAsync - Login successful: Token={Token}, UserId={UserId}, Email={Email}", result?.Token, result?.User.UserId, result?.User.Email);
 
             return result;
         }

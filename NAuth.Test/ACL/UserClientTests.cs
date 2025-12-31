@@ -445,7 +445,7 @@ namespace NAuth.Test.ACL
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(loginParam.Email, result.Email);
+            Assert.Equal(loginParam.Email, result.User.Email);
         }
 
         #endregion
