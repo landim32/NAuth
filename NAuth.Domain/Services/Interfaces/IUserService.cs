@@ -16,7 +16,7 @@ namespace NAuth.Domain.Services.Interfaces
         void ChangePassword(long userId, string oldPassword, string newPassword);
         Task<bool> SendRecoveryEmail(string email);
 
-        Task<IUserModel> Insert(UserInfo user);
+        Task<IUserModel> Insert(UserInsertedInfo user);
         Task<IUserModel> Update(UserInfo user);
         IUserModel GetUserByEmail(string email);
         IUserModel GetBySlug(string slug);

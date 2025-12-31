@@ -167,7 +167,7 @@ namespace NAuth.API.Controllers
         }
 
         [HttpPost("insert")]
-        public async Task<ActionResult<UserInfo>> Insert([FromBody] UserInfo user)
+        public async Task<ActionResult<UserInfo>> Insert([FromBody] UserInsertedInfo user)
         {
             try
             {

@@ -85,7 +85,7 @@ namespace NAuth.Test.Domain.Services
         public async Task Insert_WithValidUser_ShouldInsertSuccessfully()
         {
             // Arrange
-            var user = new UserInfo
+            var user = new UserInsertedInfo
             {
                 Name = "Test User",
                 Email = "test@example.com",
@@ -128,7 +128,7 @@ namespace NAuth.Test.Domain.Services
         public async Task Insert_WithEmptyName_ShouldThrowException()
         {
             // Arrange
-            var user = new UserInfo
+            var user = new UserInsertedInfo
             {
                 Name = "",
                 Email = "test@example.com",
@@ -148,7 +148,7 @@ namespace NAuth.Test.Domain.Services
         public async Task Insert_WithEmptyEmail_ShouldThrowException()
         {
             // Arrange
-            var user = new UserInfo
+            var user = new UserInsertedInfo
             {
                 Name = "Test User",
                 Email = "",
@@ -168,7 +168,7 @@ namespace NAuth.Test.Domain.Services
         public async Task Insert_WithInvalidEmail_ShouldThrowException()
         {
             // Arrange
-            var user = new UserInfo
+            var user = new UserInsertedInfo
             {
                 Name = "Test User",
                 Email = "invalid-email",
@@ -190,7 +190,7 @@ namespace NAuth.Test.Domain.Services
         public async Task Insert_WithDuplicateEmail_ShouldThrowException()
         {
             // Arrange
-            var user = new UserInfo
+            var user = new UserInsertedInfo
             {
                 Name = "Test User",
                 Email = "test@example.com",
@@ -214,7 +214,7 @@ namespace NAuth.Test.Domain.Services
         public async Task Insert_WithEmptyPassword_ShouldThrowException()
         {
             // Arrange
-            var user = new UserInfo
+            var user = new UserInsertedInfo
             {
                 Name = "Test User",
                 Email = "test@example.com",
@@ -238,7 +238,7 @@ namespace NAuth.Test.Domain.Services
         public async Task Insert_WithInvalidCPF_ShouldThrowException()
         {
             // Arrange
-            var user = new UserInfo
+            var user = new UserInsertedInfo
             {
                 Name = "Test User",
                 Email = "test@example.com",
@@ -270,7 +270,7 @@ namespace NAuth.Test.Domain.Services
             var mockPhoneModel = new Mock<IUserPhoneModel>();
             var mockAddressModel = new Mock<IUserAddressModel>();
 
-            var user = new UserInfo
+            var user = new UserInsertedInfo
             {
                 Name = "Test User",
                 Email = "test@example.com",
@@ -329,7 +329,7 @@ namespace NAuth.Test.Domain.Services
             var mockRoleModel = new Mock<IRoleModel>();
             mockRoleModel.SetupGet(r => r.RoleId).Returns(1L);
 
-            var user = new UserInfo
+            var user = new UserInsertedInfo
             {
                 Name = "Test User",
                 Email = "test@example.com",

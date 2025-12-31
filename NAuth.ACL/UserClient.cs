@@ -130,7 +130,7 @@ namespace NAuth.ACL
             return result;
         }
 
-        public async Task<UserInfo?> InsertAsync(UserInfo user)
+        public async Task<UserInfo?> InsertAsync(UserInsertedInfo user)
         {
             var url = $"{_nauthSetting.Value.ApiUrl}/User/insert";
             _logger.LogInformation("InsertAsync - Accessing URL: {Url}, Email={Email}", url, user?.Email);

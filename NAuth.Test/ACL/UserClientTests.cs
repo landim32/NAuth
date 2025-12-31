@@ -317,7 +317,7 @@ namespace NAuth.Test.ACL
         public async Task InsertAsync_WithValidUser_ShouldReturnInsertedUser()
         {
             // Arrange
-            var user = new UserInfo
+            var user = new UserInsertedInfo
             {
                 Name = "New User",
                 Email = "new@test.com",

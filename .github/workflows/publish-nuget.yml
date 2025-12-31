@@ -1,0 +1,211 @@
+name: Publish NuGet Packages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'NAuth.DTO/**'
+      - 'NAuth.ACL/**'
+      - '.github/workflows/publish-nuget.yml'
+  workflow_dispatch:
+    inputs:
+      version_increment:
+        description: 'Version increment type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  CONFIGURATION: Release
+
+jobs:
+  version-and-publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: Configure Git
+      run: |
+        git config --global user.name "GitHub Actions Bot"
+        git config --global user.email "actions@github.com"
+    
+    - name: Get version increment type
+      id: version-type
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "increment=${{ github.event.inputs.version_increment }}" >> $GITHUB_OUTPUT
+        else
+          echo "increment=patch" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Install xmlstarlet (for XML manipulation)
+      run: sudo apt-get update && sudo apt-get install -y xmlstarlet
+    
+    - name: Increment NAuth.DTO version
+      id: version-dto
+      run: |
+        PROJECT_FILE="NAuth.DTO/NAuth.DTO.csproj"
+        CURRENT_VERSION=$(xmlstarlet sel -t -v "//Version" $PROJECT_FILE)
+        echo "Current NAuth.DTO version: $CURRENT_VERSION"
+        
+        IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
+        MAJOR="${VERSION_PARTS[0]}"
+        MINOR="${VERSION_PARTS[1]}"
+        PATCH="${VERSION_PARTS[2]}"
+        
+        case "${{ steps.version-type.outputs.increment }}" in
+          major)
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+            ;;
+          minor)
+            MINOR=$((MINOR + 1))
+            PATCH=0
+            ;;
+          patch)
+            PATCH=$((PATCH + 1))
+            ;;
+        esac
+        
+        NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+        echo "New NAuth.DTO version: $NEW_VERSION"
+        echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        
+        xmlstarlet ed -L -u "//Version" -v "$NEW_VERSION" $PROJECT_FILE
+    
+    - name: Increment NAuth.ACL version
+      id: version-acl
+      run: |
+        PROJECT_FILE="NAuth.ACL/NAuth.ACL.csproj"
+        CURRENT_VERSION=$(xmlstarlet sel -t -v "//Version" $PROJECT_FILE)
+        echo "Current NAuth.ACL version: $CURRENT_VERSION"
+        
+        IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
+        MAJOR="${VERSION_PARTS[0]}"
+        MINOR="${VERSION_PARTS[1]}"
+        PATCH="${VERSION_PARTS[2]}"
+        
+        case "${{ steps.version-type.outputs.increment }}" in
+          major)
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+            ;;
+          minor)
+            MINOR=$((MINOR + 1))
+            PATCH=0
+            ;;
+          patch)
+            PATCH=$((PATCH + 1))
+            ;;
+        esac
+        
+        NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+        echo "New NAuth.ACL version: $NEW_VERSION"
+        echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        
+        xmlstarlet ed -L -u "//Version" -v "$NEW_VERSION" $PROJECT_FILE
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build NAuth.DTO
+      run: dotnet build NAuth.DTO/NAuth.DTO.csproj --configuration ${{ env.CONFIGURATION }} --no-restore
+    
+    - name: Build NAuth.ACL
+      run: dotnet build NAuth.ACL/NAuth.ACL.csproj --configuration ${{ env.CONFIGURATION }} --no-restore
+    
+    - name: Run tests
+      run: dotnet test NAuth.Test/NAuth.Test.csproj --configuration ${{ env.CONFIGURATION }} --no-build --verbosity normal
+      continue-on-error: true
+    
+    - name: Pack NAuth.DTO
+      run: dotnet pack NAuth.DTO/NAuth.DTO.csproj --configuration ${{ env.CONFIGURATION }} --no-build --output ./artifacts
+    
+    - name: Pack NAuth.ACL
+      run: dotnet pack NAuth.ACL/NAuth.ACL.csproj --configuration ${{ env.CONFIGURATION }} --no-build --output ./artifacts
+    
+    - name: Publish NAuth.DTO to NuGet
+      run: dotnet nuget push ./artifacts/NAuth.DTO.${{ steps.version-dto.outputs.version }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      continue-on-error: false
+    
+    - name: Publish NAuth.ACL to NuGet
+      run: dotnet nuget push ./artifacts/NAuth.ACL.${{ steps.version-acl.outputs.version }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      continue-on-error: false
+    
+    - name: Commit version changes
+      run: |
+        git add NAuth.DTO/NAuth.DTO.csproj NAuth.ACL/NAuth.ACL.csproj
+        git commit -m "chore: bump NAuth.DTO to v${{ steps.version-dto.outputs.version }} and NAuth.ACL to v${{ steps.version-acl.outputs.version }}" || echo "No changes to commit"
+        git push || echo "Nothing to push"
+    
+    - name: Create Git tags
+      run: |
+        git tag "NAuth.DTO-v${{ steps.version-dto.outputs.version }}"
+        git tag "NAuth.ACL-v${{ steps.version-acl.outputs.version }}"
+        git push --tags || echo "Tags already exist"
+    
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: "NAuth-v${{ steps.version-dto.outputs.version }}"
+        release_name: "NAuth Packages v${{ steps.version-dto.outputs.version }}"
+        body: |
+          ## NuGet Packages Released
+          
+          ### NAuth.DTO v${{ steps.version-dto.outputs.version }}
+          Data Transfer Objects (DTOs) library for NAuth authentication and authorization system.
+          
+          ?? [NuGet Package](https://www.nuget.org/packages/NAuth.DTO/${{ steps.version-dto.outputs.version }})
+          
+          ### NAuth.ACL v${{ steps.version-acl.outputs.version }}
+          Access Control Layer (ACL) client library for NAuth authentication system.
+          
+          ?? [NuGet Package](https://www.nuget.org/packages/NAuth.ACL/${{ steps.version-acl.outputs.version }})
+          
+          ## Changes
+          This release includes automatic version increment (${{ steps.version-type.outputs.increment }}) and package publishing.
+        draft: false
+        prerelease: false
+      continue-on-error: true
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-packages
+        path: ./artifacts/*.nupkg
+        retention-days: 30
+    
+    - name: Summary
+      run: |
+        echo "## ?? NuGet Packages Published" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### NAuth.DTO" >> $GITHUB_STEP_SUMMARY
+        echo "- Version: \`${{ steps.version-dto.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- Package: [NAuth.DTO on NuGet](https://www.nuget.org/packages/NAuth.DTO/${{ steps.version-dto.outputs.version }})" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### NAuth.ACL" >> $GITHUB_STEP_SUMMARY
+        echo "- Version: \`${{ steps.version-acl.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- Package: [NAuth.ACL on NuGet](https://www.nuget.org/packages/NAuth.ACL/${{ steps.version-acl.outputs.version }})" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Version Increment" >> $GITHUB_STEP_SUMMARY
+        echo "- Type: \`${{ steps.version-type.outputs.increment }}\`" >> $GITHUB_STEP_SUMMARY

@@ -293,6 +293,39 @@ namespace NAuth.Domain.Services
             return newSlug;
         }
 
+        private void InsertPhones(UserInsertedInfo user, long userId)
+        {
+            if (user.Phones != null && user.Phones.Any())
+            {
+                foreach (var phone in user.Phones)
+                {
+                    var modelPhone = _factories.PhoneFactory.BuildUserPhoneModel();
+                    modelPhone.UserId = userId;
+                    modelPhone.Phone = phone.Phone;
+                    modelPhone.Insert(_factories.PhoneFactory);
+                }
+            }
+        }
+
+        private void InsertAddresses(UserInsertedInfo user, long userId)
+        {
+            if (user.Addresses != null && user.Addresses.Any())
+            {
+                foreach (var addr in user.Addresses)
+                {
+                    var modelAddr = _factories.AddressFactory.BuildUserAddressModel();
+                    modelAddr.UserId = userId;
+                    modelAddr.ZipCode = addr.ZipCode;
+                    modelAddr.Address = addr.Address;
+                    modelAddr.Complement = addr.Complement;
+                    modelAddr.Neighborhood = addr.Neighborhood;
+                    modelAddr.City = addr.City;
+                    modelAddr.State = addr.State;
+                    modelAddr.Insert(_factories.AddressFactory);
+                }
+            }
+        }
+
         private void InsertPhones(UserInfo user)
         {
             if (user.Phones != null && user.Phones.Any())
@@ -326,6 +359,18 @@ namespace NAuth.Domain.Services
             }
         }
 
+        private void InsertRoles(UserInsertedInfo user, long userId)
+        {
+            if (user.Roles != null && user.Roles.Any())
+            {
+                var userModel = _factories.UserFactory.BuildUserModel();
+                foreach (var role in user.Roles)
+                {
+                    userModel.AddRole(userId, role.RoleId);
+                }
+            }
+        }
+
         private void InsertRoles(UserInfo user)
         {
             if (user.Roles != null && user.Roles.Any())
@@ -334,6 +379,30 @@ namespace NAuth.Domain.Services
                 foreach (var role in user.Roles)
                 {
                     userModel.AddRole(user.UserId, role.RoleId);
+                }
+            }
+        }
+
+        private void ValidateRoles(UserInsertedInfo user)
+        {
+            if (user.Roles == null)
+            {
+                return;
+            }
+
+            var roleModel = _factories.RoleFactory.BuildRoleModel();
+            var roleIds = user.Roles.Select(role => role.RoleId);
+            foreach (var roleId in roleIds)
+            {
+                if (roleId <= 0)
+                {
+                    throw new UserValidationException("RoleId is invalid");
+                }
+
+                var existingRole = roleModel.GetById(roleId, _factories.RoleFactory);
+                if (existingRole == null)
+                {
+                    throw new UserValidationException($"Role with ID {roleId} does not exist");
                 }
             }
         }
@@ -362,6 +431,29 @@ namespace NAuth.Domain.Services
             }
         }
 
+        private async Task ValidatePhones(UserInsertedInfo user)
+        {
+            if (user.Phones == null)
+            {
+                return;
+            }
+            foreach (var phone in user.Phones)
+            {
+                if (string.IsNullOrEmpty(phone.Phone))
+                {
+                    throw new UserValidationException("Phone is empty");
+                }
+                else
+                {
+                    phone.Phone = await _clients.StringClient.OnlyNumbersAsync(phone.Phone.Trim());
+                    if (string.IsNullOrEmpty(phone.Phone))
+                    {
+                        throw new UserValidationException($"{phone.Phone} is not a valid phone");
+                    }
+                }
+            }
+        }
+
         private async Task ValidatePhones(UserInfo user)
         {
             if (user.Phones == null)
@@ -382,6 +474,20 @@ namespace NAuth.Domain.Services
                         throw new UserValidationException($"{phone.Phone} is not a valid phone");
                     }
                 }
+            }
+        }
+
+        private async Task ValidateAddresses(UserInsertedInfo user)
+        {
+            if (user.Addresses == null)
+            {
+                return;
+            }
+
+            foreach (var addr in user.Addresses)
+            {
+                ValidateAddressFields(addr);
+                await ValidateAndNormalizeZipCode(addr);
             }
         }
 
@@ -439,7 +545,7 @@ namespace NAuth.Domain.Services
             }
         }
 
-        public async Task<IUserModel> Insert(UserInfo user)
+        public async Task<IUserModel> Insert(UserInsertedInfo user)
         {
             using (var transaction = _unitOfWork.BeginTransaction())
             {
@@ -454,7 +560,7 @@ namespace NAuth.Domain.Services
                     model.BirthDate = user.BirthDate;
                     model.IdDocument = user.IdDocument;
                     model.PixKey = user.PixKey;
-                    model.Status = (NAuth.Domain.Enums.UserStatus)user.Status;
+                    model.Status = Enums.UserStatus.Active;
                     model.CreatedAt = DateTime.Now;
                     model.UpdatedAt = DateTime.Now;
                     model.Hash = GetUniqueToken();
@@ -462,12 +568,11 @@ namespace NAuth.Domain.Services
 
                     var md = model.Insert(_factories.UserFactory);
 
-                    user.UserId = md.UserId;
-                    InsertPhones(user);
-                    InsertAddresses(user);
-                    InsertRoles(user);
+                    InsertPhones(user, md.UserId);
+                    InsertAddresses(user, md.UserId);
+                    InsertRoles(user, md.UserId);
 
-                    md.ChangePassword(user.UserId, user.Password, _factories.UserFactory);
+                    md.ChangePassword(md.UserId, user.Password, _factories.UserFactory);
 
                     transaction.Commit();
 
@@ -479,13 +584,12 @@ namespace NAuth.Domain.Services
                 {
                     _logger.LogError(ex, "Error inserting user with email {Email}", user.Email);
                     transaction.Rollback();
-                    //throw new InvalidOperationException($"Error inserting user with email {user.Email}", ex);
                     throw new InvalidOperationException(ex.Message, ex);
                 }
             }
         }
 
-        private async Task ValidateUserForInsert(UserInfo user, IUserModel model)
+        private async Task ValidateUserForInsert(UserInsertedInfo user, IUserModel model)
         {
             if (string.IsNullOrEmpty(user.Name))
             {
@@ -580,7 +684,6 @@ namespace NAuth.Domain.Services
                 {
                     _logger.LogError(ex, "Error updating user {UserId}", user.UserId);
                     transaction.Rollback();
-                    //throw new InvalidOperationException($"Error updating user {user.UserId}", ex);
                     throw new InvalidOperationException(ex.Message, ex);
                 }
             }
