@@ -155,39 +155,7 @@ jobs:
         git add NAuth.DTO/NAuth.DTO.csproj NAuth.ACL/NAuth.ACL.csproj
         git commit -m "chore: bump NAuth.DTO to v${{ steps.version-dto.outputs.version }} and NAuth.ACL to v${{ steps.version-acl.outputs.version }}" || echo "No changes to commit"
         git push || echo "Nothing to push"
-    
-    - name: Create Git tags
-      run: |
-        git tag "NAuth.DTO-v${{ steps.version-dto.outputs.version }}"
-        git tag "NAuth.ACL-v${{ steps.version-acl.outputs.version }}"
-        git push --tags || echo "Tags already exist"
-    
-    - name: Create GitHub Release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: "NAuth-v${{ steps.version-dto.outputs.version }}"
-        release_name: "NAuth Packages v${{ steps.version-dto.outputs.version }}"
-        body: |
-          ## NuGet Packages Released
-          
-          ### NAuth.DTO v${{ steps.version-dto.outputs.version }}
-          Data Transfer Objects (DTOs) library for NAuth authentication and authorization system.
-          
-          ?? [NuGet Package](https://www.nuget.org/packages/NAuth.DTO/${{ steps.version-dto.outputs.version }})
-          
-          ### NAuth.ACL v${{ steps.version-acl.outputs.version }}
-          Access Control Layer (ACL) client library for NAuth authentication system.
-          
-          ?? [NuGet Package](https://www.nuget.org/packages/NAuth.ACL/${{ steps.version-acl.outputs.version }})
-          
-          ## Changes
-          This release includes automatic version increment (${{ steps.version-type.outputs.increment }}) and package publishing.
-        draft: false
-        prerelease: false
-      continue-on-error: true
-    
+        
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
