@@ -1,4 +1,3 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32228.430
@@ -37,6 +36,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "5 - Extra", "5 - Extra", "{
 	ProjectSection(SolutionItems) = preProject
 		createContext.ps1 = createContext.ps1
 		nauth.sql = nauth.sql
+		publish-nuget.ps1 = publish-nuget.ps1
 		README.md = README.md
 		update-ntools.ps1 = update-ntools.ps1
 	EndProjectSection

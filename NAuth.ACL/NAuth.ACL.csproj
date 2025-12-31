@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <!-- NuGet -->
     <PackageId>NAuth.ACL</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Authors>Rodrigo Landim</Authors>
     <Company>Emagine</Company>
     <Description>Access Control Layer (ACL) client library for NAuth authentication system. Provides HTTP client interfaces and implementations for user and role management, authentication handlers, and JWT token processing for consuming NAuth API services.</Description>
@@ -13,7 +13,11 @@
     <RepositoryUrl>https://github.com/landim32/NAuth/tree/main/NAuth.ACL</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.3.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />

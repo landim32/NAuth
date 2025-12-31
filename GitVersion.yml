@@ -1,0 +1,38 @@
+mode: ContinuousDeployment
+branches:
+  main:
+    increment: Patch
+    regex: ^master$|^main$
+    tag: ''
+    prevent-increment-of-merged-branch-version: true
+    track-merge-target: false
+    source-branches: ['develop', 'release']
+  develop:
+    increment: Minor
+    regex: ^dev(elop)?(ment)?$
+    tag: alpha
+  feature:
+    increment: Minor
+    regex: ^features?[/-]
+    tag: alpha
+  release:
+    increment: Patch
+    regex: ^releases?[/-]
+    tag: beta
+  hotfix:
+    increment: Patch
+    regex: ^hotfix(es)?[/-]
+    tag: ''
+  pull-request:
+    increment: Inherit
+    regex: ^(pull|pull\-requests|pr)[/-]
+    tag: pr
+commit-message-incrementing: Enabled
+major-version-bump-message: '\+semver:\s?(breaking|major)'
+minor-version-bump-message: '\+semver:\s?(feature|minor)'
+patch-version-bump-message: '\+semver:\s?(fix|patch)'
+no-bump-message: '\+semver:\s?(none|skip)'
+tag-prefix: '[vV]'
+ignore:
+  sha: []
+merge-message-formats: {}

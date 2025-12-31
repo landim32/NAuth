@@ -3,7 +3,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <!-- NuGet -->
     <PackageId>NAuth.DTO</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Authors>Rodrigo Landim</Authors>
     <Company>Emagine</Company>
     <Description>Data Transfer Objects (DTOs) library for NAuth authentication and authorization system. Contains all data models, settings, and converters used across NAuth components for user management, roles, and authentication.</Description>
@@ -11,11 +11,15 @@
     <RepositoryUrl>https://github.com/landim32/NAuth/tree/main/NAuth.DTO</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="User\" />
     <None Remove="Enum\" />
     <None Remove="Configuration\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

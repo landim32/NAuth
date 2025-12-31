@@ -9,16 +9,6 @@ on:
       - 'NAuth.ACL/**'
       - '.github/workflows/publish-nuget.yml'
   workflow_dispatch:
-    inputs:
-      version_increment:
-        description: 'Version increment type'
-        required: true
-        default: 'patch'
-        type: choice
-        options:
-          - major
-          - minor
-          - patch
 
 env:
   DOTNET_VERSION: '8.0.x'
@@ -40,88 +30,38 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
     
-    - name: Configure Git
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v0.10.2
+      with:
+        versionSpec: '5.x'
+    
+    - name: Determine Version
+      id: gitversion
+      uses: gittools/actions/gitversion/execute@v0.10.2
+      with:
+        useConfigFile: true
+        configFilePath: GitVersion.yml
+    
+    - name: Display GitVersion outputs
       run: |
-        git config --global user.name "GitHub Actions Bot"
-        git config --global user.email "actions@github.com"
+        echo "Major: ${{ steps.gitversion.outputs.major }}"
+        echo "Minor: ${{ steps.gitversion.outputs.minor }}"
+        echo "Patch: ${{ steps.gitversion.outputs.patch }}"
+        echo "MajorMinorPatch: ${{ steps.gitversion.outputs.majorMinorPatch }}"
+        echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
+        echo "NuGetVersionV2: ${{ steps.gitversion.outputs.nuGetVersionV2 }}"
     
-    - name: Get version increment type
-      id: version-type
-      run: |
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          echo "increment=${{ github.event.inputs.version_increment }}" >> $GITHUB_OUTPUT
-        else
-          echo "increment=patch" >> $GITHUB_OUTPUT
-        fi
-    
-    - name: Install xmlstarlet (for XML manipulation)
-      run: sudo apt-get update && sudo apt-get install -y xmlstarlet
-    
-    - name: Increment NAuth.DTO version
-      id: version-dto
+    - name: Update NAuth.DTO version
       run: |
         PROJECT_FILE="NAuth.DTO/NAuth.DTO.csproj"
-        CURRENT_VERSION=$(xmlstarlet sel -t -v "//Version" $PROJECT_FILE)
-        echo "Current NAuth.DTO version: $CURRENT_VERSION"
-        
-        IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
-        MAJOR="${VERSION_PARTS[0]}"
-        MINOR="${VERSION_PARTS[1]}"
-        PATCH="${VERSION_PARTS[2]}"
-        
-        case "${{ steps.version-type.outputs.increment }}" in
-          major)
-            MAJOR=$((MAJOR + 1))
-            MINOR=0
-            PATCH=0
-            ;;
-          minor)
-            MINOR=$((MINOR + 1))
-            PATCH=0
-            ;;
-          patch)
-            PATCH=$((PATCH + 1))
-            ;;
-        esac
-        
-        NEW_VERSION="$MAJOR.$MINOR.$PATCH"
-        echo "New NAuth.DTO version: $NEW_VERSION"
-        echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-        
-        xmlstarlet ed -L -u "//Version" -v "$NEW_VERSION" $PROJECT_FILE
+        sed -i "s/<Version>.*<\/Version>/<Version>${{ steps.gitversion.outputs.nuGetVersionV2 }}<\/Version>/" $PROJECT_FILE
+        echo "Updated NAuth.DTO to version ${{ steps.gitversion.outputs.nuGetVersionV2 }}"
     
-    - name: Increment NAuth.ACL version
-      id: version-acl
+    - name: Update NAuth.ACL version
       run: |
         PROJECT_FILE="NAuth.ACL/NAuth.ACL.csproj"
-        CURRENT_VERSION=$(xmlstarlet sel -t -v "//Version" $PROJECT_FILE)
-        echo "Current NAuth.ACL version: $CURRENT_VERSION"
-        
-        IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
-        MAJOR="${VERSION_PARTS[0]}"
-        MINOR="${VERSION_PARTS[1]}"
-        PATCH="${VERSION_PARTS[2]}"
-        
-        case "${{ steps.version-type.outputs.increment }}" in
-          major)
-            MAJOR=$((MAJOR + 1))
-            MINOR=0
-            PATCH=0
-            ;;
-          minor)
-            MINOR=$((MINOR + 1))
-            PATCH=0
-            ;;
-          patch)
-            PATCH=$((PATCH + 1))
-            ;;
-        esac
-        
-        NEW_VERSION="$MAJOR.$MINOR.$PATCH"
-        echo "New NAuth.ACL version: $NEW_VERSION"
-        echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-        
-        xmlstarlet ed -L -u "//Version" -v "$NEW_VERSION" $PROJECT_FILE
+        sed -i "s/<Version>.*<\/Version>/<Version>${{ steps.gitversion.outputs.nuGetVersionV2 }}<\/Version>/" $PROJECT_FILE
+        echo "Updated NAuth.ACL to version ${{ steps.gitversion.outputs.nuGetVersionV2 }}"
     
     - name: Restore dependencies
       run: dotnet restore
@@ -143,19 +83,21 @@ jobs:
       run: dotnet pack NAuth.ACL/NAuth.ACL.csproj --configuration ${{ env.CONFIGURATION }} --no-build --output ./artifacts
     
     - name: Publish NAuth.DTO to NuGet
-      run: dotnet nuget push ./artifacts/NAuth.DTO.${{ steps.version-dto.outputs.version }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      run: dotnet nuget push ./artifacts/NAuth.DTO.${{ steps.gitversion.outputs.nuGetVersionV2 }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
       continue-on-error: false
     
     - name: Publish NAuth.ACL to NuGet
-      run: dotnet nuget push ./artifacts/NAuth.ACL.${{ steps.version-acl.outputs.version }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      run: dotnet nuget push ./artifacts/NAuth.ACL.${{ steps.gitversion.outputs.nuGetVersionV2 }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
       continue-on-error: false
     
-    - name: Commit version changes
+    - name: Create Git Tag
       run: |
-        git add NAuth.DTO/NAuth.DTO.csproj NAuth.ACL/NAuth.ACL.csproj
-        git commit -m "chore: bump NAuth.DTO to v${{ steps.version-dto.outputs.version }} and NAuth.ACL to v${{ steps.version-acl.outputs.version }}" || echo "No changes to commit"
-        git push || echo "Nothing to push"
-        
+        git config --global user.name "GitHub Actions Bot"
+        git config --global user.email "actions@github.com"
+        git tag -a "v${{ steps.gitversion.outputs.majorMinorPatch }}" -m "Release version ${{ steps.gitversion.outputs.semVer }}"
+        git push origin "v${{ steps.gitversion.outputs.majorMinorPatch }}"
+      continue-on-error: true
+    
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -168,12 +110,14 @@ jobs:
         echo "## ?? NuGet Packages Published" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### NAuth.DTO" >> $GITHUB_STEP_SUMMARY
-        echo "- Version: \`${{ steps.version-dto.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
-        echo "- Package: [NAuth.DTO on NuGet](https://www.nuget.org/packages/NAuth.DTO/${{ steps.version-dto.outputs.version }})" >> $GITHUB_STEP_SUMMARY
+        echo "- Version: \`${{ steps.gitversion.outputs.nuGetVersionV2 }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- Package: [NAuth.DTO on NuGet](https://www.nuget.org/packages/NAuth.DTO/${{ steps.gitversion.outputs.nuGetVersionV2 }})" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### NAuth.ACL" >> $GITHUB_STEP_SUMMARY
-        echo "- Version: \`${{ steps.version-acl.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
-        echo "- Package: [NAuth.ACL on NuGet](https://www.nuget.org/packages/NAuth.ACL/${{ steps.version-acl.outputs.version }})" >> $GITHUB_STEP_SUMMARY
+        echo "- Version: \`${{ steps.gitversion.outputs.nuGetVersionV2 }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- Package: [NAuth.ACL on NuGet](https://www.nuget.org/packages/NAuth.ACL/${{ steps.gitversion.outputs.nuGetVersionV2 }})" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### Version Increment" >> $GITHUB_STEP_SUMMARY
-        echo "- Type: \`${{ steps.version-type.outputs.increment }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "### Version Information" >> $GITHUB_STEP_SUMMARY
+        echo "- SemVer: \`${{ steps.gitversion.outputs.semVer }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- Full SemVer: \`${{ steps.gitversion.outputs.fullSemVer }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- Commit: \`${{ steps.gitversion.outputs.sha }}\`" >> $GITHUB_STEP_SUMMARY
