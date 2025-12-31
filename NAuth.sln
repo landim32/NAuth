@@ -35,6 +35,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "5 - Extra", "5 - Extra", "{4641BD00-8DEE-40F0-9872-3D2CEEE1E94B}"
 	ProjectSection(SolutionItems) = preProject
 		createContext.ps1 = createContext.ps1
+		GitVersion.yml = GitVersion.yml
 		nauth.sql = nauth.sql
 		publish-nuget.ps1 = publish-nuget.ps1
 		README.md = README.md

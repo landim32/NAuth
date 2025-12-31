@@ -4,11 +4,20 @@ This project uses [GitVersion](https://gitversion.net/) for automatic semantic v
 
 ## Version Strategy
 
-- **Main branch**: Patch increments by default
-- **Develop branch**: Minor increments with alpha tag
-- **Feature branches**: Minor increments with alpha tag
-- **Release branches**: Patch increments with beta tag
-- **Hotfix branches**: Patch increments
+The project uses **ContinuousDelivery** mode, which means:
+- **Main branch**: Generates stable versions (e.g., `0.2.0`, `1.0.0`)
+- **Develop branch**: Minor increments with alpha tag (e.g., `0.2.0-alpha.1`)
+- **Feature branches**: Minor increments with alpha tag (e.g., `0.2.0-alpha.2`)
+- **Release branches**: Patch increments with beta tag (e.g., `0.2.0-beta.1`)
+- **Hotfix branches**: Patch increments (stable versions)
+
+## Branch Configuration
+
+- **Main branch**: Stable releases only - Patch increments by default
+- **Develop branch**: Development work - Minor increments with alpha tag
+- **Feature branches**: New features - Minor increments with alpha tag
+- **Release branches**: Release candidates - Patch increments with beta tag
+- **Hotfix branches**: Emergency fixes - Patch increments
 
 ## Controlling Version Increments
 
