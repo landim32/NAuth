@@ -17,6 +17,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="9.0.8" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
+    <PackageReference Include="NTools.ACL" Version="0.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
   </ItemGroup>
 
@@ -33,14 +34,5 @@
 
   <ItemGroup>
     <EmbeddedResource Include="emagine.pfx" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="NTools.ACL">
-      <HintPath>..\Lib\NTools.ACL.dll</HintPath>
-    </Reference>
-    <Reference Include="NTools.DTO">
-      <HintPath>..\Lib\NTools.DTO.dll</HintPath>
-    </Reference>
   </ItemGroup>
 </Project>

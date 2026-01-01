@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.3.0" />
+    <PackageReference Include="NTools.ACL" Version="0.2.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,14 +23,5 @@
     <None Remove="Microsoft.EntityFrameworkCore.Design" />
     <None Remove="Microsoft.EntityFrameworkCore" />
     <None Remove="Microsoft.EntityFrameworkCore.Proxies" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="NTools.ACL">
-      <HintPath>..\Lib\NTools.ACL.dll</HintPath>
-    </Reference>
-    <Reference Include="NTools.DTO">
-      <HintPath>..\Lib\NTools.DTO.dll</HintPath>
-    </Reference>
   </ItemGroup>
 </Project>
