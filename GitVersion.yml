@@ -3,30 +3,30 @@ branches:
   main:
     increment: Patch
     regex: ^master$|^main$
-    label: ''
+    tag: ''
     track-merge-target: false
     source-branches: ['develop', 'release']
     is-release-branch: true
   develop:
     increment: Minor
     regex: ^dev(elop)?(ment)?$
-    label: alpha
+    tag: alpha
   feature:
     increment: Minor
     regex: ^features?[/-]
-    label: alpha
+    tag: alpha
   release:
     increment: Patch
     regex: ^releases?[/-]
-    label: beta
+    tag: beta
   hotfix:
     increment: Patch
     regex: ^hotfix(es)?[/-]
-    label: ''
+    tag: ''
   pull-request:
     increment: Inherit
     regex: ^(pull|pull\-requests|pr)[/-]
-    label: pr
+    tag: pr
 commit-message-incrementing: Enabled
 major-version-bump-message: '^(major|breaking):'
 minor-version-bump-message: '^(feature|minor):'
