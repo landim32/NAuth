@@ -5,7 +5,6 @@
     <Nullable>enable</Nullable>
     <!-- NuGet -->
     <PackageId>NAuth.ACL</PackageId>
-    <Version>0.1.1</Version>
     <Authors>Rodrigo Landim</Authors>
     <Company>Emagine</Company>
     <Description>Access Control Layer (ACL) client library for NAuth authentication system. Provides HTTP client interfaces and implementations for user and role management, authentication handlers, and JWT token processing for consuming NAuth API services.</Description>

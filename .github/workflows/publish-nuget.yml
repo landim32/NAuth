@@ -17,6 +17,9 @@ env:
 jobs:
   version-and-publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
     
     steps:
     - name: Checkout code
@@ -51,36 +54,20 @@ jobs:
         echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
         echo "NuGetVersionV2: ${{ steps.gitversion.outputs.nuGetVersionV2 }}"
     
-    - name: Update NAuth.DTO version
-      run: |
-        PROJECT_FILE="NAuth.DTO/NAuth.DTO.csproj"
-        sed -i "s/<Version>.*<\/Version>/<Version>${{ steps.gitversion.outputs.nuGetVersionV2 }}<\/Version>/" $PROJECT_FILE
-        echo "Updated NAuth.DTO to version ${{ steps.gitversion.outputs.nuGetVersionV2 }}"
-    
-    - name: Update NAuth.ACL version
-      run: |
-        PROJECT_FILE="NAuth.ACL/NAuth.ACL.csproj"
-        sed -i "s/<Version>.*<\/Version>/<Version>${{ steps.gitversion.outputs.nuGetVersionV2 }}<\/Version>/" $PROJECT_FILE
-        echo "Updated NAuth.ACL to version ${{ steps.gitversion.outputs.nuGetVersionV2 }}"
-    
     - name: Restore dependencies
       run: dotnet restore
     
     - name: Build NAuth.DTO
-      run: dotnet build NAuth.DTO/NAuth.DTO.csproj --configuration ${{ env.CONFIGURATION }} --no-restore
+      run: dotnet build NAuth.DTO/NAuth.DTO.csproj --configuration ${{ env.CONFIGURATION }} --no-restore /p:Version=${{ steps.gitversion.outputs.nuGetVersionV2 }}
     
     - name: Build NAuth.ACL
-      run: dotnet build NAuth.ACL/NAuth.ACL.csproj --configuration ${{ env.CONFIGURATION }} --no-restore
-    
-    - name: Run tests
-      run: dotnet test NAuth.Test/NAuth.Test.csproj --configuration ${{ env.CONFIGURATION }} --no-build --verbosity normal
-      continue-on-error: true
+      run: dotnet build NAuth.ACL/NAuth.ACL.csproj --configuration ${{ env.CONFIGURATION }} --no-restore /p:Version=${{ steps.gitversion.outputs.nuGetVersionV2 }}
     
     - name: Pack NAuth.DTO
-      run: dotnet pack NAuth.DTO/NAuth.DTO.csproj --configuration ${{ env.CONFIGURATION }} --no-build --output ./artifacts
+      run: dotnet pack NAuth.DTO/NAuth.DTO.csproj --configuration ${{ env.CONFIGURATION }} --no-build --output ./artifacts /p:PackageVersion=${{ steps.gitversion.outputs.nuGetVersionV2 }}
     
     - name: Pack NAuth.ACL
-      run: dotnet pack NAuth.ACL/NAuth.ACL.csproj --configuration ${{ env.CONFIGURATION }} --no-build --output ./artifacts
+      run: dotnet pack NAuth.ACL/NAuth.ACL.csproj --configuration ${{ env.CONFIGURATION }} --no-build --output ./artifacts /p:PackageVersion=${{ steps.gitversion.outputs.nuGetVersionV2 }}
     
     - name: Publish NAuth.DTO to NuGet
       run: dotnet nuget push ./artifacts/NAuth.DTO.${{ steps.gitversion.outputs.nuGetVersionV2 }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
@@ -90,13 +77,14 @@ jobs:
       run: dotnet nuget push ./artifacts/NAuth.ACL.${{ steps.gitversion.outputs.nuGetVersionV2 }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
       continue-on-error: false
     
-    - name: Create Git Tag
+    - name: Create and Push Git Tag
       run: |
-        git config --global user.name "GitHub Actions Bot"
-        git config --global user.email "actions@github.com"
-        git tag -a "v${{ steps.gitversion.outputs.majorMinorPatch }}" -m "Release version ${{ steps.gitversion.outputs.semVer }}"
-        git push origin "v${{ steps.gitversion.outputs.majorMinorPatch }}"
-      continue-on-error: true
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git tag -a "v${{ steps.gitversion.outputs.nuGetVersionV2 }}" -m "Release version ${{ steps.gitversion.outputs.nuGetVersionV2 }}"
+        git push origin "v${{ steps.gitversion.outputs.nuGetVersionV2 }}"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

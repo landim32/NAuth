@@ -3,31 +3,30 @@ branches:
   main:
     increment: Patch
     regex: ^master$|^main$
-    tag: ''
-    prevent-increment-of-merged-branch-version: true
+    label: ''
     track-merge-target: false
     source-branches: ['develop', 'release']
     is-release-branch: true
   develop:
     increment: Minor
     regex: ^dev(elop)?(ment)?$
-    tag: alpha
+    label: alpha
   feature:
     increment: Minor
     regex: ^features?[/-]
-    tag: alpha
+    label: alpha
   release:
     increment: Patch
     regex: ^releases?[/-]
-    tag: beta
+    label: beta
   hotfix:
     increment: Patch
     regex: ^hotfix(es)?[/-]
-    tag: ''
+    label: ''
   pull-request:
     increment: Inherit
     regex: ^(pull|pull\-requests|pr)[/-]
-    tag: pr
+    label: pr
 commit-message-incrementing: Enabled
 major-version-bump-message: '^(major|breaking):'
 minor-version-bump-message: '^(feature|minor):'
@@ -36,4 +35,3 @@ no-bump-message: '\+semver:\s?(none|skip)'
 tag-prefix: '[vV]'
 ignore:
   sha: []
-merge-message-formats: {}

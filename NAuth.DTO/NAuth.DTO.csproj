@@ -3,7 +3,6 @@
     <TargetFramework>net8.0</TargetFramework>
     <!-- NuGet -->
     <PackageId>NAuth.DTO</PackageId>
-    <Version>0.1.1</Version>
     <Authors>Rodrigo Landim</Authors>
     <Company>Emagine</Company>
     <Description>Data Transfer Objects (DTOs) library for NAuth authentication and authorization system. Contains all data models, settings, and converters used across NAuth components for user management, roles, and authentication.</Description>
