@@ -5,7 +5,7 @@ namespace NAuth.ACL.Interfaces
 {
     public interface IUserClient
     {
-        UserInfo? GetUserInSession(HttpContext httpContext);
+        UserSessionInfo? GetUserInSession(HttpContext httpContext);
         Task<UserInfo?> GetMeAsync(string token);
         Task<UserInfo?> GetByIdAsync(long userId, string token);
         Task<UserInfo?> GetByTokenAsync(string token);

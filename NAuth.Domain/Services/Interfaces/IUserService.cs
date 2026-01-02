@@ -22,7 +22,7 @@ namespace NAuth.Domain.Services.Interfaces
         IUserModel GetBySlug(string slug);
         IUserModel GetUserByID(long userId);
         IUserModel GetByStripeId(string stripeId);
-        UserInfo GetUserInSession(HttpContext httpContext);
+        UserSessionInfo GetUserInSession(HttpContext httpContext);
         Task<UserInfo> GetUserInfoFromModel(IUserModel md);
         IList<IUserModel> ListUsers();
         PagedResult<UserInfo> SearchUsers(string searchTerm, int page, int pageSize);

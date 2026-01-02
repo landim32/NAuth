@@ -145,7 +145,7 @@ namespace NAuth.Test.ACL
 
             // Assert
             Assert.False(result.Succeeded);
-            Assert.Contains("Error validating token", result.Failure?.Message);
+            Assert.Contains("Missing Authorization Token", result.Failure?.Message);
         }
 
         [Fact]

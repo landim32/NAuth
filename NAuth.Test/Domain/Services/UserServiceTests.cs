@@ -468,7 +468,7 @@ namespace NAuth.Test.Domain.Services
         #region GetUserInSession Tests
 
         [Fact]
-        public void GetUserInSession_WithValidClaims_ShouldReturnUserInfo()
+        public void GetUserInSession_WithValidClaims_ShouldReturnUserSessionInfo()
         {
             // Arrange
             var httpContext = new DefaultHttpContext();
@@ -478,6 +478,9 @@ namespace NAuth.Test.Domain.Services
                 new Claim(ClaimTypes.Name, "Test User"),
                 new Claim(ClaimTypes.Email, "test@example.com"),
                 new Claim("hash", "test-hash"),
+                new Claim("ipAddress", "127.0.0.1"),
+                new Claim("userAgent", "Mozilla/5.0"),
+                new Claim("fingerprint", "test-fingerprint"),
                 new Claim("isAdmin", "true"),
                 new Claim(ClaimTypes.Role, "admin"),
                 new Claim(ClaimTypes.Role, "user")
@@ -493,8 +496,13 @@ namespace NAuth.Test.Domain.Services
             Assert.Equal("Test User", result.Name);
             Assert.Equal("test@example.com", result.Email);
             Assert.Equal("test-hash", result.Hash);
+            Assert.Equal("127.0.0.1", result.IpAddress);
+            Assert.Equal("Mozilla/5.0", result.UserAgent);
+            Assert.Equal("test-fingerprint", result.Fingerprint);
             Assert.True(result.IsAdmin);
             Assert.Equal(2, result.Roles.Count);
+            Assert.Contains("admin", result.Roles);
+            Assert.Contains("user", result.Roles);
         }
 
         [Fact]

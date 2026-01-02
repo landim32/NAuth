@@ -54,7 +54,7 @@ namespace NAuth.Test.ACL
         #region GetUserInSession Tests
 
         [Fact]
-        public void GetUserInSession_WithValidClaims_ShouldReturnUserInfo()
+        public void GetUserInSession_WithValidClaims_ShouldReturnUserSessionInfo()
         {
             // Arrange
             var httpContext = new DefaultHttpContext();
@@ -64,6 +64,9 @@ namespace NAuth.Test.ACL
                 new Claim(ClaimTypes.Name, "Test User"),
                 new Claim(ClaimTypes.Email, "test@test.com"),
                 new Claim("hash", "test-hash"),
+                new Claim("ipAddress", "127.0.0.1"),
+                new Claim("userAgent", "Mozilla/5.0"),
+                new Claim("fingerprint", "test-fingerprint"),
                 new Claim("isAdmin", "true"),
                 new Claim(ClaimTypes.Role, "admin"),
                 new Claim(ClaimTypes.Role, "user")
@@ -81,8 +84,13 @@ namespace NAuth.Test.ACL
             Assert.Equal("Test User", result.Name);
             Assert.Equal("test@test.com", result.Email);
             Assert.Equal("test-hash", result.Hash);
+            Assert.Equal("127.0.0.1", result.IpAddress);
+            Assert.Equal("Mozilla/5.0", result.UserAgent);
+            Assert.Equal("test-fingerprint", result.Fingerprint);
             Assert.True(result.IsAdmin);
             Assert.Equal(2, result.Roles.Count);
+            Assert.Contains("admin", result.Roles);
+            Assert.Contains("user", result.Roles);
         }
 
         [Fact]
@@ -415,14 +423,18 @@ namespace NAuth.Test.ACL
                 Password = "password123"
             };
 
-            var user = new UserInfo
+            var userTokenResult = new UserTokenResult
             {
-                UserId = 1L,
-                Email = loginParam.Email,
-                Name = "Test User"
+                Token = "test-token-12345",
+                User = new UserInfo
+                {
+                    UserId = 1L,
+                    Email = loginParam.Email,
+                    Name = "Test User"
+                }
             };
 
-            var jsonResponse = JsonConvert.SerializeObject(user);
+            var jsonResponse = JsonConvert.SerializeObject(userTokenResult);
             var httpResponse = new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(jsonResponse, Encoding.UTF8, "application/json")
@@ -445,6 +457,8 @@ namespace NAuth.Test.ACL
 
             // Assert
             Assert.NotNull(result);
+            Assert.Equal("test-token-12345", result.Token);
+            Assert.NotNull(result.User);
             Assert.Equal(loginParam.Email, result.User.Email);
         }
 

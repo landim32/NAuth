@@ -14,7 +14,7 @@ namespace NAuth.Test.Domain.Services
     public class RoleServiceTests
     {
         private readonly Mock<ILogger<RoleService>> _mockLogger;
-        private readonly Mock<DomainFactory> _mockFactory;
+        private readonly DomainFactory _factory;
         private readonly Mock<IRoleDomainFactory> _mockRoleFactory;
         private readonly Mock<IRoleModel> _mockRoleModel;
         private readonly Mock<IStringClient> _mockStringClient;
@@ -27,17 +27,16 @@ namespace NAuth.Test.Domain.Services
             _mockRoleModel = new Mock<IRoleModel>();
             _mockStringClient = new Mock<IStringClient>();
 
-            _mockFactory = new Mock<DomainFactory>(
+            _factory = new DomainFactory(
                 Mock.Of<IUserDomainFactory>(),
                 Mock.Of<IUserPhoneDomainFactory>(),
                 Mock.Of<IUserAddressDomainFactory>(),
                 _mockRoleFactory.Object
             );
 
-            _mockFactory.SetupGet(f => f.RoleFactory).Returns(_mockRoleFactory.Object);
             _mockRoleFactory.Setup(f => f.BuildRoleModel()).Returns(_mockRoleModel.Object);
 
-            _roleService = new RoleService(_mockLogger.Object, _mockFactory.Object, _mockStringClient.Object);
+            _roleService = new RoleService(_mockLogger.Object, _factory, _mockStringClient.Object);
         }
 
         #region GetById Tests
@@ -196,6 +195,10 @@ namespace NAuth.Test.Domain.Services
             insertedRole.SetupGet(r => r.Slug).Returns("admin");
             insertedRole.SetupGet(r => r.Name).Returns(roleInfo.Name);
 
+            _mockRoleModel.SetupProperty(m => m.Slug);
+            _mockRoleModel.SetupProperty(m => m.Name);
+            _mockRoleModel.SetupGet(m => m.RoleId).Returns(0);
+            
             _mockStringClient.Setup(c => c.GenerateSlugAsync(It.IsAny<string>()))
                 .ReturnsAsync("admin");
             _mockRoleModel.Setup(m => m.ExistSlug(0, "admin")).Returns(false);
@@ -247,9 +250,18 @@ namespace NAuth.Test.Domain.Services
                 Name = "Administrator"
             };
 
+            _mockRoleModel.SetupProperty(m => m.Slug);
+            _mockRoleModel.SetupProperty(m => m.Name);
+            _mockRoleModel.SetupGet(m => m.RoleId).Returns(0);
+            
             _mockStringClient.Setup(c => c.GenerateSlugAsync(It.IsAny<string>()))
                 .ReturnsAsync("admin");
-            _mockRoleModel.Setup(m => m.ExistSlug(0, "admin")).Returns(true);
+            
+            // First call in GenerateSlug loop returns false, so slug generation succeeds
+            // Second call after GenerateSlug returns true, triggering the exception
+            _mockRoleModel.SetupSequence(m => m.ExistSlug(0, "admin"))
+                .Returns(false)  // First call in GenerateSlug loop - slug is available
+                .Returns(true);  // Second call after GenerateSlug - slug exists now
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<UserValidationException>(() => _roleService.Insert(roleInfo));
@@ -348,10 +360,20 @@ namespace NAuth.Test.Domain.Services
 
             var existingRole = new Mock<IRoleModel>();
             existingRole.SetupGet(r => r.RoleId).Returns(roleInfo.RoleId);
+            existingRole.SetupProperty(r => r.Slug);
+            existingRole.SetupProperty(r => r.Name);
+            
             _mockRoleModel.Setup(m => m.GetById(roleInfo.RoleId, _mockRoleFactory.Object))
                 .Returns(existingRole.Object);
             _mockStringClient.Setup(c => c.GenerateSlugAsync(It.IsAny<string>()))
                 .ReturnsAsync("admin");
+            
+            // First call in GenerateSlug loop returns false (slug generation succeeds)
+            // Second call after GenerateSlug returns true (slug exists, triggering exception)
+            existingRole.SetupSequence(m => m.ExistSlug(roleInfo.RoleId, "admin"))
+                .Returns(false)  // First call in GenerateSlug loop
+                .Returns(true);  // Would be called again but exception thrown before
+            
             _mockRoleModel.Setup(m => m.ExistSlug(roleInfo.RoleId, "admin")).Returns(true);
 
             // Act & Assert

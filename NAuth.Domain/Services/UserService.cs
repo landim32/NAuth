@@ -730,7 +730,7 @@ namespace NAuth.Domain.Services
             return _factories.UserFactory.BuildUserModel().GetById(userId, _factories.UserFactory);
         }
 
-        public UserInfo GetUserInSession(HttpContext httpContext)
+        public UserSessionInfo GetUserInSession(HttpContext httpContext)
         {
             if (httpContext?.User?.Claims == null || !httpContext.User.Claims.Any())
             {
@@ -739,15 +739,18 @@ namespace NAuth.Domain.Services
 
             var claims = httpContext.User.Claims.ToList();
 
-            var userInfo = new UserInfo
+            var userInfo = new UserSessionInfo
             {
                 UserId = long.TryParse(claims.FirstOrDefault(c => c.Type == "userId")?.Value, out var userId) ? userId : 0,
                 Name = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value,
                 Email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value,
                 Hash = claims.FirstOrDefault(c => c.Type == "hash")?.Value,
+                IpAddress = claims.FirstOrDefault(c => c.Type == "ipAddress")?.Value,
+                UserAgent = claims.FirstOrDefault(c => c.Type == "userAgent")?.Value,
+                Fingerprint = claims.FirstOrDefault(c => c.Type == "fingerprint")?.Value,
                 IsAdmin = bool.TryParse(claims.FirstOrDefault(c => c.Type == "isAdmin")?.Value, out var isAdmin) && isAdmin,
                 Roles = claims.Where(c => c.Type == ClaimTypes.Role)
-                    .Select(c => new RoleInfo { Slug = c.Value })
+                    .Select(c => c.Value)
                     .ToList()
             };
 
